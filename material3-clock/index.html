@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja" prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wdth,wght@6..144,25..151,1..1000&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Material 3 Clock | Modern Web Analog Clock</title>
+    <meta name="description" content="A modern, high-performance Material 3 style web clock. Featuring dynamic colors and smooth animations.">
+    <meta name="keywords" content="Material 3, Material Design, Web Clock, Analog Clock, CSS Clock, 3958, 時計, アナログ時計">
+    <link rel="canonical" href="https://search3958.github.io/namu/liquidglass-clock/">
+    
+    <link rel="alternate" hreflang="ja" href="https://search3958.github.io/namu/liquidglass-clock/">
+    <link rel="alternate" hreflang="en" href="https://search3958.github.io/namu/liquidglass-clock/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Material 3 Clock | Elegant Web Analog">
+    <meta property="og:image" content="https://search3958.github.io/project/logos/3958logo_main.svg">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Material 3 Clock",
+      "url": "https://search3958.github.io/namu/liquidglass-clock/",
+      "author": { "@type": "Organization", "name": "3958" }
+    }
+    </script>
+    
+    <style>
+        :root {
+            --md-sys-color-surface: #fef7ff;
+            --md-sys-color-on-surface: #1d1b20;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-primary: #6750a4;
+            --md-sys-color-secondary: #625b71;
+            --md-sys-color-outline-variant: #cac4d0;
+            --md-sys-color-tertiary: #7d5260;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-surface: #141218;
+                --md-sys-color-on-surface: #e6e1e5;
+                --md-sys-color-surface-container: #211f26;
+                --md-sys-color-primary: #d0bcff;
+                --md-sys-color-secondary: #ccc2dc;
+                --md-sys-color-outline-variant: #49454f;
+                --md-sys-color-tertiary: #efb8c8;
+            }
+        }
+
+        * {
+            font-family: 'Google Sans Flex', sans-serif;
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            width: 100vw; height: 100vh;
+            background-color: var(--md-sys-color-surface);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .sr-only {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;
+        }
+
+        /* Shadow Removed as requested */
+        .watch-container {
+            position: relative;
+            width: 90vw; height: 90vh;
+            max-width: 600px; max-height: 600px;
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: 100px;
+            display: flex; justify-content: center; align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .watch-face { position: relative; width: 100%; height: 100%; }
+
+        .tick {
+            position: absolute;
+            background: var(--md-sys-color-outline-variant);
+            border-radius: 100px;
+            transform-origin: center;
+        }
+        .tick.major { background: var(--md-sys-color-secondary); width: 4px !important; }
+
+        .number {
+            position: absolute;
+            font-size: 8vh;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            transform: translate(-50%, -50%);
+            font-variation-settings: "wght" 450, "wdth" 100;
+        }
+
+        .digital-time {
+            position: absolute;
+            left: 50%; top: 65%;
+            transform: translateX(-50%);
+            font-size: 2.5vh;
+            font-weight: 500;
+            color: var(--md-sys-color-secondary);
+            letter-spacing: 1px;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            border-radius: 100px;
+            z-index: 10;
+        }
+        .hour-hand { width: 12px; background: var(--md-sys-color-on-surface); margin-left: -6px; }
+        .minute-hand { width: 8px; background: var(--md-sys-color-secondary); margin-left: -4px; }
+        .second-hand { width: 3px; background: var(--md-sys-color-tertiary); margin-left: -1.5px; z-index: 20; }
+
+        .center-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 32px; height: 32px;
+            background: #694c81;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+        }
+
+        /* Logo Position & Blend Mode - Restored to original style */
+        img.logo {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 24px; height: 24px;
+            transform: translate(-50%, -50%);
+            z-index: 31;
+            filter: grayscale(1) brightness(1);
+            mix-blend-mode: color-dodge;
+            cursor: pointer;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            img.logo {
+                filter: grayscale(1) contrast(0.2) brightness(1.7);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="sr-only">Material 3 Analog Clock - Modern Web Timepiece</h1>
+
+<main class="watch-container">
+    <div class="watch-face" id="face">
+        <img src="https://search3958.github.io/project/logos/3958logo_main.svg" class="logo" alt="3958 Logo" onclick="window.location.href='https://search3958.github.io/'">
+        <div id="digital" class="digital-time" aria-live="polite">00:00</div>
+        <div id="elements-container"></div>
+        <div class="hand hour-hand" id="hour" aria-hidden="true"></div>
+        <div class="hand minute-hand" id="min" aria-hidden="true"></div>
+        <div class="hand second-hand" id="sec" aria-hidden="true"></div>
+        <div class="center-dot"></div>
+    </div>
+</main>
+
+<script>
+    const container = document.getElementById('elements-container');
+    const digitalEl = document.getElementById('digital');
+    const face = document.getElementById('face');
+
+    function getOuterPoint(angleRad, width, height, r) {
+        const cos = Math.cos(angleRad - Math.PI / 2);
+        const sin = Math.sin(angleRad - Math.PI / 2);
+        const halfW = width / 2;
+        const halfH = height / 2;
+        let x, y;
+        const absCos = Math.abs(cos), absSin = Math.abs(sin);
+        if (absCos * halfH <= absSin * halfW) {
+            x = (halfH / absSin) * cos; y = (halfH / absSin) * sin;
+        } else {
+            x = (halfW / absCos) * cos; y = (halfW / absCos) * sin;
+        }
+        const innerW = halfW - r, innerH = halfH - r;
+        if (Math.abs(x) > innerW && Math.abs(y) > innerH) {
+            const sx = Math.sign(cos), sy = Math.sign(sin);
+            const angleCorner = Math.atan2(Math.abs(y) - innerH, Math.abs(x) - innerW);
+            x = (innerW + r * Math.cos(angleCorner)) * sx;
+            y = (innerH + r * Math.sin(angleCorner)) * sy;
+        }
+        return { x, y, dist: Math.sqrt(x*x + y*y), cos, sin };
+    }
+
+    function layout() {
+        const rect = face.getBoundingClientRect();
+        const R = 80, margin = 24, W = rect.width - margin * 2, H = rect.height - margin * 2;
+        container.innerHTML = '';
+        for (let i = 0; i < 60; i++) {
+            const angleRad = (i * 6) * (Math.PI / 180);
+            const pt = getOuterPoint(angleRad, W, H, R);
+            const posX = pt.x + rect.width / 2, posY = pt.y + rect.height / 2;
+            const isMajor = i % 5 === 0;
+            const tick = document.createElement('div');
+            tick.className = isMajor ? 'tick major' : 'tick';
+            tick.style.width = isMajor ? '4px' : '2px';
+            tick.style.height = isMajor ? '24px' : '12px';
+            const shift = isMajor ? 12 : 6; 
+            tick.style.left = `${posX - pt.cos * shift}px`;
+            tick.style.top = `${posY - pt.sin * shift}px`;
+            tick.style.transform = `translate(-50%, -50%) rotate(${i * 6}deg)`;
+            container.appendChild(tick);
+            if (i % 15 === 0) {
+                const num = document.createElement('div');
+                num.className = 'number';
+                num.innerText = i === 0 ? '12' : (i / 5);
+                const numOffset = 80; 
+                num.style.left = `${posX - pt.cos * numOffset}px`;
+                num.style.top = `${posY - pt.sin * numOffset}px`;
+                container.appendChild(num);
+            }
+        }
+    }
+
+    function render() {
+        const now = new Date();
+        const rect = face.getBoundingClientRect();
+        const W = rect.width - 60, H = rect.height - 60;
+        const ms = now.getMilliseconds(), s = now.getSeconds(), m = now.getMinutes(), h = now.getHours();
+        const sDeg = (s * 6) + (ms * 0.006), mDeg = (m * 6) + (s * 0.1), hDeg = ((h % 12) * 30) + (m * 0.5);
+        const pt = getOuterPoint(sDeg * (Math.PI / 180), W, H, 80);
+        const secHand = document.getElementById('sec');
+        if(secHand) {
+            secHand.style.height = `${pt.dist}px`;
+            secHand.style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+        }
+        const baseSize = Math.min(rect.width, rect.height) / 2;
+        const minHand = document.getElementById('min'), hourHand = document.getElementById('hour');
+        if(minHand) {
+            minHand.style.height = `${baseSize * 0.7}px`;
+            minHand.style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+        }
+        if(hourHand) {
+            hourHand.style.height = `${baseSize * 0.45}px`;
+            hourHand.style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+        }
+        const timeStr = h.toString().padStart(2,'0') + ":" + m.toString().padStart(2,'0');
+        if(digitalEl.innerText !== timeStr) digitalEl.innerText = timeStr;
+        requestAnimationFrame(render);
+    }
+
+    window.addEventListener('resize', layout);
+    layout(); render();
+</script>
+
+</body>
+</html>

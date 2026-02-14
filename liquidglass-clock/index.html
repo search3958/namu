@@ -154,7 +154,7 @@
             backdrop-filter:blur(10px);
         }
         img.logo {
-            position: fixed;
+            position: absolute;
             top: 50%; left: 50%;
             width: 37px; height: 37px;
             transform: translate(-50%, -50%);
@@ -185,9 +185,7 @@
 </head>
 <body>
 <h1 class="sr-only">Liquid Glass Clock - Apple Watch Style Analog Clock</h1>
-<main>
-    <img src="https://search3958.github.io/project/logos/3958logo_main.svg" class="logo" alt="3958 Logo" onclick="window.location.href='https://search3958.github.io/'">
-    <div class="watch-container">
+<main>    <div class="watch-container">
         <div class="watch-face" id="face">
             <div id="digital" class="digital-time" aria-live="polite">00:00</div>
             <div id="elements-container"></div>
@@ -195,6 +193,9 @@
             <div class="hand minute-hand" id="min" aria-hidden="true"></div>
             <div class="hand second-hand" id="sec" aria-hidden="true"></div>
             <div class="center-dot"></div>
+
+    <img src="https://search3958.github.io/project/logos/3958logo_main.svg" class="logo" alt="3958 Logo" onclick="window.location.href='https://search3958.github.io/'">
+
         </div>
     </div>
 </main>
