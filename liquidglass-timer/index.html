@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6151036058675874"
+     crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wdth,wght@6..144,25..151,1..1000&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Glass Timer</title>
+    <style>
+        :root {
+            --outer-bg: #e9e9ec;
+            --watch-bg: rgba(255, 255, 255, 0.45);
+            --accent-color: color(display-p3 1 0.61 0); /* Timer Orange */
+            --accent-glow: rgba(255, 149, 0, 0.3);
+            --text-color: #1c1c1e;
+            --sub-text: #8e8e93;
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --outer-bg: #000000;
+                --watch-bg: rgba(28, 28, 30, 0.6);
+                --text-color: #ffffff;
+                --sub-text: #a1a1a6;
+                --glass-border: rgba(255, 255, 255, 0.1);
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+
+
+        .watch-container {
+                box-shadow: inset 0px 8px 16px 0px rgb(255 255 255 / 5%), 0px 5px 32px 0px rgba(0, 0, 0, 0.1)!important;
+            border: #ffffff01 solid 3px!important;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Google Sans Flex', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--outer-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .watch-container {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 1 / 1.1;
+            background-color: var(--watch-bg);
+            border-radius: 22%; /* Superellipse approximation */
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+                box-shadow: inset 0px 8px 16px 0px rgba(255, 255, 255, 255), 0px 5px 32px 0px rgba(0, 0, 0, 0.1);
+    border: #fff1 solid 3px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            padding: 20px;
+            corner-shape:superellipse(1.6);
+        }
+
+        /* Progress Circle */
+        .timer-display {
+            position: relative;
+            width: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: auto;
+                overflow: visible;
+        }
+
+        .circle-bg {
+            fill: none;
+            stroke: var(--sub-text);
+            stroke-width: 4;
+            opacity: 0.1;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.9s cubic-bezier(0, 0.02, 0, 1);
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+        }
+
+        .time-text {
+            position: absolute;
+            font-size: 4.5rem;
+            font-weight: 300;
+            color: var(--text-color);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -2px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            background: var(--watch-bg);
+    box-shadow: inset 0px 1px 2px 0px rgba(255, 255, 255, 0.5), 0px 5px 24px 0px rgba(0, 0, 0, 0.1);
+    border: #fff1 solid 1.5px
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+        }
+
+        .btn svg {
+            transform: none;
+            width: 30px;
+            height: 30px;
+            fill: var(--text-color);
+        }
+
+        .btn.start { background-color: 
+color(display-p3 0.194 0.834 0.366 / 1)
+; }
+        .btn.start svg { fill: color(display-p3 0.786 1 0.719 / 1); }
+        
+        .btn.pause { background-color: color(display-p3 1 0.61 0); }
+        .btn.pause svg { fill: color(display-p3 1 0.96 0.528 / 1)
+; }
+
+        .btn.reset { background-color: 
+color(display-p3 0.91 0.21 0.09)
+; }
+        .btn.reset svg { fill: 
+color(display-p3 1 0.858 0.85 / 1)
+ }
+
+        /* Time Picker (Simple Version) */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input {
+            background: var(--outer-bg);
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            width: 50px;
+            text-align: center;
+            outline: none;
+            border-radius:24px;
+            corner-shape:superellipse(1.6);
+            height:32px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="watch-container">
+    <div class="input-group" id="editor">
+        <input id="m-input" value="05" min="0" max="99">
+        <span style="color: var(--sub-text);padding-top: 5px; ">:</span>
+        <input id="s-input" value="00" min="0" max="59">
+    </div>
+
+    <div class="timer-display">
+        <svg viewBox="0 0 100 100">
+            <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="circle-progress" id="progress" cx="50" cy="50" r="45"></circle>
+        </svg>
+        <div class="time-text" id="display">05:00</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn reset" id="resetBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+        </button>
+        <button class="btn start" id="startBtn">
+            <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    let timeLeft = 300;
+    let totalTime = 300;
+    let timerId = null;
+    let isRunning = false;
+
+    const display = document.getElementById('display');
+    const progress = document.getElementById('progress');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const playIcon = document.getElementById('playIcon');
+    const mInput = document.getElementById('m-input');
+    const sInput = document.getElementById('s-input');
+
+    const circumference = 2 * Math.PI * 45;
+    progress.style.strokeDasharray = circumference;
+
+    function updateDisplay() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        display.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        
+        const offset = circumference - (timeLeft / totalTime) * circumference;
+        progress.style.strokeDashoffset = isNaN(offset) ? 0 : offset;
+    }
+
+    function toggleTimer() {
+        if (isRunning) {
+            clearInterval(timerId);
+            playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+            startBtn.className = 'btn start';
+        } else {
+            if (timeLeft <= 0) return;
+            // エディタからの値を取得（最初のみ）
+            if (timeLeft === totalTime) {
+                totalTime = parseInt(mInput.value) * 60 + parseInt(sInput.value);
+                timeLeft = totalTime;
+            }
+            
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    alert("Time is up!");
+                    resetTimer();
+                }
+            }, 1000);
+            playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            startBtn.className = 'btn pause';
+        }
+        isRunning = !isRunning;
+    }
+
+    function resetTimer() {
+        clearInterval(timerId);
+        isRunning = false;
+        totalTime = parseInt(mInput.value) * 60 + parseInt(sInput.value);
+        timeLeft = totalTime;
+        updateDisplay();
+        playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        startBtn.className = 'btn start';
+    }
+
+    startBtn.addEventListener('click', toggleTimer);
+    resetBtn.addEventListener('click', resetTimer);
+    
+    // 入力変更時に即座に反映
+    [mInput, sInput].forEach(input => {
+        input.addEventListener('change', () => {
+            if (!isRunning) resetTimer();
+        });
+    });
+
+    updateDisplay();
+</script>
+
+</body>
+</html>
