@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja" prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wdth,wght@6..144,25..151,1..1000&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Liquid Glass Clock | Apple Watch Style Web Analog Clock</title>
+    <meta name="description" content="A beautiful, high-performance Apple Watch style web clock. Featuring smooth animations, liquid glass design, and adaptive layouts. Apple Watchスタイルの美しいウェブ時計。">
+    <meta name="keywords" content="Apple Watch Clock, Web Clock, Liquid Glass, Neo-morphism, Analog Clock, CSS Clock, 3958, 時計, アナログ時計, ウェブ時計">
+    <link rel="canonical" href="https://search3958.github.io/namu/liquidglass-clock/">
+    
+    <link rel="alternate" hreflang="ja" href="https://search3958.github.io/namu/liquidglass-clock/">
+    <link rel="alternate" hreflang="en" href="https://search3958.github.io/namu/liquidglass-clock/">
+    <link rel="alternate" hreflang="x-default" href="https://search3958.github.io/namu/liquidglass-clock/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://search3958.github.io/namu/liquidglass-clock/">
+    <meta property="og:title" content="Liquid Glass Clock | Apple Watch Style">
+    <meta property="og:description" content="Experience the fluid elegance of a premium analog clock on your browser.">
+    <meta property="og:image" content="https://search3958.github.io/project/logos/3958logo_main.svg">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Liquid Glass Clock">
+    <meta name="twitter:description" content="High-performance Apple Watch style web clock.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Liquid Glass Clock",
+      "url": "https://search3958.github.io/namu/liquidglass-clock/",
+      "description": "An elegant, Apple Watch-inspired analog clock for the web.",
+      "applicationCategory": "Utility",
+      "operatingSystem": "Any",
+      "author": {
+        "@type": "Organization",
+        "name": "3958"
+      }
+    }
+    </script>
+
+    <style>
+        :root {
+            --outer-bg: #e9e9ec;
+            --watch-bg: #ffffff72;
+            --accent-color: #ff3b30;
+            --hand-color: #1c1c1e;
+            --tick-color: #e5e5ea;
+            --tick-major-color: #1c1c1e4e;
+            --text-color: #1c1c1e;
+            --sub-text-color: #a1a1a6;
+        }
+        *{
+            font-family:'google sans flex',sans-serif;
+            user-select: none;
+        }
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            background-color: var(--outer-bg);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* SEO-friendly hidden H1 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        .watch-container {
+            position: relative;
+            width: 92vw; height: 92vh;
+            background-color: var(--watch-bg);
+            border-radius: 100px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            overflow: hidden;
+            corner-shape: superellipse(1.6);
+            box-shadow: inset 0px 8px 16px 0px rgba(255, 255, 255, 255),0px 5px 32px 0px rgba(0, 0, 0, 0.1);
+            border:#fff1 solid 3px;
+        }
+
+        .watch-face { position: relative; width: 100%; height: 100%; }
+
+        .tick {
+            position: absolute;
+            background: var(--tick-color);
+            border-radius: 10px;
+            transform-origin: center;
+        }
+        .tick.major {
+            background: var(--tick-major-color);
+            width: 6px !important;
+            height: 52px !important;
+        }
+
+        .number {
+            position: absolute;
+            font-size: 10vh;
+            font-weight: 300;
+            color: var(--text-color);
+            transform: translate(-50%, -50%);
+            white-space: nowrap;font-variation-settings:
+
+    "slnt" 0,
+    "wdth" 1000,
+    "GRAD" 0,
+    "ROND" 0;
+        }
+
+        .digital-time {
+            position: absolute;
+            left: 50%; top: 38%;
+            transform: translateX(-50%);
+            font-size: 4vh;
+            font-weight: 500;
+            color: var(--sub-text-color);
+            letter-spacing: 2px;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom center;
+            border-radius: 20px;
+            z-index: 10;
+            box-shadow: 0px 0px 64px 0px rgba(0, 0, 0, 0.8);
+            
+        }
+        .hour-hand { width: 10px; background: var(--hand-color); margin-left: -2px; }
+        .minute-hand { width: 10px; background: var(--hand-color); margin-left: -1.5px; }
+        .second-hand { width: 4px; background: var(--accent-color); margin-left: -1.5px; z-index: 20; }
+
+        .center-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 42px; height: 42px;
+            background: #0009;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            box-shadow: inset 0px 1px 2px 0px rgba(255, 255, 255, 0.7),0px 5px 15px 0px rgba(0, 0, 0, 0.35);
+            border:#fff1 solid 1.5px;
+            backdrop-filter:blur(10px);
+        }
+        img.logo {
+            position: fixed;
+            top: 50%; left: 50%;
+            width: 37px; height: 37px;
+            transform: translate(-50%, -50%);
+            z-index: 31;
+            filter:grayscale(1) brightness(1);
+            mix-blend-mode: color-dodge;
+                cursor: pointer;
+        }
+        @media (prefers-color-scheme: dark) {
+            
+        :root {
+            --outer-bg: #000000;
+            --watch-bg: #1e1c1c72;
+            --accent-color: #ff483f;
+            --hand-color: #fefefe;
+            --tick-color: #e5e5ea31;
+            --tick-major-color: #ffffff7b;
+            --text-color: #f7f7f7;
+            --sub-text-color: #a1a1a6;
+        }
+        .watch-container {
+            box-shadow: inset 0px 8px 16px 0px rgba(255, 255, 255, 0.2),0px 5px 32px 0px rgba(0, 0, 0, 0.1);
+        }
+        img.logo{
+            filter:grayscale(1) contrast(0.2) brightness(1.7);}
+        }
+    </style>
+</head>
+<body>
+<h1 class="sr-only">Liquid Glass Clock - Apple Watch Style Analog Clock</h1>
+<main>
+    <img src="https://search3958.github.io/project/logos/3958logo_main.svg" class="logo" alt="3958 Logo" onclick="window.location.href='https://search3958.github.io/'">
+    <div class="watch-container">
+        <div class="watch-face" id="face">
+            <div id="digital" class="digital-time" aria-live="polite">00:00</div>
+            <div id="elements-container"></div>
+            <div class="hand hour-hand" id="hour" aria-hidden="true"></div>
+            <div class="hand minute-hand" id="min" aria-hidden="true"></div>
+            <div class="hand second-hand" id="sec" aria-hidden="true"></div>
+            <div class="center-dot"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const container = document.getElementById('elements-container');
+    const digitalEl = document.getElementById('digital');
+    const face = document.getElementById('face');
+
+    // 角丸50pxの軌道を計算
+    function getOuterPoint(angleRad, width, height, r) {
+        const cos = Math.cos(angleRad - Math.PI / 2);
+        const sin = Math.sin(angleRad - Math.PI / 2);
+        const halfW = width / 2;
+        const halfH = height / 2;
+
+        let x, y;
+        const absCos = Math.abs(cos);
+        const absSin = Math.abs(sin);
+
+        if (absCos * halfH <= absSin * halfW) {
+            x = (halfH / absSin) * cos;
+            y = (halfH / absSin) * sin;
+        } else {
+            x = (halfW / absCos) * cos;
+            y = (halfW / absCos) * sin;
+        }
+
+        const innerW = halfW - r;
+        const innerH = halfH - r;
+
+        if (Math.abs(x) > innerW && Math.abs(y) > innerH) {
+            const sx = Math.sign(cos);
+            const sy = Math.sign(sin);
+            const angleCorner = Math.atan2(Math.abs(y) - innerH, Math.abs(x) - innerW);
+            x = (innerW + r * Math.cos(angleCorner)) * sx;
+            y = (innerH + r * Math.sin(angleCorner)) * sy;
+        }
+
+        return { x, y, dist: Math.sqrt(x*x + y*y), cos, sin };
+    }
+
+    function layout() {
+        const rect = face.getBoundingClientRect();
+        const R = 50; 
+        const margin = 15;
+        const W = rect.width - margin * 2;
+        const H = rect.height - margin * 2;
+        
+        container.innerHTML = '';
+
+        for (let i = 0; i < 60; i++) {
+            const angleRad = (i * 6) * (Math.PI / 180);
+            const pt = getOuterPoint(angleRad, W, H, R);
+            const posX = pt.x + rect.width / 2;
+            const posY = pt.y + rect.height / 2;
+
+            // Tickの生成
+            const tick = document.createElement('div');
+            const isMajor = i % 5 === 0;
+            tick.className = isMajor ? 'tick major' : 'tick';
+            if (!isMajor) {
+                tick.style.width = '5px';
+                tick.style.height = '15px';
+            }
+            
+            const shift = isMajor ? 26 : 8; 
+            tick.style.left = `${posX - pt.cos * shift}px`;
+            tick.style.top = `${posY - pt.sin * shift}px`;
+            tick.style.transform = `translate(-50%, -50%) rotate(${i * 6}deg)`;
+            container.appendChild(tick);
+
+            // 数字の生成 (12, 3, 6, 9)
+            if (i % 15 === 0) {
+                const num = document.createElement('div');
+                num.className = 'number';
+                num.innerText = i === 0 ? '12' : (i / 5);
+                
+                // 数字の位置もTickの外周ロジックに基づき、さらに内側にオフセット
+                const numOffset = 100; // Tickからの距離
+                num.style.left = `${posX - pt.cos * numOffset}px`;
+                num.style.top = `${posY - pt.sin * numOffset}px`;
+                container.appendChild(num);
+            }
+        }
+    }
+
+    function render() {
+        const now = new Date();
+        const rect = face.getBoundingClientRect();
+        const W = rect.width - 70;
+        const H = rect.height - 70;
+
+        const sDeg = (now.getSeconds() * 6) + (now.getMilliseconds() * 0.006);
+        const mDeg = (now.getMinutes() * 6) + (now.getSeconds() * 0.1);
+        const hDeg = (now.getHours() % 12 * 30) + (now.getMinutes() * 0.5);
+
+        // 秒針の長さをpxで計算（角丸50pxに追従）
+        const pt = getOuterPoint(sDeg * (Math.PI / 180), W, H, 50);
+        const secHand = document.getElementById('sec');
+        if(secHand) secHand.style.height = `${pt.dist}px`;
+        
+        // 分針・時針
+        const baseSize = Math.min(rect.width, rect.height) / 2;
+        const minHand = document.getElementById('min');
+        const hourHand = document.getElementById('hour');
+        if(minHand) minHand.style.height = `${baseSize * 0.65}px`;
+        if(hourHand) hourHand.style.height = `${baseSize * 0.45}px`;
+
+        if(secHand) secHand.style.transform = `translateX(-50%) rotate(${sDeg}deg)`;
+        if(minHand) minHand.style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+        if(hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+
+        const timeStr = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+        if(digitalEl.innerText !== timeStr) digitalEl.innerText = timeStr;
+
+        requestAnimationFrame(render);
+    }
+
+    window.addEventListener('resize', layout);
+    layout();
+    render();
+</script>
+
+</body>
+</html>
