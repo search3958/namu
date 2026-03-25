@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="head-title">AVIF to PNG 変換 - Image Optimizer Pro</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" id="meta-desc" content="ブラウザ上で動作する高速 AVIF to PNG 変換ツール。AVIF画像を一括でPNG形式に変換。プライバシーに配慮したオフライン処理。">
+  <link rel="canonical" href="https://search3958.github.io/namu/main/avif-to-png.html">
+  <meta property="og:title" id="og-title" content="AVIF to PNG 変換 - Image Optimizer Pro">
+  <meta property="og:description" id="og-desc" content="ブラウザ上で動作する高速 AVIF to PNG 変換ツール。一括変換、ZIPダウンロード対応。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://search3958.github.io/namu/main/avif-to-png.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#30313e">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" id="t-jsonld"></script>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <h1 id="t-title">AVIF to PNG 変換</h1>
+      <div class="site-links">
+        <a href="https://search3958.github.io">search3958.github.io</a>
+        <a href="https://search3958.github.io/policies/">利用規約とプライバシーポリシー</a>
+        <a id="langLink" href="#">Language</a>
+      </div>
+    </header>
+
+    <div class="top">
+      <div class="card fit-content" style="flex: 1;padding:8px;">
+        <div id="dropZone" class="drop-zone">
+          <p id="t-dropMain">画像をドラッグ＆ドロップ</p>
+          <p id="t-dropSub" style="font-size: 0.8rem;">またはクリックして選択 (AVIF)</p>
+          <input type="file" id="imageInput" accept=".avif,image/avif" multiple style="display:none">
+        </div>
+      </div>
+      
+      <div class="card fit-content">
+        <form id="convertForm" class="fit-content">
+          <fieldset class="fit-content" style="display:none;">
+            <legend id="t-compRatio">圧縮率</legend>
+            <input type="radio" id="p1" name="plan" value="0.5" checked>
+            <label for="p1" id="t-compHigh">高圧縮</label>
+            <input type="radio" id="p2" name="plan" value="0.8">
+            <label for="p2" id="t-compMid">中程度</label>
+            <input type="radio" id="p3" name="plan" value="1.0">
+            <label for="p3" id="t-compLossless">ロスレス</label>
+          </fieldset>
+          <fieldset class="fit-content">
+            <legend id="t-outputFormat">出力形式</legend>
+            <input type="radio" id="m1" name="method" value="image/png" checked>
+            <label for="m1">PNG</label>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="switch-container">
+        <span id="t-autoUpdate">自動更新</span>
+        <label class="switch">
+          <input type="checkbox" id="autoUpdateToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button id="manualUpdateBtn" class="btn-small t-applyAll">設定をすべてに適用</button>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <h2 id="t-results">変換結果</h2>
+        <div class="bulk-actions">
+          <button id="zipBtn" class="btn-small t-bulkDl">一括ZIPダウンロード</button>
+        </div>
+      </div>
+      <div id="resultsList" style="display: flex; flex-direction: column; gap: 12px; width: 100%;"></div>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+        ja: {
+            langCode: "ja",
+            title: "AVIF to PNG 変換 - Image Optimizer Pro",
+            desc: "ブラウザ上で動作する高速 AVIF to PNG 変換ツール。一括変換、ZIPダウンロード、自動更新対応。プライバシーに配慮したオフライン処理。",
+            dropMain: "画像をドラッグ＆ドロップ",
+            dropSub: "またはクリックして選択 (AVIF)",
+            compRatio: "圧縮率",
+            compHigh: "高圧縮",
+            compMid: "中程度",
+            compLossless: "ロスレス",
+            outputFormat: "出力形式",
+            autoUpdate: "自動更新",
+            applyAll: "設定をすべてに適用",
+            results: "変換結果",
+            bulkDl: "一括ZIPダウンロード",
+            copy: "コピー",
+            save: "保存",
+            copied: "コピーしました",
+            lang: "Language / 言語",
+            converting: "変換中..."
+        },
+        en: {
+            langCode: "en",
+            title: "AVIF to PNG Converter - Image Optimizer Pro",
+            desc: "Fast in-browser AVIF to PNG conversion tool. Bulk processing, ZIP download, and auto-update. Privacy-focused offline processing.",
+            dropMain: "Drag & Drop AVIF Images",
+            dropSub: "or click to select",
+            compRatio: "Compression",
+            compHigh: "High",
+            compMid: "Medium",
+            compLossless: "Lossless",
+            outputFormat: "Format",
+            autoUpdate: "Auto Update",
+            applyAll: "Apply to all",
+            results: "Results",
+            bulkDl: "Bulk ZIP Download",
+            copy: "Copy",
+            save: "Save",
+            copied: "Copied!",
+            lang: "Language",
+            converting: "Converting..."
+        }
+    };
+
+    const currentLang = localStorage.getItem('selectedLang') || 'ja';
+    const t = translations[currentLang] || translations.ja;
+
+    document.documentElement.lang = t.langCode;
+    document.title = t.title;
+    document.getElementById('meta-desc').content = t.desc;
+    document.getElementById('og-title').content = t.title;
+    document.getElementById('og-desc').content = t.desc;
+    
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": t.title.split(' - ')[0],
+        "description": t.desc,
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any"
+    };
+    document.getElementById('t-jsonld').textContent = JSON.stringify(jsonLd);
+    
+    document.getElementById('t-title').innerText = currentLang === 'ja' ? 'AVIF to PNG 変換' : t.title.split(' - ')[0];
+    document.getElementById('t-dropMain').innerText = t.dropMain;
+    document.getElementById('t-dropSub').innerText = t.dropSub;
+    document.getElementById('t-compRatio').innerText = t.compRatio;
+    document.getElementById('t-compHigh').innerText = t.compHigh;
+    document.getElementById('t-compMid').innerText = t.compMid;
+    document.getElementById('t-compLossless').innerText = t.compLossless;
+    document.getElementById('t-outputFormat').innerText = t.outputFormat;
+    document.getElementById('t-autoUpdate').innerText = t.autoUpdate;
+    document.querySelectorAll('.t-applyAll').forEach(el => el.innerText = t.applyAll);
+    document.getElementById('t-results').innerText = t.results;
+    document.querySelectorAll('.t-bulkDl').forEach(el => el.innerText = t.bulkDl);
+    document.getElementById('langLink').innerText = t.lang;
+
+    const nextUrl = encodeURIComponent(window.location.href);
+    document.getElementById('langLink').href = `https://search3958.github.io/accounts/lang?next=${nextUrl}`;
+
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const zipBtn = document.getElementById('zipBtn');
+    const manualUpdateBtn = document.getElementById('manualUpdateBtn');
+    const autoUpdateToggle = document.getElementById('autoUpdateToggle');
+    const form = document.getElementById('convertForm');
+    
+    let originalFiles = []; 
+    let processedResults = [];
+    let isProcessing = false;
+
+    dropZone.addEventListener('click', () => imageInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      addFiles(e.dataTransfer.files);
+    });
+    imageInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+    form.addEventListener('change', () => {
+      if (autoUpdateToggle.checked) reprocessAll();
+    });
+    manualUpdateBtn.onclick = () => reprocessAll();
+
+    function setProcessing(val) {
+        isProcessing = val;
+        manualUpdateBtn.disabled = val;
+        if (val) {
+            manualUpdateBtn.innerText = t.converting;
+            manualUpdateBtn.style.opacity = "0.5";
+        } else {
+            manualUpdateBtn.innerText = t.applyAll;
+            manualUpdateBtn.style.opacity = "1";
+        }
+    }
+
+    async function addFiles(files) {
+      const newFiles = Array.from(files);
+      if (newFiles.length === 0) return;
+      setProcessing(true);
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+      originalFiles.push(...newFiles);
+      for (const file of newFiles) {
+        const result = await processSingleFile(file);
+        processedResults.push(result);
+      }
+      renderAllResults();
+      setProcessing(false);
+      updateGlobalUI();
+    }
+
+    async function reprocessAll() {
+      if (originalFiles.length === 0 || isProcessing) return;
+      setProcessing(true);
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+      processedResults = [];
+      const newResults = [];
+      for (const file of originalFiles) {
+        const result = await processSingleFile(file);
+        newResults.push(result);
+      }
+      processedResults = newResults;
+      renderAllResults();
+      setProcessing(false);
+      updateGlobalUI();
+    }
+
+    async function processSingleFile(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const format = form.method.value; // image/png
+            const extension = 'png';
+            canvas.toBlob((blob) => {
+              const url = URL.createObjectURL(blob);
+              const fileName = `png_${file.name.split('.')[0]}.${extension}`;
+              const ratio = ((1 - blob.size / file.size) * 100).toFixed(1);
+              resolve({ 
+                name: fileName, blob, url, type: format, originalSize: file.size, ratio: ratio 
+              });
+            }, format);
+          };
+          img.onerror = () => {
+              alert("Error decoding AVIF. Please use a modern browser like Chrome.");
+              resolve({ name: file.name, blob: file, url: "", type: "", originalSize: file.size, ratio: 0 });
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderAllResults() {
+      resultsList.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      processedResults.slice().reverse().forEach(data => {
+        if (data.url) fragment.appendChild(createResultElement(data));
+      });
+      resultsList.appendChild(fragment);
+    }
+
+    function createResultElement(data) {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      const isPlus = data.ratio < 0;
+      item.innerHTML = `
+        <img src="${data.url}">
+        <div class="result-info">
+          <div class="result-name">${data.name}</div>
+          <div class="result-meta">
+            ${(data.originalSize / 1024).toFixed(1)} KB → <strong>${(data.blob.size / 1024).toFixed(1)} KB</strong>
+            <span class="ratio-badge ${isPlus ? 'plus' : ''}">${isPlus ? '+' : '-'}${Math.abs(data.ratio)}%</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn-small copy-btn">${t.copy}</button>
+          <button class="btn-small dl-btn">${t.save}</button>
+        </div>
+      `;
+      item.querySelector('.dl-btn').onclick = () => {
+        const a = document.createElement('a');
+        a.href = data.url; a.download = data.name; a.click();
+      };
+      item.querySelector('.copy-btn').onclick = async () => {
+        try {
+          const clipboardData = [new ClipboardItem({ [data.type]: data.blob })];
+          await navigator.clipboard.write(clipboardData);
+          alert(t.copied);
+        } catch (err) { alert('Error'); }
+      };
+      return item;
+    }
+
+    function updateGlobalUI() {
+      const hasFiles = processedResults.length > 0;
+      resultsSection.style.display = hasFiles ? 'flex' : 'none';
+      zipBtn.style.display = processedResults.length > 1 ? 'block' : 'none';
+      manualUpdateBtn.disabled = !hasFiles || isProcessing;
+    }
+
+    zipBtn.onclick = async () => {
+      const zip = new JSZip();
+      processedResults.forEach(f => { if(f.url) zip.file(f.name, f.blob); });
+      const content = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(content); a.download = 'avif_to_png_images.zip'; a.click();
+    };
+  </script>
+</body>
+</html>
