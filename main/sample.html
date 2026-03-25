@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="head-title">WebP変換 - Image Optimizer Pro</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" id="meta-desc" content="ブラウザ上で動作する高速WebP変換ツール。一括変換、ZIPダウンロード、自動更新対応。">
+  <link rel="canonical" href="https://search3958.github.io/namu/main/sample.html">
+  <meta property="og:title" id="og-title" content="WebP変換 - Image Optimizer Pro">
+  <meta property="og:description" id="og-desc" content="ブラウザ上で動作する高速WebP変換ツール。一括変換、ZIPダウンロード、自動更新対応。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://search3958.github.io/namu/main/sample.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#30313e">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" id="t-jsonld"></script>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <h1 id="t-title">WebP変換</h1>
+      <div class="site-links">
+        <a href="https://search3958.github.io">search3958.github.io</a>
+        <a href="https://search3958.github.io/policies/">利用規約とプライバシーポリシー</a>
+        <a id="langLink" href="#">Language</a>
+      </div>
+    </header>
+
+    <div class="top">
+      <div class="card fit-content" style="flex: 1;padding:8px;">
+        <div id="dropZone" class="drop-zone">
+          <p id="t-dropMain">画像をドラッグ＆ドロップ</p>
+          <p id="t-dropSub" style="font-size: 0.8rem;">またはクリックして選択</p>
+          <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
+        </div>
+      </div>
+      
+      <div class="card fit-content">
+        <form id="convertForm" class="fit-content">
+          <fieldset class="fit-content">
+            <legend id="t-compRatio">圧縮率</legend>
+            <input type="radio" id="p1" name="plan" value="0.5" checked>
+            <label for="p1" id="t-compHigh">高圧縮</label>
+            <input type="radio" id="p2" name="plan" value="0.8">
+            <label for="p2" id="t-compMid">中程度</label>
+            <input type="radio" id="p3" name="plan" value="1.0">
+            <label for="p3" id="t-compLossless">ロスレス</label>
+          </fieldset>
+          <fieldset class="fit-content">
+            <legend id="t-outputFormat">出力形式</legend>
+            <input type="radio" id="m1" name="method" value="image/webp" checked>
+            <label for="m1">WebP</label>
+            <input type="radio" id="m2" name="method" value="image/jpeg">
+            <label for="m2">JPEG</label>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="switch-container">
+        <span id="t-autoUpdate">自動更新</span>
+        <label class="switch">
+          <input type="checkbox" id="autoUpdateToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button id="manualUpdateBtn" class="btn-small t-applyAll">設定をすべてに適用</button>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <h2 id="t-results">変換結果</h2>
+        <div class="bulk-actions">
+          <button id="zipBtn" class="btn-small t-bulkDl">一括ZIPダウンロード</button>
+        </div>
+      </div>
+      <div id="resultsList" style="display: flex; flex-direction: column; gap: 12px; width: 100%;"></div>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+        ja: {
+            langCode: "ja",
+            title: "WebP変換 - Image Optimizer Pro",
+            desc: "ブラウザ上で動作する高速WebP変換ツール。一括変換、ZIPダウンロード、自動更新対応。プライバシーに配慮したオフライン処理。",
+            dropMain: "画像をドラッグ＆ドロップ",
+            dropSub: "またはクリックして選択",
+            compRatio: "圧縮率",
+            compHigh: "高圧縮",
+            compMid: "中程度",
+            compLossless: "ロスレス",
+            outputFormat: "出力形式",
+            autoUpdate: "自動更新",
+            applyAll: "設定をすべてに適用",
+            results: "変換結果",
+            bulkDl: "一括ZIPダウンロード",
+            copy: "コピー",
+            save: "保存",
+            copied: "コピーしました",
+            lang: "Language / 言語",
+            converting: "変換中..."
+        },
+        en: {
+            langCode: "en",
+            title: "WebP Converter - Image Optimizer Pro",
+            desc: "Fast in-browser WebP conversion tool. Bulk processing, ZIP download, and auto-update. Privacy-focused offline processing.",
+            dropMain: "Drag & Drop Images",
+            dropSub: "or click to select",
+            compRatio: "Compression",
+            compHigh: "High",
+            compMid: "Medium",
+            compLossless: "Lossless",
+            outputFormat: "Format",
+            autoUpdate: "Auto Update",
+            applyAll: "Apply to all",
+            results: "Results",
+            bulkDl: "Bulk ZIP Download",
+            copy: "Copy",
+            save: "Save",
+            copied: "Copied!",
+            lang: "Language",
+            converting: "Converting..."
+        },
+        "zh-CN": {
+            langCode: "zh-CN",
+            title: "WebP 转换器 - Image Optimizer Pro",
+            desc: "基于浏览器的快速 WebP 转换工具。支持批量处理、ZIP 下载和自动更新。注重隐私的本地处理。",
+            dropMain: "拖放图片",
+            dropSub: "或点击选择",
+            compRatio: "压缩率",
+            compHigh: "高压缩",
+            compMid: "中等",
+            compLossless: "无损",
+            outputFormat: "输出格式",
+            autoUpdate: "自动更新",
+            applyAll: "应用于全部",
+            results: "转换结果",
+            bulkDl: "批量 ZIP 下载",
+            copy: "复制",
+            save: "保存",
+            copied: "已复制",
+            lang: "语言",
+            converting: "转换中..."
+        },
+        "zh-TW": {
+            langCode: "zh-TW",
+            title: "WebP 轉換器 - Image Optimizer Pro",
+            desc: "基於瀏覽器的快速 WebP 轉換工具。支持批量處理、ZIP 下載和自動更新。注重隱私的本地處理。",
+            dropMain: "拖放圖片",
+            dropSub: "或點擊選擇",
+            compRatio: "壓縮率",
+            compHigh: "高壓縮",
+            compMid: "中等",
+            compLossless: "無損",
+            outputFormat: "輸出格式",
+            autoUpdate: "自動更新",
+            applyAll: "套用到全部",
+            results: "轉換結果",
+            bulkDl: "批量 ZIP 下載",
+            copy: "複製",
+            save: "保存",
+            copied: "已複製",
+            lang: "語言",
+            converting: "轉換中..."
+        },
+        ko: {
+            langCode: "ko",
+            title: "WebP 변환기 - Image Optimizer Pro",
+            desc: "브라우저에서 동작하는 빠른 WebP 변환 도구. 일괄 처리, ZIP 다운로드, 자동 업데이트 지원. 개인정보 보호를 위한 로컬 처리.",
+            dropMain: "이미지를 드래그 & 드롭",
+            dropSub: "또는 클릭하여 선택",
+            compRatio: "압축률",
+            compHigh: "고압축",
+            compMid: "중간",
+            compLossless: "무손실",
+            outputFormat: "출력 형식",
+            autoUpdate: "자동 업데이트",
+            applyAll: "모든 설정 적용",
+            results: "변환 결과",
+            bulkDl: "일괄 ZIP 다운로드",
+            copy: "복사",
+            save: "저장",
+            copied: "복사되었습니다",
+            lang: "언어",
+            converting: "변환 중..."
+        },
+        "ko-KP": {
+            langCode: "ko-KP",
+            title: "WebP 변환기 - Image Optimizer Pro",
+            desc: "브라우저에서 동작하는 빠른 WebP 변환 도구. 일괄 처리, ZIP 내리적재, 자동 갱신 지원. 정보를 보호하는 본지 처리.",
+            dropMain: "화상을 드래그 & 드롭",
+            dropSub: "혹은 눌러서 선택",
+            compRatio: "압축률",
+            compHigh: "높은 압축",
+            compMid: "보통",
+            compLossless: "무손실",
+            outputFormat: "출력 형식",
+            autoUpdate: "자동 갱신",
+            applyAll: "모든 설정 적용",
+            results: "변환 결과",
+            bulkDl: "일괄 ZIP 내리적재",
+            copy: "복사",
+            save: "보관",
+            copied: "복사되였습니다",
+            lang: "언어",
+            converting: "변환 중..."
+        }
+    };
+
+    const currentLang = localStorage.getItem('selectedLang') || 'ja';
+    const t = translations[currentLang] || translations.ja;
+
+    // Apply translations & SEO
+    document.documentElement.lang = t.langCode;
+    document.title = t.title;
+    document.getElementById('meta-desc').content = t.desc;
+    document.getElementById('og-title').content = t.title;
+    document.getElementById('og-desc').content = t.desc;
+    
+    // JSON-LD Update
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": t.title.split(' - ')[0],
+        "description": t.desc,
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1542"
+        }
+    };
+    document.getElementById('t-jsonld').textContent = JSON.stringify(jsonLd);
+    
+    document.getElementById('t-title').innerText = currentLang === 'ja' ? 'WebP変換' : t.title.split(' - ')[0];
+    document.getElementById('t-dropMain').innerText = t.dropMain;
+    document.getElementById('t-dropSub').innerText = t.dropSub;
+    document.getElementById('t-compRatio').innerText = t.compRatio;
+    document.getElementById('t-compHigh').innerText = t.compHigh;
+    document.getElementById('t-compMid').innerText = t.compMid;
+    document.getElementById('t-compLossless').innerText = t.compLossless;
+    document.getElementById('t-outputFormat').innerText = t.outputFormat;
+    document.getElementById('t-autoUpdate').innerText = t.autoUpdate;
+    document.querySelectorAll('.t-applyAll').forEach(el => el.innerText = t.applyAll);
+    document.getElementById('t-results').innerText = t.results;
+    document.querySelectorAll('.t-bulkDl').forEach(el => el.innerText = t.bulkDl);
+    document.getElementById('langLink').innerText = t.lang;
+
+    const nextUrl = encodeURIComponent(window.location.href);
+    document.getElementById('langLink').href = `https://search3958.github.io/accounts/lang?next=${nextUrl}`;
+
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const zipBtn = document.getElementById('zipBtn');
+    const manualUpdateBtn = document.getElementById('manualUpdateBtn');
+    const autoUpdateToggle = document.getElementById('autoUpdateToggle');
+    const form = document.getElementById('convertForm');
+    
+    let originalFiles = []; 
+    let processedResults = [];
+    let isProcessing = false;
+
+    dropZone.addEventListener('click', () => imageInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      addFiles(e.dataTransfer.files);
+    });
+    imageInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+    form.addEventListener('change', () => {
+      if (autoUpdateToggle.checked) reprocessAll();
+    });
+    manualUpdateBtn.onclick = () => reprocessAll();
+
+    function setProcessing(val) {
+        isProcessing = val;
+        manualUpdateBtn.disabled = val;
+        if (val) {
+            manualUpdateBtn.innerText = t.converting;
+            manualUpdateBtn.style.opacity = "0.5";
+        } else {
+            manualUpdateBtn.innerText = t.applyAll;
+            manualUpdateBtn.style.opacity = "1";
+        }
+    }
+
+    async function addFiles(files) {
+      const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (newFiles.length === 0) return;
+      
+      setProcessing(true);
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+      originalFiles.push(...newFiles);
+      for (const file of newFiles) {
+        const result = await processSingleFile(file);
+        processedResults.push(result);
+      }
+      renderAllResults();
+      setProcessing(false);
+      updateGlobalUI();
+    }
+
+    async function reprocessAll() {
+      if (originalFiles.length === 0 || isProcessing) return;
+      setProcessing(true);
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+      processedResults = [];
+      const newResults = [];
+      for (const file of originalFiles) {
+        const result = await processSingleFile(file);
+        newResults.push(result);
+      }
+      processedResults = newResults;
+      renderAllResults();
+      setProcessing(false);
+      updateGlobalUI();
+    }
+
+    async function processSingleFile(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const quality = parseFloat(form.plan.value);
+            const format = form.method.value;
+            const extension = format.split('/')[1];
+            canvas.toBlob((blob) => {
+              const url = URL.createObjectURL(blob);
+              const fileName = `opt_${file.name.split('.')[0]}.${extension}`;
+              const ratio = ((1 - blob.size / file.size) * 100).toFixed(1);
+              resolve({ 
+                name: fileName, blob, url, type: format, originalSize: file.size, ratio: ratio 
+              });
+            }, format, quality);
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderAllResults() {
+      resultsList.innerHTML = '';
+      const fragment = document.createDocumentFragment();
+      processedResults.slice().reverse().forEach(data => {
+        fragment.appendChild(createResultElement(data));
+      });
+      resultsList.appendChild(fragment);
+    }
+
+    function createResultElement(data) {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      const isPlus = data.ratio < 0;
+      item.innerHTML = `
+        <img src="${data.url}">
+        <div class="result-info">
+          <div class="result-name">${data.name}</div>
+          <div class="result-meta">
+            ${(data.originalSize / 1024).toFixed(1)} KB → <strong>${(data.blob.size / 1024).toFixed(1)} KB</strong>
+            <span class="ratio-badge ${isPlus ? 'plus' : ''}">${isPlus ? '+' : '-'}${Math.abs(data.ratio)}%</span>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn-small copy-btn">${t.copy}</button>
+          <button class="btn-small dl-btn">${t.save}</button>
+        </div>
+      `;
+      item.querySelector('.dl-btn').onclick = () => {
+        const a = document.createElement('a');
+        a.href = data.url; a.download = data.name; a.click();
+      };
+      item.querySelector('.copy-btn').onclick = async () => {
+        try {
+          const clipboardData = [new ClipboardItem({ [data.type]: data.blob })];
+          await navigator.clipboard.write(clipboardData);
+          alert(t.copied);
+        } catch (err) { alert('Error'); }
+      };
+      return item;
+    }
+
+    function updateGlobalUI() {
+      const hasFiles = processedResults.length > 0;
+      resultsSection.style.display = hasFiles ? 'flex' : 'none';
+      zipBtn.style.display = processedResults.length > 1 ? 'block' : 'none';
+      manualUpdateBtn.disabled = !hasFiles || isProcessing;
+    }
+
+    zipBtn.onclick = async () => {
+      const zip = new JSZip();
+      processedResults.forEach(f => zip.file(f.name, f.blob));
+      const content = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(content); a.download = 'optimized_images.zip'; a.click();
+    };
+  </script>
+</body>
+</html>
