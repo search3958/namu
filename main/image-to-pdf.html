@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="head-title">画像からPDF変換 - Image Optimizer Pro</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" id="meta-desc" content="ブラウザ上で動作する高速な画像PDF変換ツール。PNGやJPG画像をまとめPDFに変換。プライバシーに配慮したオフライン処理。">
+  <link rel="canonical" href="https://search3958.github.io/namu/main/image-to-pdf.html">
+  <meta property="og:title" id="og-title" content="画像からPDF変換 - Image Optimizer Pro">
+  <meta property="og:description" id="og-desc" content="ブラウザ上で動作する高速な画像PDF変換ツール。一括変換、ZIP不要で直接PDF保存。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://search3958.github.io/namu/main/image-to-pdf.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#30313e">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" id="t-jsonld"></script>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <h1 id="t-title">画像からPDF変換</h1>
+      <div class="site-links">
+        <a href="https://search3958.github.io">search3958.github.io</a>
+        <a href="https://search3958.github.io/policies/">利用規約とプライバシーポリシー</a>
+        <a id="langLink" href="#">Language</a>
+      </div>
+    </header>
+
+    <div class="top">
+      <div class="card fit-content" style="flex: 1;padding:8px;">
+        <div id="dropZone" class="drop-zone">
+          <p id="t-dropMain">画像をドラッグ＆ドロップ</p>
+          <p id="t-dropSub" style="font-size: 0.8rem;">またはクリックして選択</p>
+          <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
+        </div>
+      </div>
+      
+      <div class="card fit-content">
+        <form id="convertForm" class="fit-content">
+          <fieldset class="fit-content">
+            <legend id="t-compRatio">出力設定</legend>
+            <input type="radio" id="p1" name="plan" value="single" checked>
+            <label for="p1" id="t-singlePdf">1つのPDFにまとめる</label>
+            <input type="radio" id="p2" name="plan" value="multi">
+            <label for="p2" id="t-multiPdf">画像ごとにPDFを作成</label>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <div class="switch-container">
+        <span id="t-autoUpdate">自動更新</span>
+        <label class="switch">
+          <input type="checkbox" id="autoUpdateToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <button id="manualUpdateBtn" class="btn-small t-applyAll">変換を実行</button>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <div class="results-header">
+        <h2 id="t-results">変換結果</h2>
+        <div class="bulk-actions">
+          <button id="saveAllBtn" class="btn-small">すべて保存</button>
+        </div>
+      </div>
+      <div id="resultsList" style="display: flex; flex-direction: column; gap: 12px; width: 100%;"></div>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+        ja: {
+            langCode: "ja",
+            title: "画像からPDF変換 - Image Optimizer Pro",
+            desc: "ブラウザ上で動作する高速な画像PDF変換ツール。PNGやJPG画像をまとめPDFに変換。プライバシーに配慮したオフライン処理。",
+            dropMain: "画像をドラッグ＆ドロップ",
+            dropSub: "またはクリックして選択",
+            compRatio: "出力設定",
+            singlePdf: "1つのPDFにまとめる",
+            multiPdf: "画像ごとにPDFを作成",
+            autoUpdate: "自動更新",
+            applyAll: "変換を実行",
+            results: "変換結果",
+            lang: "Language / 言語",
+            converting: "変換中..."
+        },
+        en: {
+            langCode: "en",
+            title: "Image to PDF - Image Optimizer Pro",
+            desc: "Fast in-browser Image to PDF tool. Convert PNG/JPG images to PDF. Privacy-focused offline processing.",
+            dropMain: "Drag & Drop Images",
+            dropSub: "or click to select",
+            compRatio: "Output Setting",
+            singlePdf: "Combine into one PDF",
+            multiPdf: "Separate PDFs",
+            autoUpdate: "Auto Update",
+            applyAll: "Convert",
+            results: "Results",
+            lang: "Language",
+            converting: "Converting..."
+        }
+    };
+
+    const currentLang = localStorage.getItem('selectedLang') || 'ja';
+    const t = translations[currentLang] || translations.ja;
+
+    document.documentElement.lang = t.langCode;
+    document.title = t.title;
+    document.getElementById('meta-desc').content = t.desc;
+    
+    document.getElementById('t-title').innerText = currentLang === 'ja' ? '画像からPDF変換' : t.title.split(' - ')[0];
+    document.getElementById('t-dropMain').innerText = t.dropMain;
+    document.getElementById('t-dropSub').innerText = t.dropSub;
+    document.getElementById('t-compRatio').innerText = t.compRatio;
+    document.getElementById('t-singlePdf').innerText = t.singlePdf;
+    document.getElementById('t-multiPdf').innerText = t.multiPdf;
+    document.getElementById('t-autoUpdate').innerText = t.autoUpdate;
+    document.querySelectorAll('.t-applyAll').forEach(el => el.innerText = t.applyAll);
+    document.getElementById('t-results').innerText = t.results;
+    document.getElementById('langLink').innerText = t.lang;
+
+    const nextUrl = encodeURIComponent(window.location.href);
+    document.getElementById('langLink').href = `https://search3958.github.io/accounts/lang?next=${nextUrl}`;
+
+    const { jsPDF } = window.jspdf;
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsList = document.getElementById('resultsList');
+    const saveAllBtn = document.getElementById('saveAllBtn');
+    const manualUpdateBtn = document.getElementById('manualUpdateBtn');
+    const autoUpdateToggle = document.getElementById('autoUpdateToggle');
+    const form = document.getElementById('convertForm');
+    
+    let originalFiles = []; 
+    let processedResults = [];
+    let isProcessing = false;
+
+    dropZone.addEventListener('click', () => imageInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      addFiles(e.dataTransfer.files);
+    });
+    imageInput.addEventListener('change', (e) => addFiles(e.target.files));
+
+    form.addEventListener('change', () => {
+      if (autoUpdateToggle.checked) reprocessAll();
+    });
+    manualUpdateBtn.onclick = () => reprocessAll();
+
+    function setProcessing(val) {
+        isProcessing = val;
+        manualUpdateBtn.disabled = val;
+        manualUpdateBtn.innerText = val ? t.converting : t.applyAll;
+    }
+
+    async function addFiles(files) {
+      const newFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      if (newFiles.length === 0) return;
+      setProcessing(true);
+      originalFiles.push(...newFiles);
+      await reprocessAll();
+      setProcessing(false);
+    }
+
+    async function reprocessAll() {
+      if (originalFiles.length === 0) return;
+      setProcessing(true);
+      processedResults = [];
+      
+      const mode = form.plan.value;
+      if (mode === 'single') {
+        const doc = new jsPDF();
+        for (let i = 0; i < originalFiles.length; i++) {
+          const file = originalFiles[i];
+          const imgData = await readFileAsDataURL(file);
+          const img = await loadImage(imgData);
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          if (i > 0) doc.addPage();
+          doc.addImage(imgData, 'JPEG', (pageWidth - w) / 2, (pageHeight - h) / 2, w, h);
+        }
+        const blob = doc.output('blob');
+        processedResults.push({ name: 'combined.pdf', blob, url: URL.createObjectURL(blob) });
+      } else {
+        for (const file of originalFiles) {
+          const doc = new jsPDF();
+          const imgData = await readFileAsDataURL(file);
+          const img = await loadImage(imgData);
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+          const w = img.width * ratio;
+          const h = img.height * ratio;
+          doc.addImage(imgData, 'JPEG', (pageWidth - w) / 2, (pageHeight - h) / 2, w, h);
+          const blob = doc.output('blob');
+          processedResults.push({ name: `${file.name.split('.')[0]}.pdf`, blob, url: URL.createObjectURL(blob) });
+        }
+      }
+      
+      renderAllResults();
+      setProcessing(false);
+      updateGlobalUI();
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise(r => {
+        const reader = new FileReader();
+        reader.onload = e => r(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src) {
+      return new Promise(r => {
+        const img = new Image();
+        img.onload = () => r(img);
+        img.src = src;
+      });
+    }
+
+    function renderAllResults() {
+      resultsList.innerHTML = '';
+      processedResults.forEach(data => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `
+          <div class="result-info">
+            <div class="result-name">${data.name}</div>
+            <div class="result-meta">${(data.blob.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <div class="actions">
+            <button class="btn-small dl-btn">保存</button>
+          </div>
+        `;
+        item.querySelector('.dl-btn').onclick = () => {
+          const a = document.createElement('a');
+          a.href = data.url; a.download = data.name; a.click();
+        };
+        resultsList.appendChild(item);
+      });
+    }
+
+    function updateGlobalUI() {
+      resultsSection.style.display = processedResults.length > 0 ? 'flex' : 'none';
+    }
+
+    saveAllBtn.onclick = () => {
+      processedResults.forEach(data => {
+        const a = document.createElement('a');
+        a.href = data.url; a.download = data.name; a.click();
+      });
+    };
+  </script>
+</body>
+</html>
