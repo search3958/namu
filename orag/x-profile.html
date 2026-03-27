@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Glass Compositor Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #F5F6F8;
+            --bg-card: #FFFFFF;
+            --fg: #1A1C23;
+            --fg-muted: #6B7280;
+            --border: #E0E2E8;
+            --accent: #405B9C;
+            --surface-dark: #30313e;
+            --surface-mid: #393a4a;
+            --metal-light: #8793a8;
+            --metal-highlight: #bbc7dc;
+            --container-width: 1000px;
+            --header-height: 64px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            z-index: 9999;
+        }
+
+        .app-container { display: flex; width: 100%; height: 100vh; overflow: hidden; }
+
+        .preview-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: #e2e2e2;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            position: relative;
+            background-image: conic-gradient(#fff 0.25turn, #f0f0f0 0.25turn 0.5turn, #fff 0.5turn 0.75turn, #f0f0f0 0.75turn);
+            background-size: 20px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 4px;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; }
+
+        .controls-panel {
+            width: 400px;
+            background: var(--bg-card);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            border-left: 1px solid var(--border);
+        }
+
+        .panel-nav {
+            display: flex;
+            overflow-x: auto;
+            padding: 12px 16px;
+            gap: 8px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+            flex-shrink: 0;
+        }
+        .panel-nav::-webkit-scrollbar { display: none; }
+        .nav-btn {
+            white-space: nowrap;
+            padding: 8px 14px;
+            border-radius: 32px;
+            corner-shape: superellipse(1.6);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            flex-shrink: 0;
+            color: var(--fg-muted);
+        }
+        .nav-btn.active { background: var(--surface-dark); border-color: var(--surface-dark); color: #fff; }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        section { margin-bottom: 32px; }
+        section h3 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--fg-muted);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 48px;
+            corner-shape: superellipse(1.6);
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+
+        .input-card.file-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--fg);
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 18px 24px;
+            background: var(--surface-dark);
+            color: #fff;
+            border: none;
+            border-radius: 32px;
+            corner-shape: superellipse(1.6);
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: inset 0 0px 12px 0 var(--surface-mid), inset 0 -8px 16px 0 var(--metal-light), 0 6px 24px 0 rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+        .btn-primary input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .btn-primary:disabled { background: var(--border); box-shadow: none; cursor: not-allowed; }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 18px 24px;
+            background: var(--surface-dark);
+            color: #fff;
+            border: none;
+            border-radius: 32px;
+            corner-shape: superellipse(1.6);
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: inset 0 0px 12px 0 var(--surface-mid), inset 0 -8px 16px 0 var(--metal-light), 0 6px 24px 0 rgba(0,0,0,0.3);
+        }
+        .file-upload-label input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--surface-dark);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .chip {
+            display: inline-block;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            corner-shape: superellipse(1.6);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            color: var(--fg-muted);
+            background: var(--bg-card);
+            vertical-align: middle;
+        }
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + .chip {
+            background: var(--surface-dark);
+            color: #fff;
+            border-color: var(--surface-dark);
+            box-shadow: inset 0 0px 12px 0 var(--surface-mid), inset 0 -8px 16px 0 var(--metal-light), 0 6px 24px 0 rgba(0,0,0,0.3);
+        }
+
+        .num-flex { display: flex; align-items: center; gap: 8px; }
+        .num-flex input {
+            width: 70px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            corner-shape: superellipse(1.6);
+            font-size: 14px;
+            text-align: center;
+            background: var(--bg);
+        }
+
+        .panel-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .corner-shape-warning {
+            display: none;
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #92400E;
+        }
+
+        .corner-shape-warning.show { display: block; }
+
+        .panel-footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            margin-top: 20px;
+        }
+
+        .panel-footer-links a {
+            color: var(--fg-muted);
+            font-size: 12px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .panel-footer-links a:hover { color: var(--fg); }
+
+        @media (min-width: 769px) {
+            .sheet-handle-area { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+
+            .preview-area {
+                height: var(--preview-height, 50vh);
+                flex: none;
+                padding: 10px;
+            }
+
+            .controls-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: var(--sheet-height, 50vh);
+                border-radius: 28px 28px 0 0;
+                corner-shape: superellipse(1.6);
+                transition: height 0.2s ease;
+                border-left: none;
+            }
+
+            .sheet-handle-area {
+                width: 100%;
+                padding: 16px;
+                cursor: grab;
+                display: flex;
+                justify-content: center;
+                background: var(--bg);
+                border-radius: 28px 28px 0 0;
+                corner-shape: superellipse(1.6);
+                border-bottom: 1px solid var(--border);
+                user-select: none;
+            }
+            .sheet-handle-area:active { cursor: grabbing; }
+
+            .sheet-handle {
+                width: 40px;
+                height: 4px;
+                background: var(--fg-muted);
+                border-radius: 2px;
+            }
+
+            .panel-nav { padding: 10px 14px; }
+            .nav-btn { font-size: 11px; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="preview-area" id="previewArea">
+        <div class="canvas-container">
+            <canvas id="mainCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="controls-panel" id="sheet">
+        <div class="sheet-handle-area" id="handle">
+            <div class="sheet-handle"></div>
+        </div>
+
+        <nav class="panel-nav" id="navBar">
+            <button class="nav-btn active" data-target="sec-files">基本設定</button>
+            <button class="nav-btn" data-target="sec-bg">背景サイズ</button>
+            <button class="nav-btn" data-target="sec-profile">写真調整</button>
+            <button class="nav-btn" data-target="sec-glass">エフェクト</button>
+        </nav>
+
+        <div class="panel-content" id="panelScroll">
+            <div class="corner-shape-warning" id="cornerWarning">
+                お客様の環境では corner-shape がサポートされていないため、角丸が大きすぎる場合があります。
+            </div>
+            <section id="sec-files">
+                <h3><span class="material-symbols-outlined">upload_file</span> 画像のアップロード</h3>
+                <div class="input-card file-group">
+                    <label class="file-upload-label">
+                        <span class="material-symbols-outlined">image</span>
+                        <span id="bgName">背景画像を選択</span>
+                        <input type="file" id="bgInput" accept="image/*">
+                    </label>
+                    <label class="file-upload-label">
+                        <span class="material-symbols-outlined">face</span>
+                        <span id="profName">プロフィール写真を選択</span>
+                        <input type="file" id="profileInput" accept="image/*">
+                    </label>
+                </div>
+                <div class="input-card">
+                    <label class="control-label">テーマ</label>
+                    <div class="chip-group">
+                        <label><input type="radio" name="theme" value="white" checked><span class="chip">ライト</span></label>
+                        <label><input type="radio" name="theme" value="black"><span class="chip">ダーク</span></label>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-bg">
+                <h3><span class="material-symbols-outlined">aspect_ratio</span> 背景サイズ</h3>
+                <div class="input-card">
+                    <label class="control-label">アスペクト比</label>
+                    <div class="chip-group">
+                        <label><input type="radio" name="ratio" value="1:1" checked><span class="chip">1:1</span></label>
+                        <label><input type="radio" name="ratio" value="4:3"><span class="chip">4:3</span></label>
+                        <label><input type="radio" name="ratio" value="16:9"><span class="chip">16:9</span></label>
+                        <label><input type="radio" name="ratio" value="9:16"><span class="chip">9:16</span></label>
+                        <label><input type="radio" name="ratio" value="custom"><span class="chip">カスタム</span></label>
+                    </div>
+                </div>
+                <div class="input-card">
+                    <div class="num-flex">
+                        <input type="number" id="bgW" value="1000"> <span>×</span> <input type="number" id="bgH" value="1000"> <span>px</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-profile">
+                <h3><span class="material-symbols-outlined">person_pin</span> 写真の調整</h3>
+                <div class="input-card">
+                    <label class="control-label">表示サイズ <span id="v-scale">60%</span></label>
+                    <input type="range" id="scale" min="10" max="100" value="60">
+                </div>
+                <div class="input-card">
+                    <label class="control-label">上下トリミング</label>
+                    <div style="margin-bottom: 12px;">
+                        <div class="control-label" style="color: var(--fg-muted); font-size: 11px; margin-bottom: 6px;">
+                            <span>上</span><span id="v-ct">0%</span>
+                        </div>
+                        <input type="range" id="cropT" min="0" max="80" value="0">
+                    </div>
+                    <div>
+                        <div class="control-label" style="color: var(--fg-muted); font-size: 11px; margin-bottom: 6px;">
+                            <span>下</span><span id="v-cb">0%</span>
+                        </div>
+                        <input type="range" id="cropB" min="0" max="80" value="0">
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-glass">
+                <h3><span class="material-symbols-outlined">blur_on</span> ガラス効果</h3>
+                <div class="input-card">
+                    <label class="control-label">ブラー <span id="v-blur">40px</span></label>
+                    <input type="range" id="blur" min="0" max="100" value="40">
+                </div>
+                <div class="input-card">
+                    <label class="control-label">不透明度 <span id="v-tint">20%</span></label>
+                    <input type="range" id="tint" min="0" max="100" value="20">
+                </div>
+                <div class="input-card">
+                    <label class="control-label">角丸 <span id="v-radius">40px</span></label>
+                    <input type="range" id="radius" min="0" max="200" value="40">
+                </div>
+                <div class="input-card">
+                    <label class="control-label">シャドウ濃さ <span id="v-s-op">40%</span></label>
+                    <input type="range" id="s-op" min="0" max="100" value="40">
+                </div>
+                <div class="input-card">
+                    <label class="control-label">シャドウ広がり <span id="v-s-r">50px</span></label>
+                    <input type="range" id="s-r" min="0" max="150" value="50">
+                </div>
+            </section>
+
+            <div class="panel-footer-links">
+                <a href="https://search3958.github.io/policies/" target="_blank" rel="noopener">利用規約とプライバシーポリシー</a>
+                <a href="https://search3958.github.io/" target="_blank" rel="noopener">私について</a>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            <button id="dlBtn" class="btn-primary" disabled>
+                <span class="material-symbols-outlined">download</span> 画像を保存
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const sheet = document.getElementById('sheet');
+    const previewArea = document.getElementById('previewArea');
+    const panelScroll = document.getElementById('panelScroll');
+    const sections = ['sec-files', 'sec-bg', 'sec-profile', 'sec-glass'];
+    let canvasScale = 1;
+
+    function updateCanvasDisplaySize() {
+        if (!canvas) return;
+        const rect = previewArea.getBoundingClientRect();
+        const padding = 40;
+        const availW = rect.width - padding;
+        const availH = rect.height - padding;
+        
+        if (canvas.width > 0 && canvas.height > 0) {
+            const scaleX = availW / canvas.width;
+            const scaleY = availH / canvas.height;
+            canvasScale = Math.min(scaleX, scaleY, 1);
+            canvas.style.width = (canvas.width * canvasScale) + 'px';
+            canvas.style.height = (canvas.height * canvasScale) + 'px';
+        }
+    }
+
+    // --- Bottom Sheet Interaction ---
+    let isDragging = false;
+    let dragStartY = 0;
+    let dragStartHeight = 0;
+
+    const handle = document.getElementById('handle');
+
+    function setSheetHeight(height) {
+        const h = Math.max(200, Math.min(height, window.innerHeight * 0.85));
+        sheet.style.setProperty('--sheet-height', h + 'px');
+        previewArea.style.setProperty('--preview-height', (window.innerHeight - h) + 'px');
+    }
+
+    function snapToPosition() {
+        const currentHeight = parseFloat(getComputedStyle(sheet).getPropertyValue('--sheet-height')) || window.innerHeight * 0.5;
+        const thresholds = [
+            { h: window.innerHeight * 0.3 },
+            { h: window.innerHeight * 0.5 },
+            { h: window.innerHeight * 0.75 }
+        ];
+
+        let closest = thresholds[0];
+        let minDiff = Math.abs(currentHeight - thresholds[0].h);
+
+        thresholds.forEach(t => {
+            const diff = Math.abs(currentHeight - t.h);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = t;
+            }
+        });
+
+        setSheetHeight(closest.h);
+    }
+
+    handle.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        dragStartY = e.touches[0].clientY;
+        dragStartHeight = parseFloat(getComputedStyle(sheet).getPropertyValue('--sheet-height')) || window.innerHeight * 0.5;
+        sheet.style.transition = 'none';
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const deltaY = dragStartY - e.touches[0].clientY;
+        const newHeight = dragStartHeight + deltaY;
+        setSheetHeight(newHeight);
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sheet.style.transition = 'height 0.2s ease';
+        snapToPosition();
+    });
+
+    handle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragStartY = e.clientY;
+        dragStartHeight = parseFloat(getComputedStyle(sheet).getPropertyValue('--sheet-height')) || window.innerHeight * 0.5;
+        sheet.style.transition = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const deltaY = dragStartY - e.clientY;
+        const newHeight = dragStartHeight + deltaY;
+        setSheetHeight(newHeight);
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sheet.style.transition = 'height 0.2s ease';
+        snapToPosition();
+    });
+
+    handle.addEventListener('click', () => {
+        if (isDragging) return;
+        const currentHeight = parseFloat(getComputedStyle(sheet).getPropertyValue('--sheet-height')) || window.innerHeight * 0.5;
+        let nextHeight;
+        if (currentHeight < window.innerHeight * 0.4) {
+            nextHeight = window.innerHeight * 0.5;
+        } else if (currentHeight < window.innerHeight * 0.65) {
+            nextHeight = window.innerHeight * 0.75;
+        } else {
+            nextHeight = window.innerHeight * 0.3;
+        }
+        setSheetHeight(nextHeight);
+    });
+
+    // --- Nav Navigation ---
+    const navBtns = document.querySelectorAll('.nav-btn');
+
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const target = document.getElementById(btn.dataset.target);
+            panelScroll.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+        });
+    });
+
+    panelScroll.addEventListener('scroll', () => {
+        const scrollY = panelScroll.scrollTop + 80;
+        let activeIndex = 0;
+
+        sections.forEach((id, index) => {
+            const section = document.getElementById(id);
+            if (section.offsetTop <= scrollY) {
+                activeIndex = index;
+            }
+        });
+
+        navBtns.forEach((btn, index) => {
+            btn.classList.toggle('active', index === activeIndex);
+        });
+    });
+
+    // --- State Management ---
+    let bgImg = null, profImg = null;
+    const inputs = {
+        bgW: document.getElementById('bgW'),
+        bgH: document.getElementById('bgH'),
+        scale: document.getElementById('scale'),
+        radius: document.getElementById('radius'),
+        cropT: document.getElementById('cropT'),
+        cropB: document.getElementById('cropB'),
+        blur: document.getElementById('blur'),
+        tint: document.getElementById('tint'),
+        sOp: document.getElementById('s-op'),
+        sR: document.getElementById('s-r')
+    };
+
+    const getVal = (id) => parseFloat(document.getElementById(id).value);
+    const setLabel = (id, val) => {
+        const el = document.getElementById('v-' + id);
+        if (el) el.innerText = val;
+    };
+
+    // --- Core Render ---
+    function render() {
+        if (!bgImg) return;
+
+        canvas.width = parseInt(inputs.bgW.value);
+        canvas.height = parseInt(inputs.bgH.value);
+
+        const bgScale = Math.max(canvas.width / bgImg.width, canvas.height / bgImg.height);
+        const bgW = bgImg.width * bgScale;
+        const bgH = bgImg.height * bgScale;
+        const bgX = (canvas.width - bgW) / 2;
+        const bgY = (canvas.height - bgH) / 2;
+        ctx.drawImage(bgImg, bgX, bgY, bgW, bgH);
+
+        if (profImg) {
+            const theme = document.querySelector('input[name="theme"]:checked').value;
+            const blend = theme === 'white' ? 'color-burn' : 'overlay';
+
+            const cropT = getVal('cropT') / 100;
+            const cropB = getVal('cropB') / 100;
+            const cropTotal = cropT + cropB;
+
+            const srcY = profImg.height * cropT;
+            const srcH = Math.max(1, profImg.height * (1 - cropTotal));
+
+            const pScale = getVal('scale') / 100;
+            const pW = canvas.width * pScale;
+            const pH = pW * (srcH / profImg.width);
+
+            const px = (canvas.width - pW) / 2;
+            const py = (canvas.height - pH) / 2;
+            const r = getVal('radius');
+
+            ctx.save();
+            ctx.shadowColor = `rgba(0,0,0,${getVal('s-op')/100})`;
+            ctx.shadowBlur = getVal('s-r');
+            ctx.shadowOffsetY = getVal('s-r') / 2;
+            ctx.beginPath();
+            ctx.roundRect(px, py, pW, pH, r);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(px, py, pW, pH, r);
+            ctx.clip();
+
+            ctx.filter = `blur(${getVal('blur')}px)`;
+            ctx.drawImage(bgImg, bgX, bgY, bgW, bgH);
+            ctx.filter = 'none';
+
+            ctx.fillStyle = theme === 'white'
+                ? `rgba(255,255,255,${getVal('tint')/100})`
+                : `rgba(0,0,0,${getVal('tint')/100})`;
+            ctx.fillRect(px, py, pW, pH);
+
+            ctx.globalCompositeOperation = blend;
+            ctx.drawImage(profImg, 0, srcY, profImg.width, srcH, px, py, pW, pH);
+            ctx.restore();
+
+            document.getElementById('dlBtn').disabled = false;
+        }
+        
+        updateCanvasDisplaySize();
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('bgInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        document.getElementById('bgName').innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            bgImg = new Image();
+            bgImg.onload = render;
+            bgImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('profileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        document.getElementById('profName').innerText = file.name;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            profImg = new Image();
+            profImg.onload = render;
+            profImg.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    ['scale', 'cropT', 'cropB', 'blur', 'tint', 'radius', 's-op', 's-r'].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => {
+            const isPercent = ['tint', 'scale', 'cropT', 'cropB', 's-op'].includes(id);
+            setLabel(id, el.value + (isPercent ? '%' : 'px'));
+            render();
+        });
+    });
+
+    document.getElementsByName('ratio').forEach(r => {
+        r.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') return;
+            const [w, h] = e.target.value.split(':').map(Number);
+            inputs.bgW.value = 1000;
+            inputs.bgH.value = Math.round(1000 * (h / w));
+            render();
+        });
+    });
+
+    inputs.bgW.addEventListener('input', render);
+    inputs.bgH.addEventListener('input', render);
+    document.getElementsByName('theme').forEach(r => r.addEventListener('change', render));
+
+    document.getElementById('dlBtn').addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.download = 'glass_composite.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+    });
+
+    setSheetHeight(window.innerHeight * 0.5);
+    window.addEventListener('resize', () => {
+        setSheetHeight(window.innerHeight * 0.5);
+        updateCanvasDisplaySize();
+    });
+
+    // Update canvas display size after sheet transition
+    sheet.addEventListener('transitionend', updateCanvasDisplaySize);
+
+    // Check corner-shape support
+    function checkCornerShapeSupport() {
+        const supportsCornerShape = CSS.supports('corner-shape', 'superellipse(1.6)') || 
+                                     CSS.supports('-webkit-corner-shape', 'superellipse(1.6)');
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (!supportsCornerShape || isSafari) {
+            document.getElementById('cornerWarning').classList.add('show');
+        }
+    }
+    checkCornerShapeSupport();
+</script>
+
+</body>
+</html>
