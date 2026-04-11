@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Component Editor</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background: #f4f7f9; }
+        .container { max-width: 900px; margin: 0 auto; }
+
+        /* ツールバー */
+        .toolbar {
+            background: #fff;
+            padding: 12px;
+            border: 1px solid #d1d9e0;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .toolbar button {
+            padding: 6px 14px;
+            cursor: pointer;
+            background: #ffffff;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .toolbar button:hover { background: #f0f2f5; }
+
+        /* エディタ本体 */
+        #editor {
+            border: 1px solid #d1d9e0;
+            border-radius: 0 0 8px 8px;
+            padding: 25px;
+            min-height: 400px;
+            background: white;
+            line-height: 1.8;
+            outline: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 各コンポーネントの共通設定 */
+        .comp { display: inline-block; vertical-align: middle; margin: 0 4px; user-select: none; }
+
+        /* ドロップダウン */
+        .comp-dropdown {
+            padding: 2px 5px;
+            border-radius: 4px;
+            border: 1px solid #007bff;
+            background: #f0f7ff;
+            color: #007bff;
+            cursor: pointer;
+        }
+
+        /* ユーザーカード */
+        .comp-user {
+            background: #e7f3ff;
+            border-radius: 15px;
+            padding: 2px 12px;
+            border: 1px solid #b2d7ff;
+            color: #0056b3;
+            font-size: 0.9em;
+        }
+
+        /* ファイル */
+        .comp-file {
+            text-decoration: underline;
+            color: #28a745;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* スライダー */
+        .comp-slider-container {
+            display: inline-flex;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .comp-slider { cursor: pointer; }
+        .slider-val { font-size: 0.8em; margin-left: 5px; color: #666; min-width: 20px; }
+
+        /* チェックボックス */
+        .comp-checkbox {
+            cursor: pointer;
+        }
+
+        /* ボタン */
+        .comp-button {
+            background: #eee;
+            border: 1px solid #999;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* カラーチップ */
+        .comp-color {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #d1d9e0;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-family: monospace;
+        }
+        .comp-color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+        .comp-color-values {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
+        }
+        .comp-color-hex { font-weight: bold; color: #333; }
+        .comp-color-rgb { color: #666; font-size: 0.9em; }
+        .comp-color-p3 { color: #888; font-size: 0.85em; }
+
+        /* 共通ダイアログスタイル */
+        .dialog-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .dialog {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 320px;
+            max-width: 90vw;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .dialog h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .dialog-field {
+            margin-bottom: 12px;
+        }
+        .dialog-field label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .dialog-field input, .dialog-field textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .dialog-field textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .dialog-field input[type="color"] {
+            height: 40px;
+            border: none;
+            cursor: pointer;
+        }
+        .dialog-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .dialog-buttons button {
+            padding: 8px 16px;
+            border: 1px solid #d1d9e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .dialog-buttons button.primary {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+        .dialog-buttons button.secondary {
+            background: #fff;
+        }
+        .dialog-buttons button.danger {
+            background: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .hint { margin-top: 10px; font-size: 12px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>カスタムUIエディタ</h2>
+
+    <div class="toolbar">
+        <button onclick="insertComp('checkbox')">☑ Check</button>
+        <button onclick="insertComp('button')">🔘 Button</button>
+        <button onclick="insertComp('dropdown')">▼ Dropdown</button>
+        <button onclick="insertComp('user')">👤 User</button>
+        <button onclick="insertComp('file')">📁 File</button>
+        <button onclick="insertComp('slider')">🎚 Slider</button>
+        <button onclick="insertComp('color')">🎨 Color</button>
+    </div>
+
+    <div id="editor" contenteditable="true">こちらで編集できます... </div>
+
+    <p class="hint">※各パーツは <b>右クリック または 長押し</b> で設定を変更できます。</p>
+</div>
+
+<script>
+    const editor = document.getElementById('editor');
+
+    // --- 共通ダイアログユーティリティ ---
+
+    function showDialog(title, fields, buttons, onApply) {
+        const overlay = document.createElement('div');
+        overlay.className = 'dialog-overlay';
+
+        let fieldsHTML = '';
+        fields.forEach((f, i) => {
+            const val = f.value || '';
+            const placeholder = f.placeholder ? `placeholder="${f.placeholder}"` : '';
+            if (f.type === 'textarea') {
+                fieldsHTML += `<div class="dialog-field"><label>${f.label}</label><textarea class="dlg-field" data-idx="${i}" ${placeholder}>${val}</textarea></div>`;
+            } else if (f.type === 'color') {
+                fieldsHTML += `<div class="dialog-field"><label>${f.label}</label><input type="color" class="dlg-field" data-idx="${i}" value="${val}"></div>`;
+            } else {
+                fieldsHTML += `<div class="dialog-field"><label>${f.label}</label><input type="${f.type || 'text'}" class="dlg-field" data-idx="${i}" value="${val}" ${placeholder}></div>`;
+            }
+        });
+
+        let buttonsHTML = '';
+        buttons.forEach((b, i) => {
+            const cls = b.class || 'secondary';
+            buttonsHTML += `<button class="${cls}" data-btn-idx="${i}">${b.label}</button>`;
+        });
+
+        overlay.innerHTML = `
+            <div class="dialog">
+                <h3>${title}</h3>
+                ${fieldsHTML}
+                <div class="dialog-buttons">${buttonsHTML}</div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // フィールドの参照を取得
+        const fieldEls = overlay.querySelectorAll('.dlg-field');
+
+        // ボタンイベント
+        overlay.querySelectorAll('[data-btn-idx]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.btnIdx);
+                const btnDef = buttons[idx];
+                if (btnDef.action) {
+                    btnDef.action();
+                }
+            });
+        });
+
+        // オーバーレイクリックで閉じる
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+            }
+        });
+
+        // フィールド値を取得する関数
+        function getValues() {
+            return Array.from(fieldEls).map(el => el.value);
+        }
+
+        return { overlay, getValues, fieldEls };
+    }
+
+    // --- 挿入処理 ---
+
+    function insertComp(type) {
+        editor.focus();
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        let el;
+
+        switch(type) {
+            case 'checkbox': el = createCheckbox(); break;
+            case 'button':   el = createButton(); break;
+            case 'dropdown': el = createDropdown(); break;
+            case 'user':     el = createUser(); break;
+            case 'file':     el = createFile(); break;
+            case 'slider':   el = createSlider(); break;
+            case 'color':    el = createColor(); break;
+        }
+
+        range.insertNode(el);
+        range.setStartAfter(el);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    // --- 各パーツ生成ロジック ---
+
+    function setupEdit(el, callback) {
+        el.contentEditable = "false";
+        const handler = (e) => { e.preventDefault(); callback(); };
+        el.addEventListener('contextmenu', handler);
+        let timer;
+        el.addEventListener('mousedown', () => timer = setTimeout(callback, 800));
+        el.addEventListener('mouseup', () => clearTimeout(timer));
+        el.addEventListener('mouseleave', () => clearTimeout(timer));
+    }
+
+    function createCheckbox() {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'comp comp-checkbox';
+        cb.contentEditable = "false";
+        cb.checked = true;
+        cb.dataset.label = 'チェックボックス';
+
+        setupEdit(cb, () => {
+            const { overlay, getValues } = showDialog('☑ チェックボックス設定', [
+                { label: 'ラベル（ホバー時表示）', value: cb.dataset.label || '', placeholder: 'チェックボックス' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: '適用', class: 'primary', action: () => {
+                    const vals = getValues();
+                    if (vals[0]) cb.dataset.label = vals[0];
+                    document.body.removeChild(overlay);
+                }}
+            ]);
+            cb.title = cb.dataset.label || '';
+        });
+
+        return cb;
+    }
+
+    function createButton() {
+        const btn = document.createElement('span');
+        btn.className = 'comp comp-button';
+        btn.textContent = 'ボタン';
+        btn.dataset.alert = 'Hello!';
+
+        function openDialog() {
+            const { overlay, getValues, fieldEls } = showDialog('🔘 ボタン設定', [
+                { label: 'ラベル', value: btn.textContent, placeholder: 'ボタン' },
+                { label: 'クリック時のメッセージ', value: btn.dataset.alert || '', placeholder: 'Hello!' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: '適用', class: 'primary', action: () => {
+                    const vals = getValues();
+                    if (vals[0]) btn.textContent = vals[0];
+                    if (vals[1] !== undefined) btn.dataset.alert = vals[1];
+                    document.body.removeChild(overlay);
+                }}
+            ]);
+        }
+
+        setupEdit(btn, openDialog);
+        btn.onclick = () => {
+            if (btn.dataset.alert) alert(btn.dataset.alert);
+        };
+        return btn;
+    }
+
+    function createDropdown() {
+        const span = document.createElement('span');
+        span.className = 'comp comp-dropdown';
+        span.textContent = '選択してください';
+        span.dataset.options = '選択肢1,選択肢2,選択肢3';
+
+        function openDialog() {
+            const { overlay, getValues } = showDialog('▼ ドロップダウン設定', [
+                { label: '選択肢（カンマ区切り）', value: span.dataset.options, placeholder: '選択肢1,選択肢2,選択肢3' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: '適用', class: 'primary', action: () => {
+                    const vals = getValues();
+                    if (vals[0]) {
+                        span.dataset.options = vals[0];
+                        // 最初の選択肢にリセット
+                        const opts = vals[0].split(',');
+                        span.textContent = opts[0];
+                    }
+                    document.body.removeChild(overlay);
+                }}
+            ]);
+        }
+
+        setupEdit(span, openDialog);
+
+        span.onclick = () => {
+            const opts = span.dataset.options.split(',');
+            const current = opts.indexOf(span.textContent);
+            const next = (current + 1) % opts.length;
+            span.textContent = opts[next];
+        };
+        return span;
+    }
+
+    function createUser() {
+        const span = document.createElement('span');
+        span.className = 'comp comp-user';
+        span.textContent = '👤 ユーザー設定';
+        span.dataset.email = '';
+
+        function openDialog() {
+            const currentName = span.textContent.replace('👤 ', '');
+            const { overlay, getValues } = showDialog('👤 ユーザー設定', [
+                { label: '名前', value: currentName, placeholder: '名前' },
+                { label: 'メール/電話', value: span.dataset.email || '', placeholder: 'email@example.com' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: '適用', class: 'primary', action: () => {
+                    const vals = getValues();
+                    if (vals[0]) span.textContent = '👤 ' + vals[0];
+                    if (vals[1] !== undefined) span.dataset.email = vals[1];
+                    document.body.removeChild(overlay);
+                }}
+            ]);
+        }
+
+        setupEdit(span, openDialog);
+        return span;
+    }
+
+    function createFile() {
+        const span = document.createElement('span');
+        span.className = 'comp comp-file';
+        span.textContent = '📄 ファイルを選択';
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.style.display = 'none';
+
+        span.onclick = () => fileInput.click();
+        fileInput.onchange = () => {
+            if (fileInput.files[0]) span.textContent = '📁 ' + fileInput.files[0].name;
+        };
+
+        function openDialog() {
+            const { overlay, getValues } = showDialog('📁 ファイル設定', [
+                { label: '現在のファイル', value: span.textContent, placeholder: '📄 ファイルを選択' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: 'リセット', class: 'danger', action: () => {
+                    span.textContent = '📄 ファイルを選択';
+                    fileInput.value = '';
+                    document.body.removeChild(overlay);
+                }},
+                { label: 'ファイル選択', class: 'primary', action: () => {
+                    document.body.removeChild(overlay);
+                    fileInput.click();
+                }}
+            ]);
+        }
+
+        setupEdit(span, openDialog);
+        return span;
+    }
+
+    function createSlider() {
+        const container = document.createElement('span');
+        container.className = 'comp comp-slider-container';
+        container.contentEditable = "false";
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'comp-slider';
+        slider.min = 0; slider.max = 100; slider.value = 50;
+        slider.step = 1;
+
+        const valDisp = document.createElement('span');
+        valDisp.className = 'slider-val';
+        valDisp.textContent = slider.value;
+
+        slider.oninput = () => valDisp.textContent = slider.value;
+
+        function openDialog() {
+            const { overlay, getValues } = showDialog('🎚 スライダー設定', [
+                { label: '最小値', value: slider.min, placeholder: '0', type: 'number' },
+                { label: '最大値', value: slider.max, placeholder: '100', type: 'number' },
+                { label: 'ステップ', value: slider.step || 1, placeholder: '1', type: 'number' },
+                { label: '初期値', value: slider.value, placeholder: '50', type: 'number' }
+            ], [
+                { label: 'キャンセル', class: 'secondary', action: () => document.body.removeChild(overlay) },
+                { label: '適用', class: 'primary', action: () => {
+                    const vals = getValues();
+                    if (vals[0]) slider.min = vals[0];
+                    if (vals[1]) slider.max = vals[1];
+                    if (vals[2]) slider.step = vals[2];
+                    if (vals[3]) {
+                        slider.value = vals[3];
+                        valDisp.textContent = vals[3];
+                    }
+                    document.body.removeChild(overlay);
+                }}
+            ]);
+        }
+
+        setupEdit(container, openDialog);
+
+        container.appendChild(slider);
+        container.appendChild(valDisp);
+        return container;
+    }
+
+    // --- カラーチップ関連関数 ---
+
+    function hexToRgb(hex) {
+        hex = hex.replace(/^#/, '');
+        if (hex.length === 3) {
+            hex = hex.split('').map(c => c + c).join('');
+        }
+        const num = parseInt(hex, 16);
+        return {
+            r: (num >> 16) & 255,
+            g: (num >> 8) & 255,
+            b: num & 255
+        };
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function rgbToDisplayP3(r, g, b) {
+        const srgb = [r / 255, g / 255, b / 255];
+        const linear = srgb.map(c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+        const matrix = [
+            [0.48657094, 0.26566769, 0.19821728],
+            [0.22897456, 0.69173852, 0.07928692],
+            [0.00000000, 0.04511338, 1.04394437]
+        ];
+        const p3 = matrix.map(row =>
+            row[0] * linear[0] + row[1] * linear[1] + row[2] * linear[2]
+        );
+        return p3.map(v => Math.max(0, Math.min(1, v)));
+    }
+
+    function updateColorChip(chip, hex) {
+        chip.dataset.color = hex;
+        const rgb = hexToRgb(hex);
+        const p3 = rgbToDisplayP3(rgb.r, rgb.g, rgb.b);
+
+        const preview = chip.querySelector('.comp-color-preview');
+        const hexVal = chip.querySelector('.comp-color-hex');
+        const rgbVal = chip.querySelector('.comp-color-rgb');
+        const p3Val = chip.querySelector('.comp-color-p3');
+
+        if (preview) preview.style.backgroundColor = hex;
+        if (hexVal) hexVal.textContent = hex.toUpperCase();
+        if (rgbVal) rgbVal.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+        if (p3Val) p3Val.textContent = `display-p3(${p3[0].toFixed(3)}, ${p3[1].toFixed(3)}, ${p3[2].toFixed(3)})`;
+    }
+
+    function showColorDialog(chip) {
+        const currentColor = chip.dataset.color || '#007bff';
+        const rgb = hexToRgb(currentColor);
+        const p3 = rgbToDisplayP3(rgb.r, rgb.g, rgb.b);
+
+        const overlay = document.createElement('div');
+        overlay.className = 'dialog-overlay';
+
+        const dialog = document.createElement('div');
+        dialog.className = 'dialog';
+        dialog.innerHTML = `
+            <h3>🎨 カラーを選択</h3>
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <div style="width:60px;height:60px;border-radius:8px;border:1px solid #ccc;" class="dlg-preview-box" style="background-color:${currentColor}"></div>
+                <div style="flex:1;font-family:monospace;font-size:12px;line-height:1.6;">
+                    <div>HEX: <span class="dlg-hex">${currentColor.toUpperCase()}</span></div>
+                    <div>RGB: <span class="dlg-rgb">rgb(${rgb.r}, ${rgb.g}, ${rgb.b})</span></div>
+                    <div>P3: <span class="dlg-p3">display-p3(${p3[0].toFixed(3)}, ${p3[1].toFixed(3)}, ${p3[2].toFixed(3)})</span></div>
+                </div>
+            </div>
+            <div class="dialog-field">
+                <label>カラーピッカー</label>
+                <input type="color" class="dlg-field dlg-color-picker" value="${currentColor}">
+            </div>
+            <div class="dialog-field">
+                <label>HEX 値</label>
+                <input type="text" class="dlg-field dlg-hex-input" value="${currentColor}" placeholder="#007bff">
+            </div>
+            <div class="dialog-field">
+                <label>RGB 値 (カンマ区切り)</label>
+                <input type="text" class="dlg-field dlg-rgb-input" value="${rgb.r}, ${rgb.g}, ${rgb.b}" placeholder="0, 123, 255">
+            </div>
+            <div class="dialog-buttons">
+                <button class="secondary dlg-cancel">キャンセル</button>
+                <button class="primary dlg-apply">適用</button>
+            </div>
+        `;
+
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        const picker = dialog.querySelector('.dlg-color-picker');
+        const hexInput = dialog.querySelector('.dlg-hex-input');
+        const rgbInput = dialog.querySelector('.dlg-rgb-input');
+        const previewBox = dialog.querySelector('.dlg-preview-box');
+        const hexDisplay = dialog.querySelector('.dlg-hex');
+        const rgbDisplay = dialog.querySelector('.dlg-rgb');
+        const p3Display = dialog.querySelector('.dlg-p3');
+
+        function updateDisplay(color) {
+            const rgb = hexToRgb(color);
+            const p3 = rgbToDisplayP3(rgb.r, rgb.g, rgb.b);
+            previewBox.style.backgroundColor = color;
+            hexDisplay.textContent = color.toUpperCase();
+            rgbDisplay.textContent = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            p3Display.textContent = `display-p3(${p3[0].toFixed(3)}, ${p3[1].toFixed(3)}, ${p3[2].toFixed(3)})`;
+        }
+
+        picker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            hexInput.value = color;
+            const rgb = hexToRgb(color);
+            rgbInput.value = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+            updateDisplay(color);
+        });
+
+        hexInput.addEventListener('input', (e) => {
+            let value = e.target.value;
+            if (!value.startsWith('#')) value = '#' + value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                picker.value = value;
+                const rgb = hexToRgb(value);
+                rgbInput.value = `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+                updateDisplay(value);
+            }
+        });
+
+        rgbInput.addEventListener('input', (e) => {
+            const parts = e.target.value.split(',').map(s => parseInt(s.trim()));
+            if (parts.length === 3 && parts.every(v => !isNaN(v) && v >= 0 && v <= 255)) {
+                const hex = rgbToHex(parts[0], parts[1], parts[2]);
+                picker.value = hex;
+                hexInput.value = hex;
+                updateDisplay(hex);
+            }
+        });
+
+        dialog.querySelector('.dlg-cancel').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+
+        dialog.querySelector('.dlg-apply').addEventListener('click', () => {
+            const color = picker.value;
+            updateColorChip(chip, color);
+            document.body.removeChild(overlay);
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                document.body.removeChild(overlay);
+            }
+        });
+    }
+
+    function createColor() {
+        const container = document.createElement('span');
+        container.className = 'comp comp-color';
+        container.dataset.color = '#007bff';
+
+        const preview = document.createElement('div');
+        preview.className = 'comp-color-preview';
+        preview.style.backgroundColor = '#007bff';
+
+        const values = document.createElement('div');
+        values.className = 'comp-color-values';
+
+        const hexVal = document.createElement('div');
+        hexVal.className = 'comp-color-hex';
+        hexVal.textContent = '#007BFF';
+
+        const rgbVal = document.createElement('div');
+        rgbVal.className = 'comp-color-rgb';
+        rgbVal.textContent = 'rgb(0, 123, 255)';
+
+        const p3Val = document.createElement('div');
+        p3Val.className = 'comp-color-p3';
+        const p3 = rgbToDisplayP3(0, 123, 255);
+        p3Val.textContent = `display-p3(${p3[0].toFixed(3)}, ${p3[1].toFixed(3)}, ${p3[2].toFixed(3)})`;
+
+        values.appendChild(hexVal);
+        values.appendChild(rgbVal);
+        values.appendChild(p3Val);
+
+        container.appendChild(preview);
+        container.appendChild(values);
+
+        container.onclick = () => showColorDialog(container);
+        setupEdit(container, () => showColorDialog(container));
+
+        return container;
+    }
+</script>
+
+</body>
+</html>
