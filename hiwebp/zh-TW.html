@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="ja">
+<html lang="zh-TW">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="HiWebpは画像をブラウザ内だけで高速にWebPへ変換する無料ツールです。PNG、JPG、HEIC、TIFF、PSD、PDFなどに対応。サーバー送信なしでプライバシーを保護しながら、高品質なWebP変換を無料でお使いいただけます。">
-  <meta name="keywords" content="WebP変換, 画像変換, PNG WebP, JPG WebP, HEIC変換, ブラウザ変換, 無料ツール, オンライン変換, プライバシー保護, TIFF変換, PSD変換, PDF変換">
+  <meta name="description" content="HiWebp是一款免費工具，可在瀏覽器內快速、私密地將圖片轉換為WebP。支援PNG、JPG、HEIC、TIFF、PSD、PDF等格式。不上傳伺服器，免費高品質WebP轉換。">
+  <meta name="keywords" content="WebP轉換, 圖片轉換, PNG轉WebP, JPG轉WebP, HEIC轉換, 瀏覽器轉換, 免費工具, 線上轉換器, 隱私保護, TIFF轉換, PSD轉換, PDF轉換">
   <meta name="robots" content="index, follow">
-  <title>HiWebp | ブラウザで高速WebP変換 - PNG/JPG/HEIC/TIFF/PSD対応 無料オンラインツール</title>
+  <title>HiWebp | 瀏覽器快速WebP轉換 - PNG/JPG/HEIC/TIFF/PSD免費線上工具</title>
   <link rel="canonical" id="canonical-url">
   <link rel="alternate" hreflang="ja" id="hreflang-ja" href="">
   <link rel="alternate" hreflang="en" id="hreflang-en" href="">
@@ -16,17 +16,17 @@
   <link rel="alternate" hreflang="ko" id="hreflang-ko" href="">
   <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="HiWebp | ブラウザで高速WebP変換">
-  <meta property="og:description" content="画像をブラウザ内だけでWebPへ変換する無料ツール。PNG、JPG、HEIC、TIFF、PSDなどに対応。">
+  <meta property="og:title" content="HiWebp | 瀏覽器快速WebP轉換">
+  <meta property="og:description" content="在瀏覽器內直接將圖片轉換為WebP。支援PNG、JPG、HEIC、TIFF、PSD等格式。">
   <meta property="og:url" content="">
   <meta property="og:image" content="icon.svg">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="HiWebp logo">
-  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale" content="zh_TW">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="HiWebp | ブラウザで高速WebP変換">
-  <meta name="twitter:description" content="画像をブラウザ内だけでWebPへ変換する無料ツール。PNG、JPG、HEIC、TIFF、PSDなどに対応。">
+  <meta name="twitter:title" content="HiWebp | 瀏覽器快速WebP轉換">
+  <meta name="twitter:description" content="在瀏覽器內直接將圖片轉換為WebP。支援PNG、JPG、HEIC、TIFF、PSD等格式。">
   <meta name="twitter:image" content="icon.svg">
   <meta name="twitter:image:alt" content="HiWebp logo">
   <script type="application/ld+json">
@@ -36,13 +36,13 @@
     "name": "HiWebp",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
-    "description": "ブラウザ内だけで画像をWebPへ高速変換する無料ツール",
+    "description": "瀏覽器內快速高品質WebP圖片轉換免費工具",
     "url": "",
     "image": "icon.svg",
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": "JPY"
+      "priceCurrency": "TWD"
     }
   }
   </script>
@@ -70,56 +70,56 @@
   <link rel="stylesheet" href="./style.css">
   <script>
     window.WC_I18N = Object.freeze({
-      shrink: '小さくなりました',
-      grow: '大きくなりました',
-      sizeNeutral: 'サイズはほぼ同じです',
-      notFile: '入力がFileオブジェクトではありません。',
-      fileTooLarge: max => `ファイルサイズが大きすぎます（最大 ${max}）。`,
-      invalidImageSize: '画像サイズが不正です。',
-      tooManyPixels: pixels => `画像の画素数が大きすぎます（最大 ${pixels.toLocaleString()} pixels）。`,
-      canvasCreationFailed: 'Canvasを作成できません。',
-      canvasContextFailed: 'Canvas 2D contextを取得できません。',
-      imageElementFailed: 'Image elementを作成できません。',
-      browserLoadFailed: name => `ブラウザで ${name} を画像として読み込めませんでした。`,
-      tiffNoImages: 'TIFFの画像データを見つけられませんでした。',
-      tiffInvalidData: 'TIFFの画像サイズまたはピクセルデータを取得できませんでした。',
-      heifInitFailed: 'HEIF decoderを初期化できませんでした。',
-      heifNoImages: 'HEIC/HEIFに画像が含まれていません。',
-      heifDecodeFailed: 'HEIC/HEIFのピクセルデータを展開できませんでした。',
-      psdCompositeFailed: 'PSDの合成画像を取得できませんでした。',
-      pdfNoPages: 'PDFにページがありません。',
-      encoderInvalid: 'WebPエンコーダーが有効なデータを返しませんでした。',
-      conversionStopped: '変換処理を停止しました',
-      unknownError: '不明なエラーが発生しました。',
-      noFiles: 'ファイルがありません',
-      addFilesFirst: '先に画像ファイルを追加してください。',
-      saveableResults: '保存できる結果がありません',
-      completeConversionFirst: '先に変換を完了してください。',
-      zipCreationFailed: 'ZIPを作成できませんでした',
-      filesCleared: 'ファイルをクリアしました。',
-      canConvert: '変換できます',
-      addFilesHint: 'ファイルを追加してください',
-      converting: '変換を開始しています…',
-      conversionStarted: '変換を開始しました。',
-      autoConversionStarted: '自動変換を開始しました。',
-      waiting: '変換待ち',
-      processing: (done, total) => `${done} / ${total} 件を処理しました`,
-      successFail: (success, failed) => `${success} 件成功 / ${failed} 件失敗`,
-      completed: '変換完了',
-      allSuccess: count => `${count}件の変換が完了しました。`,
-      someFailed: (success, failed) => `${success}件を変換、${failed}件が失敗しました。`,
-      unsupportedSkipped: count => `${count}個の対応していないファイルをスキップしました。`,
-      noNewFiles: '新しいファイルはありません。',
-      addedSkipped: (added, skipped) => `${added}個を追加し、${skipped}個をスキップしました。`,
-      added: count => `${count}個のファイルを追加しました。`,
-      conversionFailed: '変換失敗',
-      saveAs: name => `${name} を保存`,
-      saveButton: '保存',
-      dimensionUnknown: 'サイズ不明',
-      originalCanvasContextFailed: '元画像のCanvas contextを取得できません。',
-      creatingZip: 'ZIPファイルを作成しています。',
-      zipCreated: 'ZIPを作成しました。',
-      fileCount: count => `${count.toLocaleString()} ファイル`
+      shrink: '已縮小',
+      grow: '已放大',
+      sizeNeutral: '大小基本相同',
+      notFile: '輸入的不是File物件。',
+      fileTooLarge: max => `檔案大小過大（最大 ${max}）。`,
+      invalidImageSize: '圖片尺寸無效。',
+      tooManyPixels: pixels => `像素過多（最大 ${pixels.toLocaleString()} 像素）。`,
+      canvasCreationFailed: '無法建立畫布。',
+      canvasContextFailed: '無法取得畫布2D上下文。',
+      imageElementFailed: '無法建立圖片元素。',
+      browserLoadFailed: name => `瀏覽器無法將 ${name} 做為圖片載入。`,
+      tiffNoImages: 'TIFF中未找到圖片資料。',
+      tiffInvalidData: '無法取得TIFF圖片尺寸或像素資料。',
+      heifInitFailed: '無法初始化HEIF解碼器。',
+      heifNoImages: 'HEIC/HEIF中沒有圖片。',
+      heifDecodeFailed: '無法解碼HEIC/HEIF像素資料。',
+      psdCompositeFailed: '無法取得PSD合成圖片。',
+      pdfNoPages: 'PDF沒有頁面。',
+      encoderInvalid: 'WebP編碼器未回傳有效資料。',
+      conversionStopped: '轉換已停止',
+      unknownError: '發生未知錯誤。',
+      noFiles: '沒有檔案',
+      addFilesFirst: '請先新增圖片檔案。',
+      saveableResults: '沒有可儲存的結果',
+      completeConversionFirst: '請先完成轉換。',
+      zipCreationFailed: '無法建立ZIP',
+      filesCleared: '檔案已清除。',
+      canConvert: '可以轉換',
+      addFilesHint: '請新增檔案',
+      converting: '正在開始轉換…',
+      conversionStarted: '轉換已開始。',
+      autoConversionStarted: '自動轉換已開始。',
+      waiting: '等待轉換',
+      processing: (done, total) => `已處理 ${done} / ${total} 個`,
+      successFail: (success, failed) => `${success} 個成功 / ${failed} 個失敗`,
+      completed: '轉換完成',
+      allSuccess: count => `${count} 個轉換已完成。`,
+      someFailed: (success, failed) => `${success} 個已轉換，${failed} 個失敗。`,
+      unsupportedSkipped: count => `已跳過 ${count} 個不支援的檔案。`,
+      noNewFiles: '沒有新檔案。',
+      addedSkipped: (added, skipped) => `已新增 ${added} 個，已跳過 ${skipped} 個。`,
+      added: count => `已新增 ${count} 個檔案。`,
+      conversionFailed: '轉換失敗',
+      saveAs: name => `儲存 ${name}`,
+      saveButton: '儲存',
+      dimensionUnknown: '尺寸未知',
+      originalCanvasContextFailed: '無法取得原始圖片畫布上下文。',
+      creatingZip: '正在建立ZIP檔案…',
+      zipCreated: 'ZIP已建立。',
+      fileCount: count => `${count.toLocaleString()} 個檔案`
     });
   </script>
   <script>
@@ -154,15 +154,15 @@
   <main class="wc-main-container">
 
     <section class="wc-hero" aria-labelledby="page-title">
-      <h1 id="page-title" class="md-typescale-display-small">HiWebp 高速変換</h1>
+      <h1 id="page-title" class="md-typescale-display-small">HiWebp 快速轉換</h1>
     </section>
 
-    <section class="wc-note" aria-label="プライバシー情報">
+    <section class="wc-note" aria-label="隱私資訊">
       <md-icon aria-hidden="true">lock</md-icon>
-      <span>画像そのものはサーバーへ送信しません。</span>
+      <span>您的圖片不會傳送到伺服器。</span>
     </section>
 
-    <section class="wc-language-hint" id="language-hint" hidden aria-label="表示言語のヒント">
+    <section class="wc-language-hint" id="language-hint" hidden aria-label="語言提示">
       <div class="wc-language-hint-icon" aria-hidden="true">
         <md-icon>translate</md-icon>
       </div>
@@ -175,47 +175,47 @@
       </md-filled-tonal-button>
     </section>
 
-    <section class="wc-uploader-section" aria-label="ファイル選択">
-      <button type="button" class="wc-dropzone" id="dropzone" aria-label="画像ファイルを追加">
+    <section class="wc-uploader-section" aria-label="檔案選擇">
+      <button type="button" class="wc-dropzone" id="dropzone" aria-label="新增圖片檔案">
         <span class="wc-dropzone-icon" aria-hidden="true"><md-icon>upload_file</md-icon></span>
-        <span class="wc-dropzone-title">ファイルをここにドロップ</span>
-        <span class="wc-dropzone-secondary">またはクリックして選択</span>
-        <span class="wc-dropzone-formats">PNG · JPG · HEIC · TIFFなど</span>
+        <span class="wc-dropzone-title">將檔案拖放到此處</span>
+        <span class="wc-dropzone-secondary">或點擊選擇</span>
+        <span class="wc-dropzone-formats">PNG · JPG · HEIC · TIFF 等</span>
       </button>
       <input id="file-input" type="file" hidden multiple accept="image/png,image/jpeg,image/gif,image/webp,image/avif,image/bmp,image/svg+xml,.heic,.heif,.tif,.tiff,.psd,.pdf">
     </section>
 
-    <section class="wc-toolbar" id="result-toolbar" hidden aria-label="変換操作">
+    <section class="wc-toolbar" id="result-toolbar" hidden aria-label="轉換操作">
       <div class="wc-toolbar-meta">
         <strong id="file-count">0 files</strong>
-        <span id="toolbar-status">変換できます</span>
+        <span id="toolbar-status">可以轉換</span>
       </div>
       <div class="wc-toolbar-actions">
-        <md-outlined-button id="clear-button">クリア</md-outlined-button>
+        <md-outlined-button id="clear-button">清除</md-outlined-button>
         <md-filled-button id="convert-button">
           <md-icon slot="icon">transform</md-icon>
-          WebPに変換
+          轉換為 WebP
         </md-filled-button>
       </div>
     </section>
 
-    <section class="wc-progress-section" id="progress-section" hidden aria-label="変換の進捗">
+    <section class="wc-progress-section" id="progress-section" hidden aria-label="轉換進度">
       <div class="wc-progress-labels">
-        <span id="progress-label">変換中…</span>
+        <span id="progress-label">轉換中…</span>
         <span id="progress-percent">0%</span>
       </div>
-      <md-linear-progress id="progress-bar" value="0" aria-label="変換の進捗"></md-linear-progress>
+      <md-linear-progress id="progress-bar" value="0" aria-label="轉換進度"></md-linear-progress>
     </section>
 
-    <section class="wc-tabs-section" aria-label="表示切り替え">
-      <md-tabs id="main-tabs" aria-label="変換設定と変換結果">
+    <section class="wc-tabs-section" aria-label="顯示切換">
+      <md-tabs id="main-tabs" aria-label="轉換設定與轉換結果">
         <md-primary-tab id="settings-tab" aria-controls="settings-panel" active>
           <md-icon slot="icon">tune</md-icon>
-          変換設定
+          轉換設定
         </md-primary-tab>
         <md-primary-tab id="results-tab" aria-controls="results-panel">
           <md-icon slot="icon">image</md-icon>
-          変換結果
+          轉換結果
         </md-primary-tab>
       </md-tabs>
     </section>
@@ -228,27 +228,27 @@
             <output id="quality-value" for="quality-slider">85</output>
           </div>
           <md-slider id="quality-slider" min="1" max="100" value="85" step="1" labeled aria-label="WebP品質"></md-slider>
-          <p class="wc-setting-help">値が大きいほど画質を優先します。ロスレス時はこの設定を使いません。</p>
+          <p class="wc-setting-help">值越大畫質越優先。無損模式下不使用此設定。</p>
         </div>
 
         <div class="wc-setting-row">
           <div>
-            <div class="md-typescale-title-medium">ロスレス</div>
-            <div class="wc-setting-help">元画像のピクセルを変えずにWebP化します。</div>
+            <div class="md-typescale-title-medium">無損</div>
+            <div class="wc-setting-help">在不改變原始圖片像素的情況下轉換為 WebP。</div>
           </div>
-          <md-switch id="lossless-switch" aria-label="ロスレスを使用"></md-switch>
+          <md-switch id="lossless-switch" aria-label="使用無損"></md-switch>
         </div>
 
         <div class="wc-setting-row wc-max-size-setting">
           <div>
-            <div class="md-typescale-title-medium">長辺の最大サイズ</div>
-            <div class="wc-setting-help">有効にすると、長辺が指定したpxを超えないように縮小します。</div>
+            <div class="md-typescale-title-medium">長邊最大尺寸</div>
+            <div class="wc-setting-help">啟用後，長邊將不會超過指定像素。</div>
           </div>
-          <md-switch id="max-size-switch" aria-label="長辺の最大サイズを有効にする"></md-switch>
+          <md-switch id="max-size-switch" aria-label="啟用長邊最大尺寸"></md-switch>
         </div>
 
         <div class="wc-max-size-input-row">
-          <md-outlined-text-field id="max-size-input" type="number" label="最大サイズ" value="2048" min="1" max="100000" step="1" inputmode="numeric" aria-label="長辺の最大サイズ"></md-outlined-text-field>
+          <md-outlined-text-field id="max-size-input" type="number" label="最大尺寸" value="2048" min="1" max="100000" step="1" inputmode="numeric" aria-label="長邊最大尺寸"></md-outlined-text-field>
           <span class="wc-max-size-unit" aria-hidden="true">px</span>
         </div>
       </form>
@@ -257,10 +257,10 @@
     <section id="results-panel" class="wc-tab-panel" role="tabpanel" aria-labelledby="results-tab" hidden>
       <section class="wc-results-section" id="results-section" hidden aria-labelledby="results-title">
         <div class="wc-section-heading">
-          <h2 id="results-title" class="md-typescale-title-large">変換結果</h2>
+          <h2 id="results-title" class="md-typescale-title-large">轉換結果</h2>
           <md-filled-tonal-button id="download-all-button">
             <md-icon slot="icon">download</md-icon>
-            ZIPで保存
+            儲存為 ZIP
           </md-filled-tonal-button>
         </div>
         <div class="wc-results" id="results"></div>
@@ -269,10 +269,10 @@
   </main>
 
   <md-dialog id="error-dialog" type="alert">
-    <div slot="headline" id="error-title">変換できませんでした</div>
+    <div slot="headline" id="error-title">轉換失敗</div>
     <div slot="content" id="error-message"></div>
     <div slot="actions">
-      <md-text-button id="error-close-button">閉じる</md-text-button>
+      <md-text-button id="error-close-button">關閉</md-text-button>
     </div>
   </md-dialog>
 

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HiWebp is a free tool that converts images to WebP quickly and privately within your browser. Supports PNG, JPG, HEIC, TIFF, PSD, PDF and more. No server upload, high-quality free WebP conversion.">
+  <meta name="keywords" content="WebP conversion, image conversion, PNG to WebP, JPG to WebP, HEIC conversion, browser conversion, free tool, online converter, privacy protection, TIFF conversion, PSD conversion, PDF conversion">
+  <meta name="robots" content="index, follow">
+  <title>HiWebp | Fast WebP Conversion in Browser - Free Online Tool for PNG/JPG/HEIC/TIFF/PSD</title>
+  <link rel="canonical" id="canonical-url">
+  <link rel="alternate" hreflang="ja" id="hreflang-ja" href="">
+  <link rel="alternate" hreflang="en" id="hreflang-en" href="">
+  <link rel="alternate" hreflang="zh-CN" id="hreflang-zh-CN" href="">
+  <link rel="alternate" hreflang="zh-TW" id="hreflang-zh-TW" href="">
+  <link rel="alternate" hreflang="ko" id="hreflang-ko" href="">
+  <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HiWebp | Fast WebP Conversion in Browser">
+  <meta property="og:description" content="Convert images to WebP directly in your browser. Supports PNG, JPG, HEIC, TIFF, PSD, and more.">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="HiWebp logo">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HiWebp | Fast WebP Conversion in Browser">
+  <meta name="twitter:description" content="Convert images to WebP directly in your browser. Supports PNG, JPG, HEIC, TIFF, PSD, and more.">
+  <meta name="twitter:image" content="icon.svg">
+  <meta name="twitter:image:alt" content="HiWebp logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiWebp",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "description": "Free tool for fast WebP conversion of images directly in the browser",
+    "url": "",
+    "image": "icon.svg",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  <link rel="icon" href="icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[WebP Converter] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+  <script>
+    window.WC_I18N = Object.freeze({
+      shrink: 'Decreased',
+      grow: 'Increased',
+      sizeNeutral: 'Size is about the same',
+      notFile: 'Input is not a File object.',
+      fileTooLarge: max => `File size is too large (max ${max}).`,
+      invalidImageSize: 'Invalid image size.',
+      tooManyPixels: pixels => `Too many pixels (max ${pixels.toLocaleString()} pixels).`,
+      canvasCreationFailed: 'Failed to create Canvas.',
+      canvasContextFailed: 'Failed to get Canvas 2D context.',
+      imageElementFailed: 'Failed to create Image element.',
+      browserLoadFailed: name => `Browser cannot load ${name} as an image.`,
+      tiffNoImages: 'No image data found in TIFF.',
+      tiffInvalidData: 'Failed to get TIFF image size or pixel data.',
+      heifInitFailed: 'Failed to initialize HEIF decoder.',
+      heifNoImages: 'No images found in HEIC/HEIF.',
+      heifDecodeFailed: 'Failed to decode HEIC/HEIF pixel data.',
+      psdCompositeFailed: 'Failed to get PSD composite image.',
+      pdfNoPages: 'PDF has no pages.',
+      encoderInvalid: 'WebP encoder did not return valid data.',
+      conversionStopped: 'Conversion stopped',
+      unknownError: 'An unknown error occurred.',
+      noFiles: 'No files',
+      addFilesFirst: 'Please add image files first.',
+      saveableResults: 'No results available to save',
+      completeConversionFirst: 'Please complete the conversion first.',
+      zipCreationFailed: 'Failed to create ZIP',
+      filesCleared: 'Files cleared.',
+      canConvert: 'Ready to convert',
+      addFilesHint: 'Please add files',
+      converting: 'Starting conversion...',
+      conversionStarted: 'Conversion started.',
+      autoConversionStarted: 'Auto conversion started.',
+      waiting: 'Waiting for conversion',
+      processing: (done, total) => `${done} / ${total} processed`,
+      successFail: (success, failed) => `${success} succeeded / ${failed} failed`,
+      completed: 'Conversion complete',
+      allSuccess: count => `${count} conversions completed.`,
+      someFailed: (success, failed) => `${success} converted, ${failed} failed.`,
+      unsupportedSkipped: count => `${count} unsupported files were skipped.`,
+      noNewFiles: 'No new files.',
+      addedSkipped: (added, skipped) => `${added} added, ${skipped} skipped.`,
+      added: count => `${count} files added.`,
+      conversionFailed: 'Conversion failed',
+      saveAs: name => `Save ${name}`,
+      saveButton: 'Save',
+      dimensionUnknown: 'Unknown dimensions',
+      originalCanvasContextFailed: 'Failed to get original image Canvas context.',
+      creatingZip: 'Creating ZIP file...',
+      zipCreated: 'ZIP created.',
+      fileCount: count => `${count.toLocaleString()} files`
+    });
+  </script>
+  <script>
+    (function() {
+      try {
+        const url = new URL(window.location.href);
+        const pathParts = url.pathname.split('/');
+        if (pathParts.length > 0) {
+          const currentFile = pathParts[pathParts.length - 1] || '';
+          const canonical = document.getElementById('canonical-url');
+          if (canonical) canonical.href = url.toString().replace(/[?#].*$/, '');
+          const ogUrl = document.querySelector('meta[property="og:url"]');
+          if (ogUrl) ogUrl.content = url.toString().replace(/[?#].*$/, '');
+          const langs = ['ja','en','zh-CN','zh-TW','ko','ko-KP'];
+          for (const lang of langs) {
+            const clone = [...pathParts];
+            if (/\.html$/i.test(currentFile)) {
+              clone[clone.length - 1] = `${lang}.html`;
+            } else {
+              clone.push(`${lang}.html`);
+            }
+            const href = url.origin + clone.join('/');
+            const link = document.getElementById('hreflang-' + lang);
+            if (link) link.href = href;
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <main class="wc-main-container">
+
+    <section class="wc-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiWebp Fast Conversion</h1>
+    </section>
+
+    <section class="wc-note" aria-label="Privacy information">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>Your images are not sent to the server.</span>
+    </section>
+
+    <section class="wc-language-hint" id="language-hint" hidden aria-label="Language hint">
+      <div class="wc-language-hint-icon" aria-hidden="true">
+        <md-icon>translate</md-icon>
+      </div>
+      <div class="wc-language-hint-content">
+        <span id="language-hint-message"></span>
+      </div>
+      <md-filled-tonal-button id="language-switch-button" type="button">
+        <md-icon slot="icon">language</md-icon>
+        <span id="language-switch-label"></span>
+      </md-filled-tonal-button>
+    </section>
+
+    <section class="wc-uploader-section" aria-label="File selection">
+      <button type="button" class="wc-dropzone" id="dropzone" aria-label="Add image files">
+        <span class="wc-dropzone-icon" aria-hidden="true"><md-icon>upload_file</md-icon></span>
+        <span class="wc-dropzone-title">Drop files here</span>
+        <span class="wc-dropzone-secondary">Or click to select</span>
+        <span class="wc-dropzone-formats">PNG · JPG · HEIC · TIFF, etc.</span>
+      </button>
+      <input id="file-input" type="file" hidden multiple accept="image/png,image/jpeg,image/gif,image/webp,image/avif,image/bmp,image/svg+xml,.heic,.heif,.tif,.tiff,.psd,.pdf">
+    </section>
+
+    <section class="wc-toolbar" id="result-toolbar" hidden aria-label="Conversion actions">
+      <div class="wc-toolbar-meta">
+        <strong id="file-count">0 files</strong>
+        <span id="toolbar-status">Ready to convert</span>
+      </div>
+      <div class="wc-toolbar-actions">
+        <md-outlined-button id="clear-button">Clear</md-outlined-button>
+        <md-filled-button id="convert-button">
+          <md-icon slot="icon">transform</md-icon>
+          Convert to WebP
+        </md-filled-button>
+      </div>
+    </section>
+
+    <section class="wc-progress-section" id="progress-section" hidden aria-label="Conversion progress">
+      <div class="wc-progress-labels">
+        <span id="progress-label">Converting...</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <md-linear-progress id="progress-bar" value="0" aria-label="Conversion progress"></md-linear-progress>
+    </section>
+
+    <section class="wc-tabs-section" aria-label="View toggle">
+      <md-tabs id="main-tabs" aria-label="Conversion settings and results">
+        <md-primary-tab id="settings-tab" aria-controls="settings-panel" active>
+          <md-icon slot="icon">tune</md-icon>
+          Conversion Settings
+        </md-primary-tab>
+        <md-primary-tab id="results-tab" aria-controls="results-panel">
+          <md-icon slot="icon">image</md-icon>
+          Conversion Results
+        </md-primary-tab>
+      </md-tabs>
+    </section>
+
+    <section id="settings-panel" class="wc-tab-panel" role="tabpanel" aria-labelledby="settings-tab">
+      <form id="settings-form" class="wc-settings-form">
+        <div class="wc-setting-block">
+          <div class="wc-setting-heading">
+            <span class="md-typescale-title-medium">Quality</span>
+            <output id="quality-value" for="quality-slider">85</output>
+          </div>
+          <md-slider id="quality-slider" min="1" max="100" value="85" step="1" labeled aria-label="WebP quality"></md-slider>
+          <p class="wc-setting-help">Higher values prioritize image quality. This setting is not used during lossless conversion.</p>
+        </div>
+
+        <div class="wc-setting-row">
+          <div>
+            <div class="md-typescale-title-medium">Lossless</div>
+            <div class="wc-setting-help">Convert to WebP without changing the original image's pixels.</div>
+          </div>
+          <md-switch id="lossless-switch" aria-label="Use lossless"></md-switch>
+        </div>
+
+        <div class="wc-setting-row wc-max-size-setting">
+          <div>
+            <div class="md-typescale-title-medium">Maximum side size</div>
+            <div class="wc-setting-help">When enabled, the image will be resized so the longest side does not exceed the specified pixels.</div>
+          </div>
+          <md-switch id="max-size-switch" aria-label="Enable maximum side size"></md-switch>
+        </div>
+
+        <div class="wc-max-size-input-row">
+          <md-outlined-text-field id="max-size-input" type="number" label="Maximum size" value="2048" min="1" max="100000" step="1" inputmode="numeric" aria-label="Maximum side size"></md-outlined-text-field>
+          <span class="wc-max-size-unit" aria-hidden="true">px</span>
+        </div>
+      </form>
+    </section>
+
+    <section id="results-panel" class="wc-tab-panel" role="tabpanel" aria-labelledby="results-tab" hidden>
+      <section class="wc-results-section" id="results-section" hidden aria-labelledby="results-title">
+        <div class="wc-section-heading">
+          <h2 id="results-title" class="md-typescale-title-large">Conversion Results</h2>
+          <md-filled-tonal-button id="download-all-button">
+            <md-icon slot="icon">download</md-icon>
+            Save as ZIP
+          </md-filled-tonal-button>
+        </div>
+        <div class="wc-results" id="results"></div>
+      </section>
+    </section>
+  </main>
+
+  <md-dialog id="error-dialog" type="alert">
+    <div slot="headline" id="error-title">Conversion failed</div>
+    <div slot="content" id="error-message"></div>
+    <div slot="actions">
+      <md-text-button id="error-close-button">Close</md-text-button>
+    </div>
+  </md-dialog>
+
+  <div class="wc-sr-status" id="sr-status" aria-live="polite"></div>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6151036058675874"
+     crossorigin="anonymous"></script>
+  <ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6151036058675874"
+     data-ad-slot="3695134123"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+  <script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+  <script type="module" src="./app.js"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+  <style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }</style>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+</body>
+</html>

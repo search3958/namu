@@ -117,6 +117,13 @@ function logError(message, error) {
   console.error(`[WebP Converter] ${message}`, error);
 }
 
+function uiText(key, ...args) {
+  const template = window.WC_I18N?.[key];
+  if (typeof template === 'function') return template(...args);
+  if (typeof template === 'string') return template;
+  return key;
+}
+
 function getRequiredElement(id) {
   const element = document.getElementById(id);
   if (!element) {
@@ -318,7 +325,7 @@ function formatBytes(value) {
 }
 
 function formatDimensions(width, height) {
-  return Number.isFinite(width) && Number.isFinite(height) ? `${width.toLocaleString()} × ${height.toLocaleString()}` : 'サイズ不明';
+  return Number.isFinite(width) && Number.isFinite(height) ? `${width.toLocaleString()} × ${height.toLocaleString()}` : uiText('dimensionUnknown');
 }
 
 function formatPercentChange(originalBytes, outputBytes) {
@@ -327,12 +334,12 @@ function formatPercentChange(originalBytes, outputBytes) {
   }
   const delta = ((outputBytes - originalBytes) / originalBytes) * 100;
   if (delta < 0) {
-    return { text: `${Math.abs(delta).toFixed(1)}% 小さくなりました`, className: 'wc-result-size-good' };
+    return { text: `${Math.abs(delta).toFixed(1)}% ${uiText('shrink')}`, className: 'wc-result-size-good' };
   }
   if (delta > 0) {
-    return { text: `${delta.toFixed(1)}% 大きくなりました`, className: 'wc-result-size-bad' };
+    return { text: `${delta.toFixed(1)}% ${uiText('grow')}`, className: 'wc-result-size-bad' };
   }
-  return { text: 'サイズはほぼ同じです', className: 'wc-result-size-neutral' };
+  return { text: uiText('sizeNeutral'), className: 'wc-result-size-neutral' };
 }
 
 function announce(message) {
@@ -612,30 +619,30 @@ function isSupportedFile(file) {
 
 async function ensureFileIsReasonable(file) {
   if (!(file instanceof File)) {
-    throw new Error('入力がFileオブジェクトではありません。');
+    throw new Error(uiText('notFile'));
   }
   if (file.size > WC_CONFIG.maxFileBytes) {
-    throw new Error(`ファイルサイズが大きすぎます（最大 ${formatBytes(WC_CONFIG.maxFileBytes)}）。`);
+    throw new Error(uiText('fileTooLarge', formatBytes(WC_CONFIG.maxFileBytes)));
   }
 }
 
 async function createCanvas(width, height) {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) {
-    throw new Error('画像サイズが不正です。');
+    throw new Error(uiText('invalidImageSize'));
   }
   const pixels = width * height;
   if (pixels > WC_CONFIG.maxPixels) {
-    throw new Error(`画像の画素数が大きすぎます（最大 ${WC_CONFIG.maxPixels.toLocaleString()} pixels）。`);
+    throw new Error(uiText('tooManyPixels', WC_CONFIG.maxPixels));
   }
   const canvas = document.createElement('canvas');
   if (!canvas) {
-    throw new Error('Canvasを作成できません。');
+    throw new Error(uiText('canvasCreationFailed'));
   }
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
   if (!context) {
-    throw new Error('Canvas 2D contextを取得できません。');
+    throw new Error(uiText('canvasContextFailed'));
   }
   return { canvas, context };
 }
@@ -665,14 +672,14 @@ async function decodeNativeImage(file) {
 
   const url = rememberObjectUrl(URL.createObjectURL(file));
   const image = new Image();
-  if (!image) throw new Error('Image elementを作成できません。');
+  if (!image) throw new Error(uiText('imageElementFailed'));
   image.decoding = 'async';
   image.alt = '';
   image.src = url;
 
   await new Promise((resolve, reject) => {
     image.onload = () => resolve();
-    image.onerror = () => reject(new Error(`ブラウザで ${file.name} を画像として読み込めませんでした。`));
+    image.onerror = () => reject(new Error(uiText('browserLoadFailed', file.name)));
   });
 
   const { canvas, context } = await createCanvas(image.naturalWidth, image.naturalHeight);
@@ -687,7 +694,7 @@ async function decodeTiff(file) {
   const buffer = await file.arrayBuffer();
   const ifds = UTIF.decode(buffer);
   if (!Array.isArray(ifds) || ifds.length === 0) {
-    throw new Error('TIFFの画像データを見つけられませんでした。');
+    throw new Error(uiText('tiffNoImages'));
   }
   const firstIfd = ifds[0];
   UTIF.decodeImage(buffer, firstIfd);
@@ -695,7 +702,7 @@ async function decodeTiff(file) {
   const width = firstIfd.width ?? firstIfd.t256;
   const height = firstIfd.height ?? firstIfd.t257;
   if (!width || !height || !rgba) {
-    throw new Error('TIFFの画像サイズまたはピクセルデータを取得できませんでした。');
+    throw new Error(uiText('tiffInvalidData'));
   }
   const { canvas, context } = await createCanvas(width, height);
   const imageData = new ImageData(new Uint8ClampedArray(rgba), width, height);
@@ -708,12 +715,12 @@ async function decodeHeif(file) {
   const libheif = await loadHeif();
   const decoder = new libheif.HeifDecoder();
   if (!decoder || typeof decoder.decode !== 'function') {
-    throw new Error('HEIF decoderを初期化できませんでした。');
+    throw new Error(uiText('heifInitFailed'));
   }
   const buffer = await file.arrayBuffer();
   const images = decoder.decode(new Uint8Array(buffer));
   if (!Array.isArray(images) || images.length === 0) {
-    throw new Error('HEIC/HEIFに画像が含まれていません。');
+    throw new Error(uiText('heifNoImages'));
   }
   const image = images[0];
   const width = image.get_width();
@@ -724,7 +731,7 @@ async function decodeHeif(file) {
   await new Promise((resolve, reject) => {
     image.display({ data: rgba, width, height }, displayData => {
       if (!displayData) {
-        reject(new Error('HEIC/HEIFのピクセルデータを展開できませんでした。'));
+        reject(new Error(uiText('heifDecodeFailed')));
         return;
       }
       resolve();
@@ -743,7 +750,7 @@ async function decodePsd(file) {
   const psd = agPsd.readPsd(buffer, { logMissingFeatures: false });
   const canvas = psd?.canvas;
   if (!canvas || typeof canvas.width !== 'number' || typeof canvas.height !== 'number') {
-    throw new Error('PSDの合成画像を取得できませんでした。');
+    throw new Error(uiText('psdCompositeFailed'));
   }
   logInfo(`PSD decoded: ${file.name}`, { width: canvas.width, height: canvas.height });
   return { canvas, width: canvas.width, height: canvas.height, kind: 'psd' };
@@ -755,7 +762,7 @@ async function decodePdf(file) {
   const loadingTask = pdfjs.getDocument({ data: buffer, isEvalSupported: false });
   const pdf = await loadingTask.promise;
   if (!pdf || pdf.numPages < 1) {
-    throw new Error('PDFにページがありません。');
+    throw new Error(uiText('pdfNoPages'));
   }
   const page = await pdf.getPage(1);
   const baseViewport = page.getViewport({ scale: 1 });
@@ -799,7 +806,7 @@ async function getOutputImageData(canvas, width, height) {
   const target = getTargetDimensions(width, height);
   if (target.width === width && target.height === height) {
     const context = canvas.getContext('2d', { willReadFrequently: true, alpha: true });
-    if (!context) throw new Error('元画像のCanvas contextを取得できません。');
+    if (!context) throw new Error(uiText('originalCanvasContextFailed'));
     return context.getImageData(0, 0, width, height);
   }
 
@@ -818,7 +825,7 @@ async function encodeWebp(imageData) {
     : { quality: WC_STATE.settings.quality, lossless: 0 };
   const buffer = await encode(imageData, options);
   if (!(buffer instanceof ArrayBuffer) || buffer.byteLength === 0) {
-    throw new Error('WebPエンコーダーが有効なデータを返しませんでした。');
+    throw new Error(uiText('encoderInvalid'));
   }
   return new Blob([buffer], { type: 'image/webp' });
 }
@@ -863,8 +870,8 @@ function setActiveTab(index, reason = 'manual') {
 
 function setToolbarState() {
   const count = WC_STATE.files.length;
-  wcDom.fileCount.textContent = `${count.toLocaleString()} file${count === 1 ? '' : 's'}`;
-  wcDom.toolbarStatus.textContent = count > 0 ? '変換できます' : 'ファイルを追加してください';
+  wcDom.fileCount.textContent = uiText('fileCount', count);
+  wcDom.toolbarStatus.textContent = count > 0 ? uiText('canConvert') : uiText('addFilesHint');
   wcDom.resultToolbar.hidden = count === 0;
   wcDom.convertButton.disabled = count === 0 || WC_STATE.converting;
 }
@@ -923,7 +930,7 @@ function renderResults() {
     meta.appendChild(dimensions);
 
     const size = document.createElement('span');
-    size.textContent = result.error ? '変換失敗' : `${formatBytes(result.file.size)} → ${formatBytes(result.blob.size)}`;
+    size.textContent = result.error ? uiText('conversionFailed') : `${formatBytes(result.file.size)} → ${formatBytes(result.blob.size)}`;
     meta.appendChild(size);
 
     const status = document.createElement('div');
@@ -944,8 +951,8 @@ function renderResults() {
     actions.className = 'wc-result-actions';
     if (!result.error && result.blob) {
       const button = document.createElement('md-outlined-button');
-      button.setAttribute('aria-label', `${result.name} を保存`);
-      button.innerHTML = '<md-icon slot="icon">download</md-icon>保存';
+      button.setAttribute('aria-label', uiText('saveAs', result.name));
+      button.innerHTML = `<md-icon slot="icon">download</md-icon>${uiText('saveButton')}`;
       button.addEventListener('click', () => downloadBlob(result.blob, result.name));
       actions.appendChild(button);
     }
@@ -1007,16 +1014,16 @@ function addFiles(fileList) {
   if (added === 0) {
     announce(
       skippedUnsupported > 0
-        ? `${skippedUnsupported}個の対応していないファイルをスキップしました。`
-        : '新しいファイルはありません。'
+        ? uiText('unsupportedSkipped', skippedUnsupported)
+        : uiText('noNewFiles')
     );
     return;
   }
 
   announce(
     skippedUnsupported > 0
-      ? `${added}個を追加し、${skippedUnsupported}個をスキップしました。`
-      : `${added}個のファイルを追加しました。`
+      ? uiText('addedSkipped', added, skippedUnsupported)
+      : uiText('added', added)
   );
   logInfo(`Files added: ${added}`, WC_STATE.files.map(file => file.name));
   setActiveTab(WC_TAB_INDEX.results, 'files-added');
@@ -1043,10 +1050,10 @@ function clearAll() {
   wcDom.resultsSection.hidden = true;
   wcDom.fileInput.value = '';
   setToolbarState();
-  setProgress(0, 0, '変換待ち');
+  setProgress(0, 0, uiText('waiting'));
   wcDom.progressSection.hidden = true;
   setActiveTab(WC_TAB_INDEX.settings, 'clear');
-  announce('ファイルをクリアしました。');
+  announce(uiText('filesCleared'));
   logInfo('All files and results cleared.');
 }
 
@@ -1062,7 +1069,7 @@ async function runWithConcurrency(items, limit, handler) {
       if (currentIndex >= total) return;
       await handler(items[currentIndex], currentIndex);
       completed += 1;
-      setProgress(completed, total, `${completed} / ${total} 件を処理しました`);
+      setProgress(completed, total, uiText('processing', completed, total));
     }
   }
 
@@ -1076,7 +1083,7 @@ async function startConversion({ force = false } = {}) {
     return;
   }
   if (WC_STATE.files.length === 0) {
-    showError('ファイルがありません', '先に画像ファイルを追加してください。');
+    showError(uiText('noFiles'), uiText('addFilesFirst'));
     return;
   }
 
@@ -1100,8 +1107,8 @@ async function startConversion({ force = false } = {}) {
   wcDom.progressSection.hidden = false;
   wcDom.convertButton.disabled = true;
   wcDom.clearButton.disabled = true;
-  setProgress(0, items.length, '変換を開始しています…');
-  announce(force ? '変換を開始しました。' : '自動変換を開始しました。');
+  setProgress(0, items.length, uiText('converting'));
+  announce(force ? uiText('conversionStarted') : uiText('autoConversionStarted'));
   logInfo('Batch conversion started.', { force, count: items.length });
 
   try {
@@ -1118,7 +1125,7 @@ async function startConversion({ force = false } = {}) {
         const result = await convertFile(file);
         WC_STATE.results.set(key, result);
       } catch (error) {
-        const message = error instanceof Error ? error.message : '不明なエラーが発生しました。';
+        const message = error instanceof Error ? error.message : uiText('unknownError');
         WC_STATE.results.set(key, {
           file,
           name: `${getBaseName(file.name)}.webp`,
@@ -1142,14 +1149,14 @@ async function startConversion({ force = false } = {}) {
       processedCount,
       processedCount,
       failedCount > 0
-        ? `${successCount} 件成功 / ${failedCount} 件失敗`
-        : '変換完了'
+        ? uiText('successFail', successCount, failedCount)
+        : uiText('completed')
     );
 
     announce(
       failedCount > 0
-        ? `${successCount}件を変換、${failedCount}件が失敗しました。`
-        : `${successCount}件の変換が完了しました。`
+        ? uiText('someFailed', successCount, failedCount)
+        : uiText('allSuccess', successCount)
     );
 
     logInfo('Batch conversion finished.', {
@@ -1160,8 +1167,8 @@ async function startConversion({ force = false } = {}) {
     });
   } catch (error) {
     showError(
-      '変換処理を停止しました',
-      error instanceof Error ? error.message : '不明なエラーが発生しました。',
+      uiText('conversionStopped'),
+      error instanceof Error ? error.message : uiText('unknownError'),
       error
     );
   } finally {
@@ -1210,18 +1217,18 @@ function downloadBlob(blob, name) {
 async function downloadAll() {
   const successful = Array.from(WC_STATE.results.values()).filter(result => !result.error && result.blob);
   if (successful.length === 0) {
-    showError('保存できる結果がありません', '先に変換を完了してください。');
+    showError(uiText('saveableResults'), uiText('completeConversionFirst'));
     return;
   }
 
   try {
     wcDom.downloadAllButton.disabled = true;
-    announce('ZIPファイルを作成しています。');
+    announce(uiText('creatingZip'));
     const JSZip = await loadJsZip();
     const zip = new JSZip();
 
     if (!zip || typeof zip.file !== 'function') {
-      throw new Error('ZIP作成APIを初期化できませんでした。');
+      throw new Error(uiText('zipCreationFailed'));
     }
 
     const usedNames = new Set();
@@ -1245,12 +1252,12 @@ async function downloadAll() {
     });
 
     downloadBlob(archive, 'webp-converted.zip');
-    announce('ZIPを作成しました。');
+    announce(uiText('zipCreated'));
     logInfo('Batch ZIP created.', { files: successful.length, bytes: archive.size });
   } catch (error) {
     showError(
-      'ZIPを作成できませんでした',
-      error instanceof Error ? error.message : '不明なエラーが発生しました。',
+      uiText('zipCreationFailed'),
+      error instanceof Error ? error.message : uiText('unknownError'),
       error
     );
   } finally {
@@ -1417,7 +1424,7 @@ function initialize() {
     });
   } catch (error) {
     logError('Application initialization failed.', error);
-    announce('アプリの初期化に失敗しました。コンソールを確認してください。');
+    announce(uiText('unknownError'));
   }
 }
 
