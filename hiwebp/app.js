@@ -144,7 +144,12 @@ function getPageLanguage() {
   const match = /^(ja|en|zh-CN|zh-TW|ko|ko-KP)\.html$/i.exec(fileName);
 
   if (!match) {
-    logInfo('Current page language could not be detected from filename.', { pathname, fileName });
+    const htmlLang = document.documentElement.getAttribute('lang');
+    const mappedLang = htmlLang ? mapBrowserLanguage(htmlLang) : null;
+    if (mappedLang && WC_SUPPORTED_LANGUAGES.includes(mappedLang)) {
+      return mappedLang;
+    }
+    logInfo('Current page language could not be detected from filename or html lang.', { pathname, fileName, htmlLang });
     return null;
   }
 
@@ -252,6 +257,8 @@ function updateLanguageHint() {
   const pageLanguage = getPageLanguage();
   const preference = getPreferredLanguage();
   const preferredLanguage = preference.language;
+
+  logInfo('Language hint evaluation.', { pageLanguage, preferredLanguage, source: preference.source });
 
   if (!pageLanguage || !preferredLanguage || pageLanguage === preferredLanguage) {
     wcDom.languageHint.hidden = true;
