@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="画像をブラウザ内だけでWebPへ変換する静的ツール。PNG、JPG、HEIC、TIFF、PSDなどに対応。">
+  <title>HiWebpで高速に変換</title>
+  <link rel="icon" href="https://search3958.github.io/project/logos/3958logo_main.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[WebP Converter] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="wc-main-container">
+
+    <section class="wc-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiWebp 高速変換</h1>
+    </section>
+
+    <section class="wc-note" aria-label="プライバシー情報">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>画像そのものはサーバーへ送信しません。</span>
+    </section>
+
+    <section class="wc-language-hint" id="language-hint" hidden aria-label="表示言語のヒント">
+      <div class="wc-language-hint-icon" aria-hidden="true">
+        <md-icon>translate</md-icon>
+      </div>
+      <div class="wc-language-hint-content">
+        <span id="language-hint-message"></span>
+      </div>
+      <md-filled-tonal-button id="language-switch-button" type="button">
+        <md-icon slot="icon">language</md-icon>
+        <span id="language-switch-label"></span>
+      </md-filled-tonal-button>
+    </section>
+
+    <section class="wc-uploader-section" aria-label="ファイル選択">
+      <button type="button" class="wc-dropzone" id="dropzone" aria-label="画像ファイルを追加">
+        <span class="wc-dropzone-icon" aria-hidden="true"><md-icon>upload_file</md-icon></span>
+        <span class="wc-dropzone-title">ファイルをここにドロップ</span>
+        <span class="wc-dropzone-secondary">またはクリックして選択</span>
+        <span class="wc-dropzone-formats">PNG · JPG · HEIC · TIFFなど</span>
+      </button>
+      <input id="file-input" type="file" hidden multiple accept="image/png,image/jpeg,image/gif,image/webp,image/avif,image/bmp,image/svg+xml,.heic,.heif,.tif,.tiff,.psd,.pdf">
+    </section>
+
+    <section class="wc-toolbar" id="result-toolbar" hidden aria-label="変換操作">
+      <div class="wc-toolbar-meta">
+        <strong id="file-count">0 files</strong>
+        <span id="toolbar-status">変換できます</span>
+      </div>
+      <div class="wc-toolbar-actions">
+        <md-outlined-button id="clear-button">クリア</md-outlined-button>
+        <md-filled-button id="convert-button">
+          <md-icon slot="icon">transform</md-icon>
+          WebPに変換
+        </md-filled-button>
+      </div>
+    </section>
+
+    <section class="wc-progress-section" id="progress-section" hidden aria-label="変換の進捗">
+      <div class="wc-progress-labels">
+        <span id="progress-label">変換中…</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <md-linear-progress id="progress-bar" value="0" aria-label="変換の進捗"></md-linear-progress>
+    </section>
+
+    <section class="wc-tabs-section" aria-label="表示切り替え">
+      <md-tabs id="main-tabs" aria-label="変換設定と変換結果">
+        <md-primary-tab id="settings-tab" aria-controls="settings-panel" active>
+          <md-icon slot="icon">tune</md-icon>
+          変換設定
+        </md-primary-tab>
+        <md-primary-tab id="results-tab" aria-controls="results-panel">
+          <md-icon slot="icon">image</md-icon>
+          変換結果
+        </md-primary-tab>
+      </md-tabs>
+    </section>
+
+    <section id="settings-panel" class="wc-tab-panel" role="tabpanel" aria-labelledby="settings-tab">
+      <form id="settings-form" class="wc-settings-form">
+        <div class="wc-setting-block">
+          <div class="wc-setting-heading">
+            <span class="md-typescale-title-medium">品質</span>
+            <output id="quality-value" for="quality-slider">85</output>
+          </div>
+          <md-slider id="quality-slider" min="1" max="100" value="85" step="1" labeled aria-label="WebP品質"></md-slider>
+          <p class="wc-setting-help">値が大きいほど画質を優先します。ロスレス時はこの設定を使いません。</p>
+        </div>
+
+        <div class="wc-setting-row">
+          <div>
+            <div class="md-typescale-title-medium">ロスレス</div>
+            <div class="wc-setting-help">元画像のピクセルを変えずにWebP化します。</div>
+          </div>
+          <md-switch id="lossless-switch" aria-label="ロスレスを使用"></md-switch>
+        </div>
+
+        <div class="wc-setting-row wc-max-size-setting">
+          <div>
+            <div class="md-typescale-title-medium">長辺の最大サイズ</div>
+            <div class="wc-setting-help">有効にすると、長辺が指定したpxを超えないように縮小します。</div>
+          </div>
+          <md-switch id="max-size-switch" aria-label="長辺の最大サイズを有効にする"></md-switch>
+        </div>
+
+        <div class="wc-max-size-input-row">
+          <md-outlined-text-field id="max-size-input" type="number" label="最大サイズ" value="2048" min="1" max="100000" step="1" inputmode="numeric" aria-label="長辺の最大サイズ"></md-outlined-text-field>
+          <span class="wc-max-size-unit" aria-hidden="true">px</span>
+        </div>
+      </form>
+    </section>
+
+    <section id="results-panel" class="wc-tab-panel" role="tabpanel" aria-labelledby="results-tab" hidden>
+      <section class="wc-results-section" id="results-section" hidden aria-labelledby="results-title">
+        <div class="wc-section-heading">
+          <h2 id="results-title" class="md-typescale-title-large">変換結果</h2>
+          <md-filled-tonal-button id="download-all-button">
+            <md-icon slot="icon">download</md-icon>
+            ZIPで保存
+          </md-filled-tonal-button>
+        </div>
+        <div class="wc-results" id="results"></div>
+      </section>
+    </section>
+  </main>
+
+  <md-dialog id="error-dialog" type="alert">
+    <div slot="headline" id="error-title">変換できませんでした</div>
+    <div slot="content" id="error-message"></div>
+    <div slot="actions">
+      <md-text-button id="error-close-button">閉じる</md-text-button>
+    </div>
+  </md-dialog>
+
+  <div class="wc-sr-status" id="sr-status" aria-live="polite"></div>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6151036058675874"
+     crossorigin="anonymous"></script>
+  <ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6151036058675874"
+     data-ad-slot="3695134123"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+  <script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+  <script type="module" src="./app.js"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+  <style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }</style>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+</body>
+</html>
