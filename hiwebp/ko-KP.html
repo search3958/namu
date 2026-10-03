@@ -138,6 +138,8 @@
             const clone = [...pathParts];
             if (/\.html$/i.test(currentFile)) {
               clone[clone.length - 1] = `${lang}.html`;
+            } else if (currentFile && WC_SUPPORTED_LANGUAGES.includes(currentFile)) {
+              clone[clone.length - 1] = `${lang}.html`;
             } else {
               clone.push(`${lang}.html`);
             }

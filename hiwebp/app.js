@@ -240,6 +240,8 @@ function buildLanguagePageUrl(targetLanguage) {
   const currentFile = pathParts[pathParts.length - 1] || '';
   if (/\.html$/i.test(currentFile)) {
     pathParts[pathParts.length - 1] = `${targetLanguage}.html`;
+  } else if (currentFile && WC_SUPPORTED_LANGUAGES.includes(currentFile)) {
+    pathParts[pathParts.length - 1] = `${targetLanguage}.html`;
   } else {
     pathParts.push(`${targetLanguage}.html`);
   }
