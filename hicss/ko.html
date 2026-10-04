@@ -3,10 +3,10 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
-  <meta name="description" content="HiCSS는 브라우저에서 CSS를 빠르게 압축하고 형식화할 수 있는 무료 도구입니다. 중복 규칙 삭제도 지원하며 CSS를 서버로 전송하지 않습니다.">
+  <meta name="description" content="NaeCSS는 브라우저에서 CSS를 빠르게 압축하고 형식화할 수 있는 무료 도구입니다. 중복 규칙 삭제도 지원하며 CSS를 서버로 전송하지 않습니다.">
   <meta name="keywords" content="CSS 압축,CSS 형식화,CSS minify,CSS beautify,CSS 중복 삭제,무료 도구">
   <meta name="robots" content="index, follow">
-  <title>HiCSS | CSS 압축, 형식화, 중복 삭제 도구</title>
+  <title>NaeCSS | CSS 압축, 형식화, 중복 삭제 도구</title>
   <link rel="canonical" id="canonical-url">
   <link rel="alternate" hreflang="ja" id="hreflang-ja" href="">
   <link rel="alternate" hreflang="en" id="hreflang-en" href="">
@@ -15,24 +15,24 @@
   <link rel="alternate" hreflang="ko" id="hreflang-ko" href="">
   <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="HiCSS | CSS 압축, 형식화, 중복 삭제 도구">
+  <meta property="og:title" content="NaeCSS | CSS 압축, 형식화, 중복 삭제 도구">
   <meta property="og:description" content="브라우저에서 CSS를 빠르게 압축하고 형식화합니다. 중복 규칙 삭제도 지원합니다.">
   <meta property="og:url" content="">
   <meta property="og:image" content="icon.svg">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
-  <meta property="og:image:alt" content="HiCSS logo">
+  <meta property="og:image:alt" content="NaeCSS logo">
   <meta property="og:locale" content="ko_KR">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="HiCSS | CSS 압축, 형식화, 중복 삭제 도구">
+  <meta name="twitter:title" content="NaeCSS | CSS 압축, 형식화, 중복 삭제 도구">
   <meta name="twitter:description" content="브라우저에서 CSS를 빠르게 압축하고 형식화합니다. 중복 규칙 삭제도 지원합니다.">
   <meta name="twitter:image" content="icon.svg">
-  <meta name="twitter:image:alt" content="HiCSS logo">
+  <meta name="twitter:image:alt" content="NaeCSS logo">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "HiCSS",
+    "name": "NaeCSS",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
     "description": "브라우저에서 CSS를 압축하고 형식화할 수 있는 무료 도구",
@@ -63,14 +63,14 @@
     import '@material/web/all.js';
     import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
     document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
-    console.log('[HiCSS] Material Web initialized: 2.5.0');
+    console.log('[NaeCSS] Material Web initialized: 2.5.0');
   </script>
 
   <link rel="stylesheet" href="../m3color.css">
   <link rel="stylesheet" href="./style.css">
 
   <!-- External engines: do not implement a CSS optimizer locally. -->
-  <script data-hicss-engine="css_beautify" src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/2.0.3/beautify-css.min.js" defer onload="console.log('[HiCSS] css-beautify CDN loaded.');" onerror="console.error('[HiCSS] css-beautify CDN failed to load.');"></script>
+  <script data-hicss-engine="css_beautify" src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/2.0.3/beautify-css.min.js" defer onload="console.log('[NaeCSS] css-beautify CDN loaded.');" onerror="console.error('[NaeCSS] css-beautify CDN failed to load.');"></script>
 
   <script>
     window.HC_I18N = Object.freeze({
@@ -102,7 +102,7 @@
 <body>
   <main class="hc-main-container">
     <section class="hc-hero" aria-labelledby="page-title">
-      <h1 id="page-title" class="md-typescale-display-small">HiCSS 도구</h1>
+      <h1 id="page-title" class="md-typescale-display-small">NaeCSS 도구</h1>
     </section>
 
     <section class="hc-note" aria-label="프라이버시 정보">
@@ -245,9 +245,9 @@
     window.addEventListener('load', () => {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        console.log('[HiCSS] Ad initialized.');
+        console.log('[NaeCSS] Ad initialized.');
       } catch (error) {
-        console.error('[HiCSS] Ad initialization failed.', error);
+        console.error('[NaeCSS] Ad initialization failed.', error);
       }
     }, { once: true });
   </script>
@@ -260,13 +260,13 @@
         const canonicalUrl = url.toString().replace(/[?#].*$/, '');
         const canonical = document.getElementById('canonical-url');
         if (canonical) canonical.href = canonicalUrl;
-        else console.error('[HiCSS] Missing #canonical-url.');
+        else console.error('[NaeCSS] Missing #canonical-url.');
 
         const ogUrl = document.querySelector('meta[property="og:url"]');
         if (ogUrl) ogUrl.content = canonicalUrl;
-        else console.error('[HiCSS] Missing og:url meta element.');
+        else console.error('[NaeCSS] Missing og:url meta element.');
       } catch (error) {
-        console.error('[HiCSS] Canonical URL initialization failed.', error);
+        console.error('[NaeCSS] Canonical URL initialization failed.', error);
       }
     }, { once: true });
   </script>

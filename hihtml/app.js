@@ -46,18 +46,18 @@
   const hhDom = {};
 
   function logInfo(message, data) {
-    if (typeof data === 'undefined') console.info(`[HiHTML] ${message}`);
-    else console.info(`[HiHTML] ${message}`, data);
+    if (typeof data === 'undefined') console.info(`[NaeHTML] ${message}`);
+    else console.info(`[NaeHTML] ${message}`, data);
   }
 
   function logWarn(message, data) {
-    if (typeof data === 'undefined') console.warn(`[HiHTML] ${message}`);
-    else console.warn(`[HiHTML] ${message}`, data);
+    if (typeof data === 'undefined') console.warn(`[NaeHTML] ${message}`);
+    else console.warn(`[NaeHTML] ${message}`, data);
   }
 
   function logError(message, error) {
-    if (typeof error === 'undefined') console.error(`[HiHTML] ${message}`);
-    else console.error(`[HiHTML] ${message}`, error);
+    if (typeof error === 'undefined') console.error(`[NaeHTML] ${message}`);
+    else console.error(`[NaeHTML] ${message}`, error);
   }
 
   function uiText(key, ...args) {
@@ -817,7 +817,7 @@
     initPageMetadata();
     startFilePolling();
     setStatus(uiText('inputEmpty'));
-    logInfo('HiHTML 調整ツール initialization completed.', { mode: HH_STATE.mode, settings: HH_STATE.settings });
+    logInfo('NaeHTML 調整ツール initialization completed.', { mode: HH_STATE.mode, settings: HH_STATE.settings });
   }
 
   document.addEventListener('DOMContentLoaded', initialize, { once: true });

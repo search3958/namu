@@ -64,14 +64,14 @@ const HC_LANGUAGE_UI = Object.freeze({
 
 function logInfo(message, detail) {
   if (typeof detail === 'undefined') {
-    console.log(`[HiCSS] ${message}`);
+    console.log(`[NaeCSS] ${message}`);
     return;
   }
-  console.log(`[HiCSS] ${message}`, detail);
+  console.log(`[NaeCSS] ${message}`, detail);
 }
 
 function logError(message, error) {
-  console.error(`[HiCSS] ${message}`, error);
+  console.error(`[NaeCSS] ${message}`, error);
 }
 
 function uiText(key, ...args) {
@@ -1014,7 +1014,7 @@ function bindEvents() {
 
   window.addEventListener('beforeunload', () => {
     if (HC_STATE.scheduledTimer !== null) window.clearTimeout(HC_STATE.scheduledTimer);
-    logInfo('HiCSS page unloading.');
+    logInfo('NaeCSS page unloading.');
   }, { once: true });
 
   logInfo('UI event bindings completed.');
