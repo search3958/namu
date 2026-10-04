@@ -3,10 +3,10 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
-  <meta name="description" content="HiJSはJavaScriptをブラウザ内で高速に圧縮・整形できる無料ツールです。オプションでJavaScriptの難読化にも対応しています。">
+  <meta name="description" content="HiJSはJavaScriptをブラウザ内で高速に調整できる無料ツールです。圧縮・整形・難読化・未使用コード削除に対応しています。">
   <meta name="keywords" content="JavaScript圧縮,JavaScript整形,JavaScript minify,JavaScript beautify,JavaScript難読化,無料ツール">
   <meta name="robots" content="index, follow">
-  <title>HiJS | JavaScript圧縮・整形・難読化ツール</title>
+  <title>HiJS | JavaScript 調整ツール</title>
   <link rel="canonical" id="canonical-url">
   <link rel="alternate" hreflang="ja" id="hreflang-ja" href="">
   <link rel="alternate" hreflang="en" id="hreflang-en" href="">
@@ -15,8 +15,8 @@
   <link rel="alternate" hreflang="ko" id="hreflang-ko" href="">
   <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="HiJS | JavaScript圧縮・整形・難読化ツール">
-  <meta property="og:description" content="JavaScriptをブラウザ内で高速に圧縮・整形。オプションで難読化にも対応。">
+  <meta property="og:title" content="HiJS | JavaScript 調整ツール">
+  <meta property="og:description" content="JavaScriptをブラウザ内で高速に調整。圧縮・整形・難読化・未使用コード削除に対応。">
   <meta property="og:url" content="">
   <meta property="og:image" content="icon.svg">
   <meta property="og:image:width" content="512">
@@ -24,8 +24,8 @@
   <meta property="og:image:alt" content="HiJS logo">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="HiJS | JavaScript圧縮・整形・難読化ツール">
-  <meta name="twitter:description" content="JavaScriptをブラウザ内で高速に圧縮・整形。オプションで難読化にも対応。">
+  <meta name="twitter:title" content="HiJS | JavaScript 調整ツール">
+  <meta name="twitter:description" content="JavaScriptをブラウザ内で高速に調整。圧縮・整形・難読化・未使用コード削除に対応。">
   <meta name="twitter:image" content="icon.svg">
   <meta name="twitter:image:alt" content="HiJS logo">
   <script type="application/ld+json">
@@ -35,7 +35,7 @@
     "name": "HiJS",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any",
-    "description": "ブラウザ内でJavaScriptを圧縮・整形・難読化できる無料ツール",
+    "description": "ブラウザ内でJavaScriptを圧縮・整形・難読化・未使用コード削除できる無料ツール",
     "url": "",
     "image": "icon.svg",
     "offers": {
@@ -73,6 +73,7 @@
       inputEmpty: 'JavaScriptを入力してください。',
       engineMissing: 'JavaScript処理エンジンを読み込めませんでした。ネットワーク接続を確認してください。',
       compressed: 'JavaScriptを圧縮しました。',
+      adjusted: 'JavaScriptを調整しました。',
       formatted: 'JavaScriptを整形しました。',
       copied: '結果をクリップボードにコピーしました。',
       copyFailed: 'クリップボードへのコピーに失敗しました。',
@@ -87,6 +88,7 @@
       fileExternallyUpdated: name => `${name} の外部変更を自動反映しました。`,
       readFailed: 'JavaScriptファイルを読み込めませんでした。',
       processFailed: 'JavaScriptの処理に失敗しました。入力内容または外部エンジンを確認してください。',
+      unusedWarning: '未使用コード削除では、グローバルから参照される変数・関数が削除される場合があります。',
       size: bytes => `${bytes.toLocaleString()} bytes`,
       reduction: percent => `${percent.toFixed(1)}%削減`
     });
@@ -95,7 +97,7 @@
 <body>
   <main class="hj-main-container">
     <section class="hj-hero" aria-labelledby="page-title">
-      <h1 id="page-title" class="md-typescale-display-small">HiJS JavaScript ツール</h1>
+      <h1 id="page-title" class="md-typescale-display-small">HiJS 調整ツール</h1>
     </section>
 
     <section class="hj-note" aria-label="プライバシー情報">
@@ -170,6 +172,14 @@
             </div>
             <md-switch id="obfuscation-switch" aria-label="難読化を有効にする"></md-switch>
           </div>
+
+          <div class="hj-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">未使用変数・関数の削除</div>
+              <p class="hj-setting-help">Terserで参照されていない変数・関数を削除します。トップレベルも対象になります。</p>
+            </div>
+            <md-switch id="remove-unused-switch" aria-label="未使用変数・関数の削除を有効にする"></md-switch>
+          </div>
         </div>
 
         <div class="hj-action-bar">
@@ -221,15 +231,20 @@
   </main>
 
   <div class="hj-sr-status" id="sr-status" aria-live="polite"></div>
-
-  <style>footer {
+<style>footer {
     padding: 48px 0px;
     padding-top: 15px;
     text-align: center;
     font-size: 20px;
-  }</style>
+  }a {
+    text-decoration: none;
+    color: #000;
+}</style>
+
 
   <script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6909508295" crossorigin="anonymous" async></script>
   <script src="./app.js"></script>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
 </body>
 </html>

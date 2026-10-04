@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="description" content="HiJS是一款免費工具，可在瀏覽器中快速調整JavaScript。支持壓縮、格式化、混淆和刪除未使用代碼。">
+  <meta name="keywords" content="JavaScript壓縮,JavaScript格式化,JavaScript minify,JavaScript beautify,JavaScript混淆,免費工具">
+  <meta name="robots" content="index, follow">
+  <title>HiJS | JavaScript 調整工具</title>
+  <link rel="canonical" id="canonical-url">
+  <link rel="alternate" hreflang="ja" id="hreflang-ja" href="ja.html">
+  <link rel="alternate" hreflang="en" id="hreflang-en" href="en.html">
+  <link rel="alternate" hreflang="zh-CN" id="hreflang-zh-CN" href="zh-CN.html">
+  <link rel="alternate" hreflang="zh-TW" id="hreflang-zh-TW" href="zh-TW.html">
+  <link rel="alternate" hreflang="ko" id="hreflang-ko" href="ko.html">
+  <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="ko-KP.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HiJS | JavaScript 調整工具">
+  <meta property="og:description" content="在瀏覽器中快速調整JavaScript。支持壓縮、格式化、混淆和刪除未使用代碼。">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="HiJS logo">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HiJS | JavaScript 調整工具">
+  <meta name="twitter:description" content="在瀏覽器中快速調整JavaScript。支持壓縮、格式化、混淆和刪除未使用代碼。">
+  <meta name="twitter:image" content="icon.svg">
+  <meta name="twitter:image:alt" content="HiJS logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiJS",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "description": "可在瀏覽器中壓縮、格式化、混淆和刪除JavaScript未使用代碼的免費工具",
+    "url": "",
+    "image": "icon.svg",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    }
+  }
+  </script>
+  <link rel="icon" href="icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[HiJS] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script>
+    window.HJ_I18N = Object.freeze({
+      inputEmpty: '請輸入JavaScript。',
+      engineMissing: '無法加載JavaScript處理引擎。請檢查網絡連接。',
+      compressed: 'JavaScript已壓縮。',
+      adjusted: 'JavaScript已調整。',
+      formatted: 'JavaScript已格式化。',
+      copied: '結果已複製到剪貼板。',
+      copyFailed: '複製到剪貼板失敗。',
+      downloaded: 'JavaScript文件已下載。',
+      downloadFailed: '下載JavaScript文件失敗。',
+      saved: 'JavaScript已保存到文件。',
+      savedToFile: name => `${name} 已更新。`,
+      saveFailed: '保存JavaScript文件失敗。',
+      noOpenFile: '請先打開JavaScript文件。',
+      fileAccessUnavailable: 'File System Access API不可用，切換到常規文件選擇。',
+      fileLoaded: name => `${name} 已加載。`,
+      fileExternallyUpdated: name => `${name} 的外部更改已自動應用。`,
+      readFailed: '無法讀取JavaScript文件。',
+      processFailed: 'JavaScript處理失敗。請檢查輸入或外部引擎。',
+      unusedWarning: '刪除未使用代碼時，從全局引用的變量或函數可能會被刪除。',
+      size: bytes => `${bytes.toLocaleString()} bytes`,
+      reduction: percent => `${percent.toFixed(1)}%減少`
+    });
+  </script>
+</head>
+<body>
+  <main class="hj-main-container">
+    <section class="hj-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiJS 調整工具</h1>
+    </section>
+
+    <section class="hj-note" aria-label="隱私信息">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>JavaScript本身不會發送到服務器。處理在瀏覽器中進行。</span>
+    </section>
+
+    <section class="hj-language-hint" id="language-hint" hidden aria-label="語言提示">
+      <div class="hj-language-hint-icon" aria-hidden="true">
+        <md-icon>translate</md-icon>
+      </div>
+      <div class="hj-language-hint-content">
+        <span id="language-hint-message"></span>
+      </div>
+      <md-filled-tonal-button id="language-switch-button" type="button">
+        <md-icon slot="icon">language</md-icon>
+        <span id="language-switch-label"></span>
+      </md-filled-tonal-button>
+    </section>
+
+    <section class="hj-workspace" aria-label="JavaScript編輯和設置">
+      <section class="hj-editor-section" aria-labelledby="input-title">
+        <div class="hj-section-heading">
+          <div>
+            <h2 id="input-title" class="md-typescale-title-large">JavaScript 輸入</h2>
+            <p class="hj-section-help">貼上或載入JavaScript文件。</p>
+          </div>
+          <div class="hj-section-actions">
+            <input id="file-input" type="file" accept=".js,text/javascript,application/javascript" hidden>
+            <md-outlined-button id="open-file-button" type="button">
+              <md-icon slot="icon">upload_file</md-icon>
+              開啟 JavaScript 檔案
+            </md-outlined-button>
+            <md-text-button id="clear-input-button" type="button">
+              <md-icon slot="icon">delete</md-icon>
+              清除
+            </md-text-button>
+          </div>
+        </div>
+
+        <div class="hj-editor-shell" id="input-editor-shell">
+          <textarea id="js-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="JavaScript輸入" placeholder="function add(first, second) {\n  return first + second;\n}\n\nconsole.log(add(1, 2));"></textarea>
+          <div class="hj-drop-overlay" id="drop-overlay" hidden>
+            <md-icon aria-hidden="true">upload_file</md-icon>
+            <span>將JavaScript檔案拖放到此處</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="hj-settings-section" aria-labelledby="settings-title">
+        <div class="hj-section-heading">
+          <div>
+            <h2 id="settings-title" class="md-typescale-title-large">設定</h2>
+            <p class="hj-section-help">結果會根據輸入或設定的更改自動更新。</p>
+          </div>
+        </div>
+
+        <div class="hj-setting-grid">
+          <div class="hj-setting-block">
+            <span class="md-typescale-title-medium">縮排</span>
+            <div class="hj-indent-actions" role="group" aria-label="格式化時的縮排">
+              <md-outlined-button class="hj-indent-button" data-indent="2" type="button">2個空格</md-outlined-button>
+              <md-outlined-button class="hj-indent-button" data-indent="4" type="button">4個空格</md-outlined-button>
+            </div>
+            <p class="hj-setting-help">格式化時使用的空格數。</p>
+          </div>
+
+          <div class="hj-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">混淆</div>
+              <p class="hj-setting-help">對壓縮結果應用JavaScript混淆器。根據處理內容，文件大小可能會增加。</p>
+            </div>
+            <md-switch id="obfuscation-switch" aria-label="啟用混淆"></md-switch>
+          </div>
+
+          <div class="hj-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">刪除未使用的變量和函數</div>
+              <p class="hj-setting-help">使用Terser刪除未被引用的變量和函數。頂層聲明也包含在內。</p>
+            </div>
+            <md-switch id="remove-unused-switch" aria-label="啟用未使用變量和函數刪除"></md-switch>
+          </div>
+        </div>
+
+        <div class="hj-action-bar">
+          <div class="hj-action-status" id="action-status" aria-live="polite">請輸入JavaScript。</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="hj-result-section" aria-labelledby="result-title">
+      <div class="hj-section-heading">
+        <div>
+          <h2 id="result-title" class="md-typescale-title-large">結果</h2>
+          <p class="hj-section-help" id="file-status">未開啟任何檔案。</p>
+          <p class="hj-section-help" id="result-meta">尚未處理。</p>
+        </div>
+        <div class="hj-section-actions">
+          <md-outlined-button id="copy-button" type="button" disabled>
+            <md-icon slot="icon">content_copy</md-icon>
+            複製
+          </md-outlined-button>
+          <md-outlined-button id="download-button" type="button" disabled>
+            <md-icon slot="icon">download</md-icon>
+            下載
+          </md-outlined-button>
+          <md-filled-button id="save-button" type="button" disabled>
+            <md-icon slot="icon">save</md-icon>
+            儲存
+          </md-filled-button>
+        </div>
+      </div>
+
+      <div class="hj-result-tabs-wrap" aria-label="JavaScript處理方法">
+        <md-tabs id="result-tabs" aria-label="JavaScript處理方法">
+          <md-primary-tab id="compress-tab" active>
+            <md-icon slot="icon">compress</md-icon>
+            壓縮
+          </md-primary-tab>
+          <md-primary-tab id="format-tab">
+            <md-icon slot="icon">format_align_left</md-icon>
+            格式化
+          </md-primary-tab>
+        </md-tabs>
+      </div>
+
+      <div class="hj-editor-shell hj-result-shell">
+        <textarea id="js-output" spellcheck="false" readonly aria-label="JavaScript處理結果" placeholder="結果將顯示於此處。"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <div class="hj-sr-status" id="sr-status" aria-live="polite"></div>
+<style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }a {
+    text-decoration: none;
+    color: #000;
+}</style>
+
+
+  <script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6909508295" crossorigin="anonymous" async></script>
+  <script src="./app.js"></script>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+</body>
+</html>
