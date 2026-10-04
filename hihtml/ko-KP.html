@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko-KP">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="description" content="HiHTML는 브라우저에서 HTML을 빠르게 조정할 수 있는 무료 도구이다. HTML 압축, 형식화 및 임베디드 CSS, JavaScript의 개별 처리를 지원한다.">
+  <meta name="keywords" content="HTML 압축,HTML 형식화,HTML minify,HTML beautify,HTML compress,HTML format,CSS 압축,JavaScript 압축,무료 도구">
+  <meta name="robots" content="index, follow">
+  <title>HiHTML | HTML 조정 도구</title>
+  <link rel="canonical" id="canonical-url">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HiHTML | HTML 조정 도구">
+  <meta property="og:description" content="브라우저에서 HTML을 빠르게 조정한다. 압축, 형식화 및 임베디드 CSS, JavaScript의 개별 처리를 지원한다.">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="HiHTML logo">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HiHTML | HTML 조정 도구">
+  <meta name="twitter:description" content="브라우저에서 HTML을 빠르게 조정한다. 압축, 형식화 및 임베디드 CSS, JavaScript의 개별 처리를 지원한다.">
+  <meta name="twitter:image" content="icon.svg">
+  <meta name="twitter:image:alt" content="HiHTML logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiHTML",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "description": "브라우저에서 HTML을 압축, 형식화하고 임베디드 CSS, JavaScript를 개별적으로 처리할 수 있는 무료 도구",
+    "url": "",
+    "image": "icon.svg",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    }
+  }
+  </script>
+  <link rel="icon" href="icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[HiHTML] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script>
+    window.HH_I18N = Object.freeze({
+      inputEmpty: 'HTML을 입력하십시오.',
+      processing: 'HTML을 처리하고 있습니다…',
+      compressed: 'HTML을 압축하였습니다.',
+      formatted: 'HTML을 형식화하였습니다.',
+      processingFailed: 'HTML 처리에 실패하였습니다. 입력내용이나 외부 엔진을 확인하십시오.',
+      copied: '결과를 클립보드에 복사하였습니다.',
+      copyFailed: '클립보드로의 복사에 실패하였습니다.',
+      downloaded: 'HTML 파일을 다운로드하였습니다.',
+      downloadFailed: 'HTML 파일 다운로드에 실패하였습니다.',
+      savedToFile: name => `${name} 을(를) 갱신하였습니다.`,
+      saveFailed: 'HTML 파일에의 저장에 실패하였습니다.',
+      noOpenFile: '먼저 HTML 파일을 열어주십시오.',
+      nothingToSave: '저장할 결과가 없습니다.',
+      fileAccessUnavailable: 'File System Access API를 리용할수 없어 보통의 파일 선택으로 전환합니다.',
+      fileLoaded: name => `${name} 을(를) 읽어들였습니다.`,
+      loadedWithoutHandle: name => `${name} 을(를) 읽어들였습니다 (직접 저장 불가).`,
+      fileExternallyUpdated: name => `${name} 의 외부 변경을 자동 반영하였습니다.`,
+      readFailed: 'HTML 파일을 읽을 수 없었습니다.',
+      invalidFileType: 'HTML 파일을 선택하십시오.',
+      editingFile: name => `편집 중: ${name}`,
+      notProcessed: '아직 처리되지 않았습니다.',
+      size: bytes => `${bytes.toLocaleString()} bytes`
+    });
+  </script>
+</head>
+<body>
+  <main class="hh-main-container">
+    <section class="hh-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiHTML 조정 도구</h1>
+    </section>
+
+    <section class="hh-note" aria-label="개인정보">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>HTML 자체는 서버로 전송하지 않는다. 처리는 브라우저에서 진행한다.</span>
+    </section>
+
+    <section class="hh-workspace" aria-label="HTML 편집 및 설정">
+      <section class="hh-editor-section" aria-labelledby="input-title">
+        <div class="hh-section-heading">
+          <div>
+            <h2 id="input-title" class="md-typescale-title-large">HTML 입력</h2>
+            <p class="hh-section-help">붙여넣거나 HTML 파일을 읽어들이세요.</p>
+          </div>
+          <div class="hh-section-actions">
+            <input id="file-input" type="file" accept=".html,.htm,text/html" hidden>
+            <md-outlined-button id="open-file-button" type="button">
+              <md-icon slot="icon">upload_file</md-icon>
+              HTML 파일 열기
+            </md-outlined-button>
+            <md-text-button id="clear-input-button" type="button">
+              <md-icon slot="icon">delete</md-icon>
+              지우기
+            </md-text-button>
+          </div>
+        </div>
+
+        <div class="hh-editor-shell" id="input-editor-shell">
+          <textarea id="html-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="HTML 입력" placeholder="<!doctype html>\n<html>\n  <head>\n    <title>Example</title>\n  </head>\n  <body>\n    <main>Hello</main>\n  </body>\n</html>"></textarea>
+          <div class="hh-drop-overlay" id="drop-overlay" hidden>
+            <md-icon aria-hidden="true">upload_file</md-icon>
+            <span>HTML 파일을 여기에 끌어놓기</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="hh-settings-section" aria-labelledby="settings-title">
+        <div class="hh-section-heading">
+          <div>
+            <h2 id="settings-title" class="md-typescale-title-large">설정</h2>
+            <p class="hh-section-help">결과는 입력이나 설정 변경에 따라 자동적으로 갱신된다.</p>
+          </div>
+        </div>
+
+        <div class="hh-setting-grid">
+          <div class="hh-setting-block">
+            <span class="md-typescale-title-medium">형식화 시 들여쓰기</span>
+            <div class="hh-indent-actions" role="group" aria-label="형식화 시 들여쓰기">
+              <md-outlined-button id="indent-2-button" class="hh-indent-button" data-indent="2" type="button">2칸</md-outlined-button>
+              <md-outlined-button id="indent-4-button" class="hh-indent-button" data-indent="4" type="button">4칸</md-outlined-button>
+            </div>
+          </div>
+
+          <div class="hh-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">CSS</div>
+              <p class="hh-setting-help">모드에 맞춰 임베디드&lt;style&gt;의 CSS를 압축·형식화한다.</p>
+            </div>
+            <md-switch id="css-switch" selected aria-label="임베디드 CSS의 처리를 활성화"></md-switch>
+          </div>
+
+          <div class="hh-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">JavaScript</div>
+              <p class="hh-setting-help">모드에 맞춰 임베디드&lt;script&gt;의 JavaScript를 압축·형식화한다.</p>
+            </div>
+            <md-switch id="javascript-switch" selected aria-label="임베디드 JavaScript의 처리를 활성화"></md-switch>
+          </div>
+        </div>
+
+        <div class="hh-action-bar">
+          <div class="hh-action-status" id="action-status" aria-live="polite">HTML을 입력하십시오.</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="hh-result-section" aria-labelledby="result-title">
+      <div class="hh-section-heading">
+        <div>
+          <h2 id="result-title" class="md-typescale-title-large">결과</h2>
+          <p class="hh-section-help" id="file-status">파일이 열려 있지 않습니다.</p>
+          <p class="hh-section-help" id="result-meta">아직 처리되지 않았습니다.</p>
+        </div>
+        <div class="hh-section-actions">
+          <md-outlined-button id="copy-button" type="button" disabled>
+            <md-icon slot="icon">content_copy</md-icon>
+            복사
+          </md-outlined-button>
+          <md-outlined-button id="download-button" type="button" disabled>
+            <md-icon slot="icon">download</md-icon>
+            다운로드
+          </md-outlined-button>
+          <md-filled-button id="save-button" type="button" disabled>
+            <md-icon slot="icon">save</md-icon>
+            저장
+          </md-filled-button>
+        </div>
+      </div>
+
+      <div class="hh-result-tabs-wrap" aria-label="HTML 처리 모드">
+        <md-tabs id="result-tabs" aria-label="HTML 처리 모드">
+          <md-primary-tab id="compress-tab" active>
+            <md-icon slot="icon">compress</md-icon>
+            압축
+          </md-primary-tab>
+          <md-primary-tab id="format-tab">
+            <md-icon slot="icon">format_align_left</md-icon>
+            형식화
+          </md-primary-tab>
+        </md-tabs>
+      </div>
+
+      <div class="hh-editor-shell hh-result-shell">
+        <textarea id="html-output" spellcheck="false" readonly aria-label="HTML 처리 결과" placeholder="결과가 여기에 표시됩니다."></textarea>
+      </div>
+    </section>
+  </main>
+
+  <div class="hh-sr-status" id="sr-status" aria-live="polite"></div>
+<style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }a {
+    text-decoration: none;
+    color: #000;
+}</style>
+
+
+  <script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6909508295" crossorigin="anonymous" async></script>
+  <script src="./app.js"></script>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+</body>
+</html>

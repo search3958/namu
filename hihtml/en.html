@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="description" content="HiHTML is a free tool that allows you to fine-tune HTML quickly in the browser. It supports HTML compression, formatting, and individual processing of embedded CSS and JavaScript.">
+  <meta name="keywords" content="HTML minify,HTML beautify,HTML compress,HTML format,CSS compress,JavaScript compress,free tool">
+  <meta name="robots" content="index, follow">
+  <title>HiHTML | HTML Fine-tuning Tool</title>
+  <link rel="canonical" id="canonical-url">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HiHTML | HTML Fine-tuning Tool">
+  <meta property="og:description" content="Fine-tune HTML quickly in the browser. Supports compression, formatting, and individual processing of embedded CSS and JavaScript.">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="HiHTML logo">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HiHTML | HTML Fine-tuning Tool">
+  <meta name="twitter:description" content="Fine-tune HTML quickly in the browser. Supports compression, formatting, and individual processing of embedded CSS and JavaScript.">
+  <meta name="twitter:image" content="icon.svg">
+  <meta name="twitter:image:alt" content="HiHTML logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiHTML",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "description": "Free tool to compress and format HTML and individually process embedded CSS and JavaScript in the browser",
+    "url": "",
+    "image": "icon.svg",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    }
+  }
+  </script>
+  <link rel="icon" href="icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[HiHTML] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <script>
+    window.HH_I18N = Object.freeze({
+      inputEmpty: 'Please enter HTML.',
+      processing: 'Processing HTML…',
+      compressed: 'HTML compressed.',
+      formatted: 'HTML formatted.',
+      processingFailed: 'HTML processing failed. Please check the input or external engine.',
+      copied: 'Result copied to clipboard.',
+      copyFailed: 'Failed to copy to clipboard.',
+      downloaded: 'HTML file downloaded.',
+      downloadFailed: 'Failed to download HTML file.',
+      savedToFile: name => `${name} updated.`,
+      saveFailed: 'Failed to save HTML file.',
+      noOpenFile: 'Please open an HTML file first.',
+      nothingToSave: 'No result to save.',
+      fileAccessUnavailable: 'File System Access API is unavailable; switching to normal file selection.',
+      fileLoaded: name => `${name} loaded.`,
+      loadedWithoutHandle: name => `${name} loaded (direct save unavailable).`,
+      fileExternallyUpdated: name => `External changes to ${name} applied automatically.`,
+      readFailed: 'Could not read HTML file.',
+      invalidFileType: 'Please select an HTML file.',
+      editingFile: name => `Editing: ${name}`,
+      notProcessed: 'Not processed yet.',
+      size: bytes => `${bytes.toLocaleString()} bytes`
+    });
+  </script>
+</head>
+<body>
+  <main class="hh-main-container">
+    <section class="hh-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiHTML Fine-tuning Tool</h1>
+    </section>
+
+    <section class="hh-note" aria-label="Privacy information">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>HTML itself is not sent to the server. Processing is done in the browser.</span>
+    </section>
+
+    <section class="hh-workspace" aria-label="HTML editing and settings">
+      <section class="hh-editor-section" aria-labelledby="input-title">
+        <div class="hh-section-heading">
+          <div>
+            <h2 id="input-title" class="md-typescale-title-large">HTML Input</h2>
+            <p class="hh-section-help">Paste it, or load an HTML file.</p>
+          </div>
+          <div class="hh-section-actions">
+            <input id="file-input" type="file" accept=".html,.htm,text/html" hidden>
+            <md-outlined-button id="open-file-button" type="button">
+              <md-icon slot="icon">upload_file</md-icon>
+              Open HTML file
+            </md-outlined-button>
+            <md-text-button id="clear-input-button" type="button">
+              <md-icon slot="icon">delete</md-icon>
+              Clear
+            </md-text-button>
+          </div>
+        </div>
+
+        <div class="hh-editor-shell" id="input-editor-shell">
+          <textarea id="html-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="HTML input" placeholder="<!doctype html>\n<html>\n  <head>\n    <title>Example</title>\n  </head>\n  <body>\n    <main>Hello</main>\n  </body>\n</html>"></textarea>
+          <div class="hh-drop-overlay" id="drop-overlay" hidden>
+            <md-icon aria-hidden="true">upload_file</md-icon>
+            <span>Drop HTML file here</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="hh-settings-section" aria-labelledby="settings-title">
+        <div class="hh-section-heading">
+          <div>
+            <h2 id="settings-title" class="md-typescale-title-large">Settings</h2>
+            <p class="hh-section-help">You can adjust the mode and process embedded CSS and JavaScript individually.</p>
+          </div>
+        </div>
+
+        <div class="hh-setting-grid">
+          <div class="hh-setting-block">
+            <span class="md-typescale-title-medium">Indent during formatting</span>
+            <div class="hh-indent-actions" role="group" aria-label="Indent during formatting">
+              <md-outlined-button id="indent-2-button" class="hh-indent-button" data-indent="2" type="button">2 spaces</md-outlined-button>
+              <md-outlined-button id="indent-4-button" class="hh-indent-button" data-indent="4" type="button">4 spaces</md-outlined-button>
+            </div>
+          </div>
+
+          <div class="hh-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">CSS</div>
+              <p class="hh-setting-help">Compresses or formats CSS in embedded &lt;style&gt; according to the mode.</p>
+            </div>
+            <md-switch id="css-switch" selected aria-label="Enable processing of embedded CSS"></md-switch>
+          </div>
+
+          <div class="hh-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">JavaScript</div>
+              <p class="hh-setting-help">Compresses or formats JavaScript in embedded &lt;script&gt; according to the mode.</p>
+            </div>
+            <md-switch id="javascript-switch" selected aria-label="Enable processing of embedded JavaScript"></md-switch>
+          </div>
+        </div>
+
+        <div class="hh-action-bar">
+          <div class="hh-action-status" id="action-status" aria-live="polite">Please enter HTML.</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="hh-result-section" aria-labelledby="result-title">
+      <div class="hh-section-heading">
+        <div>
+          <h2 id="result-title" class="md-typescale-title-large">Result</h2>
+          <p class="hh-section-help" id="file-status">No file is open.</p>
+          <p class="hh-section-help" id="result-meta">Not processed yet.</p>
+        </div>
+        <div class="hh-section-actions">
+          <md-outlined-button id="copy-button" type="button" disabled>
+            <md-icon slot="icon">content_copy</md-icon>
+            Copy
+          </md-outlined-button>
+          <md-outlined-button id="download-button" type="button" disabled>
+            <md-icon slot="icon">download</md-icon>
+            Download
+          </md-outlined-button>
+          <md-filled-button id="save-button" type="button" disabled>
+            <md-icon slot="icon">save</md-icon>
+            Save
+          </md-filled-button>
+        </div>
+      </div>
+
+      <div class="hh-result-tabs-wrap" aria-label="HTML processing mode">
+        <md-tabs id="result-tabs" aria-label="HTML processing mode">
+          <md-primary-tab id="compress-tab" active>
+            <md-icon slot="icon">compress</md-icon>
+            Compress
+          </md-primary-tab>
+          <md-primary-tab id="format-tab">
+            <md-icon slot="icon">format_align_left</md-icon>
+            Format
+          </md-primary-tab>
+        </md-tabs>
+      </div>
+
+      <div class="hh-editor-shell hh-result-shell">
+        <textarea id="html-output" spellcheck="false" readonly aria-label="HTML processing result" placeholder="Results will appear here."></textarea>
+      </div>
+    </section>
+  </main>
+
+  <div class="hh-sr-status" id="sr-status" aria-live="polite"></div>
+<style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }a {
+    text-decoration: none;
+    color: #000;
+}</style>
+
+
+  <script src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6909508295" crossorigin="anonymous" async></script>
+  <script src="./app.js"></script>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+</body>
+</html>
