@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="description" content="HiCSS는 브라우저에서 CSS를 빠르게 압축하고 형식화할 수 있는 무료 도구입니다. 중복 규칙 삭제도 지원하며 CSS를 서버로 전송하지 않습니다.">
+  <meta name="keywords" content="CSS 압축,CSS 형식화,CSS minify,CSS beautify,CSS 중복 삭제,무료 도구">
+  <meta name="robots" content="index, follow">
+  <title>HiCSS | CSS 압축, 형식화, 중복 삭제 도구</title>
+  <link rel="canonical" id="canonical-url">
+  <link rel="alternate" hreflang="ja" id="hreflang-ja" href="">
+  <link rel="alternate" hreflang="en" id="hreflang-en" href="">
+  <link rel="alternate" hreflang="zh-CN" id="hreflang-zh-CN" href="">
+  <link rel="alternate" hreflang="zh-TW" id="hreflang-zh-TW" href="">
+  <link rel="alternate" hreflang="ko" id="hreflang-ko" href="">
+  <link rel="alternate" hreflang="ko-KP" id="hreflang-ko-KP" href="">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="HiCSS | CSS 압축, 형식화, 중복 삭제 도구">
+  <meta property="og:description" content="브라우저에서 CSS를 빠르게 압축하고 형식화합니다. 중복 규칙 삭제도 지원합니다.">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="icon.svg">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="HiCSS logo">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="HiCSS | CSS 압축, 형식화, 중복 삭제 도구">
+  <meta name="twitter:description" content="브라우저에서 CSS를 빠르게 압축하고 형식화합니다. 중복 규칙 삭제도 지원합니다.">
+  <meta name="twitter:image" content="icon.svg">
+  <meta name="twitter:image:alt" content="HiCSS logo">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "HiCSS",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "description": "브라우저에서 CSS를 압축하고 형식화할 수 있는 무료 도구",
+    "url": "",
+    "image": "icon.svg",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "KRW"
+    }
+  }
+  </script>
+  <link rel="icon" href="icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://esm.sh">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,400,0..1&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web@2.5.0/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typeScaleStyles} from '@material/web/typography/md-typescale-styles.js';
+    document.adoptedStyleSheets.push(typeScaleStyles.styleSheet);
+    console.log('[HiCSS] Material Web initialized: 2.5.0');
+  </script>
+
+  <link rel="stylesheet" href="../m3color.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- External engines: do not implement a CSS optimizer locally. -->
+  <script data-hicss-engine="css_beautify" src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/2.0.3/beautify-css.min.js" defer onload="console.log('[HiCSS] css-beautify CDN loaded.');" onerror="console.error('[HiCSS] css-beautify CDN failed to load.');"></script>
+
+  <script>
+    window.HC_I18N = Object.freeze({
+      languageMessage: language => `${language}로 사용할 수 있습니다`,
+      languageAction: language => `${language}로 전환`,
+      inputEmpty: 'CSS를 입력하세요.',
+      engineMissing: 'CSS 처리 엔진을 로드할 수 없습니다. 네트워크 연결을 확인하세요.',
+      compressed: 'CSS가 압축되었습니다.',
+      formatted: 'CSS가 형식화되었습니다.',
+      copied: '결과가 클립보드에 복사되었습니다.',
+      copyFailed: '클립보드 복사에 실패했습니다.',
+      downloaded: 'CSS 파일이 다운로드되었습니다.',
+      downloadFailed: 'CSS 파일 다운로드에 실패했습니다.',
+      saved: 'CSS가 파일에 저장되었습니다.',
+      savedToFile: name => `${name} 이(가) 업데이트되었습니다.`,
+      saveFailed: 'CSS 파일 저장에 실패했습니다.',
+      noOpenFile: '먼저 CSS 파일을 열어주세요.',
+      fileAccessUnavailable: 'File System Access API를 사용할 수 없어 일반 파일 선택으로 전환합니다.',
+      fileLoaded: name => `${name} 이(가) 로드되었습니다.`,
+      fileExternallyUpdated: name => `${name}의 외부 변경사항이 자동으로 적용되었습니다.`,
+      readFailed: 'CSS 파일을 읽을 수 없습니다.',
+      processFailed: 'CSS 처리에 실패했습니다. 입력 내용이나 외부 엔진을 확인하세요.',
+      warning: warnings => `${warnings}개의 경고`,
+      size: bytes => `${bytes.toLocaleString()} bytes`,
+      reduction: percent => `${percent.toFixed(1)}%감소`
+    });
+  </script>
+</head>
+<body>
+  <main class="hc-main-container">
+    <section class="hc-hero" aria-labelledby="page-title">
+      <h1 id="page-title" class="md-typescale-display-small">HiCSS 도구</h1>
+    </section>
+
+    <section class="hc-note" aria-label="프라이버시 정보">
+      <md-icon aria-hidden="true">lock</md-icon>
+      <span>CSS 자체는 서버로 전송되지 않습니다. 처리는 브라우저에서 이루어집니다.</span>
+    </section>
+
+    <section class="hc-language-hint" id="language-hint" hidden aria-label="언어 힌트">
+      <div class="hc-language-hint-icon" aria-hidden="true">
+        <md-icon>translate</md-icon>
+      </div>
+      <div class="hc-language-hint-content">
+        <span id="language-hint-message"></span>
+      </div>
+      <md-filled-tonal-button id="language-switch-button" type="button">
+        <md-icon slot="icon">language</md-icon>
+        <span id="language-switch-label"></span>
+      </md-filled-tonal-button>
+    </section>
+
+    <section class="hc-workspace" aria-label="CSS 편집 및 설정">
+      <section class="hc-editor-section" aria-labelledby="input-title">
+        <div class="hc-section-heading">
+          <div>
+            <h2 id="input-title" class="md-typescale-title-large">CSS 입력</h2>
+            <p class="hc-section-help">붙여넣거나 CSS 파일을 불러오세요.</p>
+          </div>
+          <div class="hc-section-actions">
+            <input id="file-input" type="file" accept=".css,text/css" hidden>
+            <md-outlined-button id="open-file-button" type="button">
+              <md-icon slot="icon">upload_file</md-icon>
+              CSS 파일 열기
+            </md-outlined-button>
+            <md-text-button id="clear-input-button" type="button">
+              <md-icon slot="icon">delete</md-icon>
+              지우기
+            </md-text-button>
+          </div>
+        </div>
+
+        <div class="hc-editor-shell" id="input-editor-shell">
+          <textarea id="css-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="CSS 입력" placeholder=".example {\n  color: #333;\n  color: #333;\n}\n\n.example {\n  margin: 0 16px;\n}"></textarea>
+          <div class="hc-drop-overlay" id="drop-overlay" hidden>
+            <md-icon aria-hidden="true">upload_file</md-icon>
+            <span>CSS 파일을 여기에 드롭</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-settings-section" aria-labelledby="settings-title">
+        <div class="hc-section-heading">
+          <div>
+            <h2 id="settings-title" class="md-typescale-title-large">설정</h2>
+            <p class="hc-section-help">결과는 입력이나 설정 변경에 따라 자동으로 업데이트됩니다.</p>
+          </div>
+        </div>
+
+        <div class="hc-setting-grid">
+          <div class="hc-setting-block">
+            <span class="md-typescale-title-medium">들여쓰기</span>
+            <div class="hc-indent-actions" role="group" aria-label="형식화시 들여쓰기">
+              <md-outlined-button class="hc-indent-button" data-indent="2" type="button">2칸</md-outlined-button>
+              <md-outlined-button class="hc-indent-button" data-indent="4" type="button">4칸</md-outlined-button>
+            </div>
+            <p class="hc-setting-help">형식화에 사용되는 공백 수입니다.</p>
+          </div>
+
+          <div class="hc-setting-row">
+            <div>
+              <div class="md-typescale-title-medium">중복 삭제</div>
+              <p class="hc-setting-help">CleanCSS 최적화 기능으로 중복 규칙, 중복 @media, 중복 @font-face를 삭제합니다.</p>
+            </div>
+            <md-switch id="duplicate-switch" aria-label="중복 삭제를 활성화"></md-switch>
+          </div>
+        </div>
+
+        <div class="hc-action-bar">
+          <div class="hc-action-status" id="action-status" aria-live="polite">CSS를 입력하세요.</div>
+        </div>
+      </section>
+    </section>
+
+    <section class="hc-result-section" aria-labelledby="result-title">
+      <div class="hc-section-heading">
+        <div>
+          <h2 id="result-title" class="md-typescale-title-large">결과</h2>
+          <p class="hc-section-help" id="file-status">파일이 열려 있지 않습니다.</p>
+          <p class="hc-section-help" id="result-meta">아직 처리되지 않았습니다.</p>
+        </div>
+        <div class="hc-section-actions">
+          <md-outlined-button id="copy-button" type="button" disabled>
+            <md-icon slot="icon">content_copy</md-icon>
+            복사
+          </md-outlined-button>
+          <md-outlined-button id="download-button" type="button" disabled>
+            <md-icon slot="icon">download</md-icon>
+            다운로드
+          </md-outlined-button>
+          <md-filled-button id="save-button" type="button" disabled>
+            <md-icon slot="icon">save</md-icon>
+            저장
+          </md-filled-button>
+        </div>
+      </div>
+
+      <div class="hc-result-tabs-wrap" aria-label="CSS 처리 방법">
+        <md-tabs id="result-tabs" aria-label="CSS 처리 방법">
+          <md-primary-tab id="compress-tab" active>
+            <md-icon slot="icon">compress</md-icon>
+            압축
+          </md-primary-tab>
+          <md-primary-tab id="format-tab">
+            <md-icon slot="icon">format_align_left</md-icon>
+            형식화
+          </md-primary-tab>
+        </md-tabs>
+      </div>
+
+      <div class="hc-editor-shell hc-result-shell">
+        <textarea id="css-output" spellcheck="false" readonly aria-label="CSS 처리 결과" placeholder="결과가 여기에 표시됩니다."></textarea>
+      </div>
+    </section>
+  </main>
+
+  <div class="hc-sr-status" id="sr-status" aria-live="polite"></div>
+
+  <style>footer {
+    padding: 48px 0px;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 20px;
+  }a {
+    text-decoration: none;
+    color: #000;
+}</style>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6151036058675874" crossorigin="anonymous"></script>
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6151036058675874" data-ad-slot="3695134123" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>
+    window.addEventListener('load', () => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        console.log('[HiCSS] Ad initialized.');
+      } catch (error) {
+        console.error('[HiCSS] Ad initialization failed.', error);
+      }
+    }, { once: true });
+  </script>
+  <script type="module" src="./app.js"></script>
+  <script src="https://search3958.github.io/frameworks/headerv2.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      try {
+        const url = new URL(window.location.href);
+        const canonicalUrl = url.toString().replace(/[?#].*$/, '');
+        const canonical = document.getElementById('canonical-url');
+        if (canonical) canonical.href = canonicalUrl;
+        else console.error('[HiCSS] Missing #canonical-url.');
+
+        const ogUrl = document.querySelector('meta[property="og:url"]');
+        if (ogUrl) ogUrl.content = canonicalUrl;
+        else console.error('[HiCSS] Missing og:url meta element.');
+      } catch (error) {
+        console.error('[HiCSS] Canonical URL initialization failed.', error);
+      }
+    }, { once: true });
+  </script>
+  <script src="https://search3958.github.io/check.js?check=none"></script>
+</body>
+</html>
