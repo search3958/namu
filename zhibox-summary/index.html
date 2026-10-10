@@ -38,14 +38,13 @@
     </section>
 
     <div class="mode-tabs" role="tablist" aria-label="入力方法">
-      <button class="mode-tab active" type="button" role="tab" data-mode="url" aria-selected="true">URLから</button>
-      <button class="mode-tab" type="button" role="tab" data-mode="text" aria-selected="false">直接入力</button>
+      <button class="mode-tab active" type="button" role="tab" data-mode="text" aria-selected="true">直接入力</button>
+      <button class="mode-tab" type="button" role="tab" data-mode="url" aria-selected="false">URLから (Beta)</button>
     </div>
 
     <div class="composer">
-      <input id="url-input" class="composer-input" type="url" placeholder="要約したいページのURLを貼り付け" inputmode="url" autocomplete="off">
-      <textarea id="text-input" class="composer-input" rows="3" placeholder="利用規約や文章を貼り付け" hidden></textarea>
-
+      <input id="url-input" class="composer-input" type="url" placeholder="要約したいページのURLを貼り付け" inputmode="url" autocomplete="off" hidden>
+<textarea id="text-input" class="composer-input" rows="3" placeholder="利用規約や文章を貼り付け"></textarea>
       <div class="composer-foot">
         <span id="char-counter" class="counter" hidden></span>
         <button id="send-btn" class="send-btn" type="button" aria-label="要約する">

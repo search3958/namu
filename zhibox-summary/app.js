@@ -13,7 +13,7 @@
   var COOKIE_LEGACY_TOKEN = "of8_access_token";
   var COOKIE_LEGACY_SIG = "of8_access_signature";
 
-  var mode = "url";
+  var mode = "text";
   var lastMarkdown = "";
   var loggedIn = false;
   var lastUsage = null;
