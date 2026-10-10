@@ -1,0 +1,419 @@
+:root {
+  --bg: #f7f7f7;
+  --panel: #ffffff;
+  --text: #111111;
+  --sub: #333333;
+  --muted: #8a8a8a;
+  --line: #e6e6e6;
+  --chip: #f1f1f1;
+  --dark: #111111;
+  --dark-text: #ffffff;
+  --red: #e02424;
+  --accent: #2563eb;
+  color-scheme: light dark;
+  font-family: "Noto Sans JP", system-ui, -apple-system, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e0e10;
+    --panel: #17171a;
+    --text: #f2f2f2;
+    --sub: #c8c8cc;
+    --muted: #8e8e96;
+    --line: #2a2a2f;
+    --chip: #24242a;
+    --dark: #f2f2f2;
+    --dark-text: #111111;
+    --red: #ff6b6b;
+    --accent: #60a5fa;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* ---------- トップバー ---------- */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.logo {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
+.auth {
+  display: flex;
+  gap: 8px;
+}
+
+.pill-btn {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.pill-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- メインパネル ---------- */
+
+.panel {
+  margin: 0 12px 12px;
+  background: var(--panel);
+  border-radius: 24px;
+  min-height: calc(100vh - 84px);
+  padding: 56px 20px 40px;
+}
+
+.hero {
+  text-align: center;
+  margin-top: 56px;
+}
+
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.sub {
+  margin: 0;
+  font-size: 15px;
+  color: var(--sub);
+}
+
+/* ---------- 入力方法タブ ---------- */
+
+.mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 28px 0 16px;
+}
+
+.mode-tab {
+  font: inherit;
+  font-size: 15px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mode-tab.active {
+  background: var(--dark);
+  color: var(--dark-text);
+}
+
+/* ---------- 入力ボックス ---------- */
+
+.composer {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 18px 18px 56px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.composer-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  resize: none;
+}
+
+.composer-input::placeholder {
+  color: var(--muted);
+}
+
+.composer-foot {
+  position: absolute;
+  left: 18px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.counter {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.counter.over {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.send-btn {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: var(--dark);
+  color: var(--dark-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.send-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---------- 状態表示（利用回数は赤字） ---------- */
+
+.usage {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--red);
+}
+
+.status {
+  margin: 6px 0 0;
+  min-height: 1.2em;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.error {
+  margin: 8px 0 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-size: 14px;
+  color: var(--red);
+}
+
+/* ---------- 結果 ---------- */
+
+.result {
+  max-width: 680px;
+  margin: 28px auto 0;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.text-btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.notice {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fef9c3;
+  color: #713f12;
+  font-size: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .notice {
+    background: #3a3210;
+    color: #fde68a;
+  }
+}
+
+.markdown-body {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  line-height: 1.4;
+  margin: 1.4em 0 0.5em;
+}
+
+.markdown-body h1 { font-size: 1.4rem; }
+
+.markdown-body h2 {
+  font-size: 1.2rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+
+.markdown-body h3 { font-size: 1.05rem; }
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote,
+.markdown-body table,
+.markdown-body pre {
+  margin: 0.6em 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.5em;
+}
+
+.markdown-body li + li {
+  margin-top: 0.2em;
+}
+
+.markdown-body li:has(> input[type="checkbox"]) {
+  list-style: none;
+  margin-left: -1.2em;
+}
+
+.markdown-body input[type="checkbox"] {
+  display: inline-block;
+  width: auto;
+  margin: 0 6px 0 0;
+  vertical-align: middle;
+}
+
+.markdown-body blockquote {
+  margin-left: 0;
+  padding: 4px 12px;
+  color: var(--sub);
+  background: var(--chip);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+}
+
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  max-width: 100%;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body th {
+  background: var(--chip);
+}
+
+.markdown-body pre {
+  overflow-x: auto;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.markdown-body :not(pre) > code {
+  background: var(--chip);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 1.5em 0;
+}
+
+.markdown-body a {
+  color: var(--accent);
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.markdown-body .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ---------- スマホ ---------- */
+
+@media (max-width: 600px) {
+  .panel {
+    margin: 0 8px 8px;
+    padding: 36px 14px 32px;
+  }
+
+  .hero {
+    margin-top: 32px;
+  }
+
+  .composer {
+    padding: 16px 14px 52px;
+  }
+
+  .composer-foot {
+    left: 14px;
+    right: 10px;
+  }
+}

@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>128×64 グレースケール命令エミュレーター</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: #202124;
+      background: #f5f6f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    .main-container { width: min(1440px, 100%); margin: 0 auto; padding: 20px; }
+    .page-header { margin-bottom: 18px; }
+    .page-header h1 { font-size: clamp(1.25rem, 2vw, 1.65rem); margin: 0 0 5px; }
+    .page-header p { margin: 0; color: #5f6368; font-size: .92rem; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr); gap: 16px; align-items: start; }
+    .panel { background: #fff; border: 1px solid #dadce0; border-radius: 12px; padding: 16px; min-width: 0; }
+    .panel h2 { font-size: 1.05rem; margin: 0 0 12px; }
+    .screen-wrap { width: 100%; background: #e8eaed; border: 1px solid #9aa0a6; border-radius: 4px; overflow: hidden; }
+    #display-canvas { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; image-rendering: pixelated; cursor: default; }
+    .screen-meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .82rem; color: #5f6368; }
+    .control-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .control-row label { font-size: .9rem; }
+    .button { border: 1px solid #c4c7c5; color: #202124; background: #fff; border-radius: 8px; padding: 8px 12px; }
+    .button:hover { background: #f1f3f4; }
+    .button.primary { background: #d3e3fd; border-color: #d3e3fd; }
+    .button.danger { color: #b3261e; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .key-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; margin-top: 8px; }
+    .key-button { min-width: 0; padding: 7px 2px; font-family: ui-monospace, monospace; }
+    .key-button.is-active { background: #c2e7ff; border-color: #4285f4; }
+    .key-note { color: #5f6368; font-size: .8rem; margin: 8px 0 0; }
+    .editor-textarea { display: block; width: 100%; min-height: 360px; resize: vertical; padding: 12px; border: 1px solid #c4c7c5; border-radius: 8px; background: #fbfcfd; color: #202124; line-height: 1.5; tab-size: 2; font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .editor-textarea:focus { outline: 2px solid #4285f4; outline-offset: 1px; }
+    .editor-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .status { font-size: .88rem; color: #5f6368; }
+    .status[data-kind="error"] { color: #b3261e; }
+    .status[data-kind="success"] { color: #137333; }
+    .bottom-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 16px; margin-top: 16px; }
+    .variable-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 7px; margin: 0; padding: 0; list-style: none; }
+    .variable-list li { display: flex; justify-content: space-between; gap: 8px; border: 1px solid #e0e3e7; background: #fafafa; border-radius: 6px; padding: 7px 9px; min-width: 0; }
+    .variable-name { color: #5f6368; overflow-wrap: anywhere; }
+    .variable-value { font-family: ui-monospace, monospace; font-weight: 600; overflow-wrap: anywhere; text-align: right; }
+    .empty-message { color: #777; font-size: .9rem; margin: 0; }
+    .log-list { max-height: 240px; overflow: auto; padding-left: 24px; margin: 0; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .log-list li { padding: 2px 0; overflow-wrap: anywhere; }
+    .log-list .error { color: #b3261e; }
+    .log-list .warning { color: #8a5a00; }
+    details { margin-top: 16px; }
+    details summary { cursor: pointer; font-weight: 600; }
+    .help-content { color: #3c4043; font-size: .9rem; line-height: 1.55; }
+    .help-content code { padding: 1px 4px; border-radius: 4px; background: #f1f3f4; font-family: ui-monospace, monospace; }
+    .help-content li { margin: 4px 0; }
+    @media (max-width: 850px) {
+      .main-container { padding: 12px; }
+      .workspace, .bottom-grid { grid-template-columns: minmax(0, 1fr); }
+      .editor-textarea { min-height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="main-container">
+    <header class="page-header">
+      <h1>128×64 グレースケール命令エミュレーター</h1>
+      <p>ブラウザー内で動作します。ディスプレイは128×64ピクセル、各ピクセルは0〜Fの16階調です。</p>
+    </header>
+
+    <section class="workspace" aria-label="エミュレーター">
+      <section class="panel" aria-labelledby="display-title">
+        <h2 id="display-title">ディスプレイ</h2>
+        <div class="screen-wrap">
+          <canvas id="display-canvas" width="128" height="64" aria-label="128×64のピクセルディスプレイ"></canvas>
+        </div>
+        <div class="screen-meta">
+          <span>座標: x=1〜128 / y=1〜64</span>
+          <span id="pixel-info">選択画素: (1, 1) = 0</span>
+        </div>
+        <p class="key-note">このディスプレイはプログラムからのみ変更できます。画面上のクリックやドラッグでは画素を書き換えません。</p>
+
+        <h2 style="margin-top:18px">クリックキー</h2>
+        <div id="key-grid" class="key-grid" aria-label="クリック可能なキー"></div>
+        <p class="key-note"><code>clicking-key name</code> は最後に押したキーを変数に保存します。画面を描画する機能ではありません。</p>
+      </section>
+
+      <section class="panel" aria-labelledby="editor-title">
+        <h2 id="editor-title">プログラム</h2>
+        <textarea id="program-editor" class="editor-textarea" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="エミュレーターのプログラム">var black 0
+var dark 4
+var medium 8
+var light 12
+var white 15
+pixel black 1 1
+pixel dark 2 1
+pixel medium 3 1
+pixel light 4 1
+pixel white 5 1
+display readvalue 5 1</textarea>
+        <div class="editor-footer">
+          <div class="button-row">
+            <button id="run-program" class="button primary" type="button">実行</button>
+            <button id="stop-program" class="button danger" type="button" disabled>停止</button>
+            <button id="reset-program" class="button" type="button">変数を初期化</button>
+          </div>
+          <span id="run-status" class="status" role="status" aria-live="polite" data-kind="info">待機中</span>
+        </div>
+        <p class="key-note">命令は1行に1つ。命令名・ラベル名・変数名は大文字小文字を区別しません。値には空白を含む文字列（引用符付き）も指定できます。</p>
+      </section>
+    </section>
+
+    <section class="bottom-grid">
+      <section class="panel" aria-labelledby="variables-title">
+        <h2 id="variables-title">変数</h2>
+        <ul id="variable-list" class="variable-list"><li class="empty-message">変数はまだありません。</li></ul>
+      </section>
+      <section class="panel" aria-labelledby="log-title">
+        <div class="control-row" style="justify-content:space-between;margin-top:0;margin-bottom:10px">
+          <h2 id="log-title" style="margin:0">実行ログ</h2>
+          <button id="clear-log" class="button" type="button">ログを消去</button>
+        </div>
+        <ol id="log-list" class="log-list" aria-live="polite"></ol>
+      </section>
+    </section>
+
+    <section class="panel" style="margin-top:16px">
+      <details open>
+        <summary>命令一覧・仕様</summary>
+        <div class="help-content">
+          <ul>
+            <li><code>lavel reset</code> / <code>label reset</code>: ラベルを定義します。</li>
+            <li><code>goto reset</code>: 指定ラベルへ移動します。</li>
+            <li><code>if input1 input2 reset</code>: 2つの変数の値が等しい場合、指定ラベルへ移動します。</li>
+            <li><code>else input1 input2 reset</code>: 2つの変数の値が異なる場合、指定ラベルへ移動します（通常のif-elseブロックではありません）。</li>
+            <li><code>display var 1 1</code>: 画面のx=1、y=1の画素の階調を0〜Fの1桁の16進数にして変数 <code>var</code> に保存します。座標は1始まりです。</li>
+            <li><code>pixel var 1 1</code>: <code>var</code> の値（0〜15、または0〜F）を画面のx=1、y=1に書き込みます。画素の変更はプログラムから行います。10進数の <code>10</code> は階調A、<code>15</code> はFです。</li>
+            <li><code>var name world</code>: 変数 <code>name</code> に値を代入します。変数が未定義でも定義でき、再定義もできます。文字列に空白がある場合は <code>var name "hello world"</code> のように引用符で囲みます。</li>
+            <li><code>input name input1</code>: <code>input1</code> の値を <code>name</code> の末尾に追加します。</li>
+            <li><code>copy name input1</code>: <code>input1</code> の値で <code>name</code> を置き換えます。</li>
+            <li><code>clicking-key name</code>: 直近にクリック／押下したキーを <code>name</code> に保存します。</li>
+            <li><code>add input1 input2</code> / <code>sub input1 input2</code> / <code>imul input1 input2</code> / <code>idiv input1 input2</code>: 変数 <code>input1</code> を左辺として計算結果で更新します。変数の値は整数として解釈し、16進数表記（A〜Fを含む値）にも対応します。</li>
+            <li><code>wait 100</code>: 指定したミリ秒だけ待機します。</li>
+          </ul>
+          <p>空行と <code>#</code> で始まるコメント行は無視されます。<code>var</code> と <code>display</code> は変数を定義・更新します。参照先の変数が未定義の場合は空文字として黙って処理せず、エラーとして実行を停止します。ラベルが存在しない、割り算の除数が0、命令の引数が不正などの場合もログに表示します。</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const DISPLAY_WIDTH = 128;
+      const DISPLAY_HEIGHT = 64;
+      const MAX_STEPS = 500000;
+      const YIELD_EVERY = 80;
+      const KEY_VALUES = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'];
+
+      const elements = {
+        canvas: document.getElementById('display-canvas'),
+        pixelInfo: document.getElementById('pixel-info'),
+        keyGrid: document.getElementById('key-grid'),
+        editor: document.getElementById('program-editor'),
+        run: document.getElementById('run-program'),
+        stop: document.getElementById('stop-program'),
+        reset: document.getElementById('reset-program'),
+        status: document.getElementById('run-status'),
+        variables: document.getElementById('variable-list'),
+        logs: document.getElementById('log-list'),
+        clearLog: document.getElementById('clear-log')
+      };
+
+      const missingElements = Object.entries(elements).filter(([, element]) => !element);
+      if (missingElements.length) {
+        const missingNames = missingElements.map(([name]) => name).join(', ');
+        console.error('[PixelVM] 必須要素が見つかりません:', missingNames);
+        document.body.insertAdjacentHTML('afterbegin', '<p style="padding:12px;color:#b3261e">初期化エラー: HTML要素が不足しています。コンソールを確認してください。</p>');
+        return;
+      }
+
+      const context = elements.canvas.getContext('2d', { alpha: false });
+      if (!context) {
+        console.error('[PixelVM] Canvas 2Dコンテキストを取得できません。');
+        setStatus('Canvasを初期化できません', 'error');
+        return;
+      }
+
+      const framebuffer = new Uint8Array(DISPLAY_WIDTH * DISPLAY_HEIGHT);
+      const variables = new Map();
+      const labels = new Map();
+      let isRunning = false;
+      let stopRequested = false;
+      let activeRunId = 0;
+      let lastClickedKey = '';
+      let currentlyPressedKey = '';
+      let selectedPixel = { x: 1, y: 1 };
+
+      function setStatus(message, kind = 'info') {
+        elements.status.textContent = message;
+        elements.status.dataset.kind = kind;
+        console.info('[PixelVM] status:', message);
+      }
+
+      function appendLog(message, kind = 'info') {
+        const item = document.createElement('li');
+        item.textContent = message;
+        if (kind !== 'info') item.className = kind;
+        elements.logs.appendChild(item);
+        while (elements.logs.children.length > 250) elements.logs.removeChild(elements.logs.firstElementChild);
+        elements.logs.scrollTop = elements.logs.scrollHeight;
+        if (kind === 'error') console.error('[PixelVM]', message);
+        else if (kind === 'warning') console.warn('[PixelVM]', message);
+        else console.debug('[PixelVM]', message);
+      }
+
+      function shadeHex(value) {
+        return Math.max(0, Math.min(15, Number(value) || 0)).toString(16).toUpperCase();
+      }
+
+      function paintCanvas() {
+        const image = context.createImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        for (let i = 0; i < framebuffer.length; i += 1) {
+          const channel = framebuffer[i] * 17;
+          const offset = i * 4;
+          image.data[offset] = channel;
+          image.data[offset + 1] = channel;
+          image.data[offset + 2] = channel;
+          image.data[offset + 3] = 255;
+        }
+        context.putImageData(image, 0, 0);
+        updatePixelInfo();
+      }
+
+      function updatePixelInfo() {
+        const index = (selectedPixel.y - 1) * DISPLAY_WIDTH + (selectedPixel.x - 1);
+        elements.pixelInfo.textContent = `選択画素: (${selectedPixel.x}, ${selectedPixel.y}) = ${shadeHex(framebuffer[index])}`;
+      }
+
+      function renderVariables() {
+        elements.variables.replaceChildren();
+        if (variables.size === 0) {
+          const empty = document.createElement('li');
+          empty.className = 'empty-message';
+          empty.textContent = '変数はまだありません。';
+          elements.variables.appendChild(empty);
+          return;
+        }
+        const sorted = [...variables.entries()].sort(([left], [right]) => left.localeCompare(right));
+        for (const [name, value] of sorted) {
+          const item = document.createElement('li');
+          const nameElement = document.createElement('span');
+          const valueElement = document.createElement('span');
+          nameElement.className = 'variable-name';
+          valueElement.className = 'variable-value';
+          nameElement.textContent = name;
+          valueElement.textContent = value === '' ? '(空)' : value;
+          item.append(nameElement, valueElement);
+          elements.variables.appendChild(item);
+        }
+      }
+
+      function setPixel(x, y, shade) {
+        if (!Number.isInteger(x) || !Number.isInteger(y) || x < 1 || x > DISPLAY_WIDTH || y < 1 || y > DISPLAY_HEIGHT) {
+          throw new RangeError(`画素座標が範囲外です: x=${x}, y=${y}（xは1〜${DISPLAY_WIDTH}、yは1〜${DISPLAY_HEIGHT}）`);
+        }
+        if (!Number.isInteger(shade) || shade < 0 || shade > 15) {
+          throw new RangeError(`階調は0〜15（0〜F）で指定してください: ${shade}`);
+        }
+        framebuffer[(y - 1) * DISPLAY_WIDTH + (x - 1)] = shade;
+        selectedPixel = { x, y };
+        paintCanvas();
+      }
+
+      function normalizeName(name) {
+        return String(name).toLocaleLowerCase('en-US');
+      }
+
+      function requireVariable(name, command) {
+        const normalized = normalizeName(name);
+        if (!variables.has(normalized)) {
+          throw new Error(`${command.lineNumber}行目: 変数「${name}」が未定義です。先に var などで定義してください。`);
+        }
+        return variables.get(normalized);
+      }
+
+      function comparableValue(value) {
+        const text = String(value).trim();
+        if (/^[+-]?\d+$/.test(text)) {
+          const number = Number(text);
+          return Number.isSafeInteger(number) ? { numeric: number } : null;
+        }
+        if (/^[0-9a-f]$/i.test(text) && /[a-f]/i.test(text)) {
+          return { numeric: Number.parseInt(text, 16) };
+        }
+        if (/^[+-]?0x[0-9a-f]+$/i.test(text)) {
+          const sign = text.startsWith('-') ? -1 : 1;
+          const unsigned = text.replace(/^[+-]/, '').slice(2);
+          const number = Number.parseInt(unsigned, 16) * sign;
+          return Number.isSafeInteger(number) ? { numeric: number } : null;
+        }
+        return null;
+      }
+
+      function valuesEqual(left, right) {
+        const a = comparableValue(left);
+        const b = comparableValue(right);
+        if (a && b) return a.numeric === b.numeric;
+        return String(left) === String(right);
+      }
+
+      function setVariable(name, value) {
+        if (!name || !/^[\p{L}_][\p{L}\p{N}_-]*$/u.test(name)) {
+          throw new Error(`変数名が不正です: ${name || '(空)'}`);
+        }
+        const normalizedName = normalizeName(name);
+        const previousValue = variables.has(normalizedName) ? variables.get(normalizedName) : undefined;
+        variables.set(normalizedName, String(value));
+        renderVariables();
+        console.info('[PixelVM] variable updated:', { name: normalizedName, previousValue, value: String(value) });
+      }
+
+      function parseInteger(value, variableName) {
+        const trimmed = String(value).trim();
+        if (!trimmed) throw new Error(`変数 ${variableName} の値が空です。数値を代入してください。`);
+        if (/^[+-]?\d+$/.test(trimmed)) {
+          const number = Number(trimmed);
+          if (!Number.isSafeInteger(number)) throw new Error(`数値が大きすぎます: ${trimmed}`);
+          return number;
+        }
+        if (/^[+-]?(?:0x)?[0-9a-f]+$/i.test(trimmed)) {
+          const sign = trimmed.startsWith('-') ? -1 : 1;
+          const unsigned = trimmed.replace(/^[+-]/, '').replace(/^0x/i, '');
+          const number = Number.parseInt(unsigned, 16) * sign;
+          if (Number.isSafeInteger(number)) return number;
+        }
+        throw new Error(`変数 ${variableName} の値「${trimmed}」は整数として解釈できません。`);
+      }
+
+      function parseShade(value, variableName, command) {
+        const shade = parseInteger(value, variableName);
+        if (!Number.isInteger(shade) || shade < 0 || shade > 15) {
+          throw new Error(`${command.lineNumber}行目: 変数「${variableName}」の階調は0〜15（0〜F）で指定してください。値: ${value}`);
+        }
+        return shade;
+      }
+
+      function tokenize(line, lineNumber) {
+        const tokens = [];
+        let token = '';
+        let quote = '';
+        let escaped = false;
+        let tokenStarted = false;
+        for (let i = 0; i < line.length; i += 1) {
+          const char = line[i];
+          if (escaped) {
+            token += char;
+            escaped = false;
+            tokenStarted = true;
+            continue;
+          }
+          if (quote && char === '\\') {
+            escaped = true;
+            continue;
+          }
+          if (quote) {
+            if (char === quote) quote = '';
+            else token += char;
+            tokenStarted = true;
+            continue;
+          }
+          if (char === '"' || char === "'") {
+            quote = char;
+            tokenStarted = true;
+            continue;
+          }
+          if (/\s/.test(char)) {
+            if (tokenStarted) {
+              tokens.push(token);
+              token = '';
+              tokenStarted = false;
+            }
+            continue;
+          }
+          token += char;
+          tokenStarted = true;
+        }
+        if (escaped) token += '\\';
+        if (quote) throw new Error(`${lineNumber}行目: 引用符が閉じられていません。`);
+        if (tokenStarted) tokens.push(token);
+        return tokens;
+      }
+
+      function stripComment(line) {
+        let quote = '';
+        let escaped = false;
+        for (let index = 0; index < line.length; index += 1) {
+          const char = line[index];
+          if (escaped) {
+            escaped = false;
+            continue;
+          }
+          if (quote && char === '\\') {
+            escaped = true;
+            continue;
+          }
+          if (quote) {
+            if (char === quote) quote = '';
+            continue;
+          }
+          if (char === '"' || char === "'") {
+            quote = char;
+            continue;
+          }
+          if (char === '#') return line.slice(0, index);
+        }
+        return line;
+      }
+
+      function parseProgram(source) {
+        const commands = [];
+        const localLabels = new Map();
+        const lines = source.replace(/^\uFEFF/, '').split(/\r?\n/);
+        for (let index = 0; index < lines.length; index += 1) {
+          const lineNumber = index + 1;
+          const withoutComment = stripComment(lines[index]).trim();
+          if (!withoutComment) continue;
+          const args = tokenize(withoutComment, lineNumber);
+          if (args.length === 0) continue;
+          const commandName = args[0].toLowerCase();
+          if (commandName === 'lavel' || commandName === 'label') {
+            if (args.length !== 2) throw new Error(`${lineNumber}行目: ${args[0]} の書式は「${args[0]} ラベル名」です。`);
+            const labelName = normalizeName(args[1]);
+            if (localLabels.has(labelName)) throw new Error(`${lineNumber}行目: ラベル「${args[1]}」が重複しています。`);
+            localLabels.set(labelName, commands.length);
+            commands.push({ op: 'label', args: [args[1]], lineNumber });
+          } else {
+            commands.push({ op: commandName, args: args.slice(1), lineNumber });
+          }
+        }
+        return { commands, labels: localLabels };
+      }
+
+      function assertArgCount(command, count) {
+        if (command.args.length !== count) {
+          throw new Error(`${command.lineNumber}行目: ${command.op} の引数は${count}個必要ですが、${command.args.length}個です。`);
+        }
+      }
+
+      function findLabel(labelName, command) {
+        const target = labels.get(normalizeName(labelName));
+        if (target === undefined) throw new Error(`${command.lineNumber}行目: ラベル「${labelName}」が見つかりません。`);
+        return target;
+      }
+
+      function getFramebufferShade(xArg, yArg, command) {
+        const x = Number(xArg);
+        const y = Number(yArg);
+        if (!Number.isInteger(x) || !Number.isInteger(y)) {
+          throw new Error(`${command.lineNumber}行目: displayの座標は整数で指定してください。`);
+        }
+        if (x < 1 || x > DISPLAY_WIDTH || y < 1 || y > DISPLAY_HEIGHT) {
+          throw new Error(`${command.lineNumber}行目: displayの座標が範囲外です（x:1〜${DISPLAY_WIDTH}, y:1〜${DISPLAY_HEIGHT}）。`);
+        }
+        return framebuffer[(y - 1) * DISPLAY_WIDTH + (x - 1)];
+      }
+
+      function evaluateCommand(command, pc) {
+        const args = command.args;
+        switch (command.op) {
+          case 'label':
+            assertArgCount(command, 1);
+            return pc + 1;
+          case 'goto':
+            assertArgCount(command, 1);
+            return findLabel(args[0], command);
+          case 'if': {
+            assertArgCount(command, 3);
+            const same = valuesEqual(requireVariable(args[0], command), requireVariable(args[1], command));
+            return same ? findLabel(args[2], command) : pc + 1;
+          }
+          case 'else': {
+            assertArgCount(command, 3);
+            const different = !valuesEqual(requireVariable(args[0], command), requireVariable(args[1], command));
+            return different ? findLabel(args[2], command) : pc + 1;
+          }
+          case 'pixel': {
+            assertArgCount(command, 3);
+            const shade = parseShade(requireVariable(args[0], command), args[0], command);
+            const x = Number(args[1]);
+            const y = Number(args[2]);
+            if (!Number.isInteger(x) || !Number.isInteger(y)) {
+              throw new Error(`${command.lineNumber}行目: pixelの座標は整数で指定してください。`);
+            }
+            setPixel(x, y, shade);
+            appendLog(`${command.lineNumber}行目: pixel ${args[0]} ${x} ${y} → ${shadeHex(shade)}`);
+            return pc + 1;
+          }
+          case 'display': {
+            assertArgCount(command, 3);
+            const shade = getFramebufferShade(args[1], args[2], command);
+            setVariable(args[0], shadeHex(shade));
+            return pc + 1;
+          }
+          case 'var': {
+            if (args.length < 2) throw new Error(`${command.lineNumber}行目: var の書式は「var 変数名 値」です。`);
+            const value = args.slice(1).join(' ');
+            setVariable(args[0], value);
+            return pc + 1;
+          }
+          case 'input': {
+            assertArgCount(command, 2);
+            const destination = requireVariable(args[0], command);
+            const source = requireVariable(args[1], command);
+            setVariable(args[0], destination + source);
+            return pc + 1;
+          }
+          case 'copy': {
+            assertArgCount(command, 2);
+            setVariable(args[0], requireVariable(args[1], command));
+            return pc + 1;
+          }
+          case 'clicking-key': {
+            assertArgCount(command, 1);
+            setVariable(args[0], currentlyPressedKey || lastClickedKey);
+            return pc + 1;
+          }
+          case 'add':
+          case 'sub':
+          case 'imul':
+          case 'idiv': {
+            assertArgCount(command, 2);
+            const left = parseInteger(requireVariable(args[0], command), args[0]);
+            const right = parseInteger(requireVariable(args[1], command), args[1]);
+            let result;
+            if (command.op === 'add') result = left + right;
+            else if (command.op === 'sub') result = left - right;
+            else if (command.op === 'imul') result = left * right;
+            else {
+              if (right === 0) throw new Error(`${command.lineNumber}行目: 0では割れません。`);
+              result = Math.trunc(left / right);
+            }
+            if (!Number.isSafeInteger(result)) throw new Error(`${command.lineNumber}行目: 計算結果が整数の安全な範囲を超えました。`);
+            setVariable(args[0], String(result));
+            return pc + 1;
+          }
+          case 'wait': {
+            assertArgCount(command, 1);
+            const milliseconds = Number(args[0]);
+            if (!Number.isFinite(milliseconds) || milliseconds < 0 || milliseconds > 2147483647) {
+              throw new Error(`${command.lineNumber}行目: waitには0〜2147483647のミリ秒を指定してください。`);
+            }
+            return { nextPc: pc + 1, waitMs: Math.trunc(milliseconds) };
+          }
+          default:
+            throw new Error(`${command.lineNumber}行目: 未対応の命令「${command.op}」です。`);
+        }
+      }
+
+      function sleep(milliseconds) {
+        return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+      }
+
+      async function waitWhileRunning(milliseconds, runId) {
+        let remaining = milliseconds;
+        while (remaining > 0 && !stopRequested && runId === activeRunId) {
+          const interval = Math.min(remaining, 50);
+          const startedAt = performance.now();
+          await sleep(interval);
+          remaining -= Math.max(interval, performance.now() - startedAt);
+        }
+      }
+
+      async function runProgram() {
+        if (isRunning) {
+          appendLog('プログラムはすでに実行中です。', 'warning');
+          return;
+        }
+        let parsed;
+        try {
+          parsed = parseProgram(elements.editor.value);
+        } catch (error) {
+          appendLog(`構文エラー: ${error.message}`, 'error');
+          setStatus('構文エラー', 'error');
+          return;
+        }
+        if (parsed.commands.length === 0) {
+          appendLog('実行できる命令がありません。', 'warning');
+          setStatus('命令がありません', 'error');
+          return;
+        }
+
+        labels.clear();
+        for (const [name, position] of parsed.labels) labels.set(name, position);
+        activeRunId += 1;
+        const runId = activeRunId;
+        isRunning = true;
+        stopRequested = false;
+        elements.run.disabled = true;
+        elements.stop.disabled = false;
+        setStatus('実行中', 'success');
+        appendLog(`実行開始（${parsed.commands.length}命令、${labels.size}ラベル）`);
+        let pc = 0;
+        let steps = 0;
+        try {
+          while (pc >= 0 && pc < parsed.commands.length) {
+            if (stopRequested || runId !== activeRunId) break;
+            if (steps >= MAX_STEPS) throw new Error(`命令実行数が上限（${MAX_STEPS}）に達しました。無限ループの可能性があります。`);
+            const command = parsed.commands[pc];
+            const oldPc = pc;
+            let result = evaluateCommand(command, pc);
+            steps += 1;
+            if (typeof result === 'object') {
+              pc = result.nextPc;
+              appendLog(`${command.lineNumber}行目: wait ${result.waitMs} ms`);
+              await waitWhileRunning(result.waitMs, runId);
+            } else {
+              pc = result;
+              console.debug('[PixelVM] execute', { line: command.lineNumber, command: command.op, args: command.args, pc: oldPc, nextPc: pc });
+            }
+            if (steps % YIELD_EVERY === 0) await sleep(0);
+          }
+          if (stopRequested || runId !== activeRunId) {
+            appendLog(`停止しました（${steps}命令実行）`, 'warning');
+            setStatus('停止しました', 'info');
+          } else {
+            appendLog(`プログラム終了（${steps}命令実行）`);
+            setStatus('正常終了', 'success');
+          }
+        } catch (error) {
+          appendLog(`実行エラー: ${error.message}`, 'error');
+          setStatus('実行エラー', 'error');
+        } finally {
+          if (runId === activeRunId) {
+            isRunning = false;
+            elements.run.disabled = false;
+            elements.stop.disabled = true;
+          }
+        }
+      }
+
+      function stopProgram() {
+        if (!isRunning) {
+          appendLog('停止要求を受け付けましたが、実行中ではありません。', 'warning');
+          return;
+        }
+        stopRequested = true;
+        appendLog('停止要求を受け付けました。');
+        setStatus('停止処理中…', 'info');
+      }
+
+      function resetVariables() {
+        if (isRunning) {
+          appendLog('実行中は変数を初期化できません。先に停止してください。', 'warning');
+          return;
+        }
+        variables.clear();
+        renderVariables();
+        setStatus('変数を初期化しました', 'success');
+        appendLog('変数を初期化しました。ディスプレイの内容は保持しています。');
+      }
+
+      function buildKeys() {
+        elements.keyGrid.replaceChildren();
+        for (const keyValue of KEY_VALUES) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'button key-button';
+          button.textContent = keyValue;
+          button.dataset.keyValue = keyValue;
+          button.setAttribute('aria-label', `キー ${keyValue}`);
+          button.addEventListener('pointerdown', event => {
+            currentlyPressedKey = keyValue;
+            lastClickedKey = keyValue;
+            button.classList.add('is-active');
+            try { button.setPointerCapture(event.pointerId); } catch (error) {
+              console.debug('[PixelVM] ポインターキャプチャを利用できません:', error.message);
+            }
+            console.info('[PixelVM] key pressed:', keyValue);
+          });
+          const release = () => {
+            if (currentlyPressedKey === keyValue) currentlyPressedKey = '';
+            button.classList.remove('is-active');
+          };
+          button.addEventListener('pointerup', release);
+          button.addEventListener('pointercancel', release);
+          button.addEventListener('lostpointercapture', release);
+          button.addEventListener('click', () => {
+            lastClickedKey = keyValue;
+            console.info('[PixelVM] key clicked:', keyValue);
+          });
+          elements.keyGrid.appendChild(button);
+        }
+        console.info('[PixelVM] クリックキーを初期化しました:', KEY_VALUES.length);
+      }
+
+      elements.run.addEventListener('click', runProgram);
+      elements.stop.addEventListener('click', stopProgram);
+      elements.reset.addEventListener('click', resetVariables);
+      elements.clearLog.addEventListener('click', () => {
+        elements.logs.replaceChildren();
+        appendLog('ログを消去しました。');
+      });
+      document.addEventListener('keydown', event => {
+        if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+        if (/^[0-9a-f]$/i.test(event.key)) {
+          currentlyPressedKey = event.key.toUpperCase();
+          lastClickedKey = currentlyPressedKey;
+        }
+      });
+      document.addEventListener('keyup', event => {
+        if (currentlyPressedKey && event.key.toUpperCase() === currentlyPressedKey) currentlyPressedKey = '';
+      });
+      window.addEventListener('blur', () => { currentlyPressedKey = ''; });
+
+      buildKeys();
+      paintCanvas();
+      renderVariables();
+      setStatus('待機中', 'info');
+      appendLog('エミュレーターを初期化しました。');
+      console.info('[PixelVM] 初期化完了:', { width: DISPLAY_WIDTH, height: DISPLAY_HEIGHT, grayscaleLevels: 16 });
+    })();
+  </script>
+</body>
+</html>
