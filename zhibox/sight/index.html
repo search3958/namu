@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="data:,">
-<title>ZhiSight</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>ZhiSight 統計 (Beta)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
 <script type="importmap">
   {
     "imports": {
@@ -16,97 +17,43 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <script src="https://search3958.github.io/frameworks/client-service.js"></script>
-<style>
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;font:14px/1.5 system-ui,sans-serif}
-md-icon{font-family:'Material Symbols Outlined'}
-code{word-break:break-all}
-h1{font-size:22px;font-weight:400;margin:4px 0 16px}
-h2{font-size:16px;font-weight:500;margin:0 0 8px}
-h3{font-size:14px;font-weight:500;margin:0 0 8px}
-.note{font-size:12px;opacity:.75}
-.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.grow{flex:1}
-.stack{display:flex;flex-direction:column;gap:16px}
-.card{border:1px solid rgba(127,127,127,.3);border-radius:16px;padding:16px}
-.mt{margin-top:16px}
-
-header{display:flex;align-items:center;gap:16px;padding:8px 16px}
-.brand{font-size:22px;font-weight:500}
-#appSel{width:280px}
-#avatar{width:28px;height:28px;border-radius:50%}
-
-.shell{display:flex}
-nav{display:flex;flex-direction:column;align-items:center;gap:12px;width:88px;flex:none;padding:16px 0}
-.ri{display:flex;flex-direction:column;align-items:center;cursor:pointer;font-size:12px}
-
-main{flex:1;min-width:0;padding:16px 24px 48px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:16px}
-.kpi .v{font-size:32px;font-weight:400}
-.top{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-.hours{display:flex;align-items:flex-end;gap:3px;height:180px;margin-top:8px}
-.bar{flex:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;font-size:10px}
-.bar i{display:block;width:100%;min-height:2px;background:var(--md-sys-color-primary);border-radius:3px 3px 0 0}
-
-.geo{display:grid;grid-template-columns:2fr 1fr;gap:16px}
-.mapwrap{position:relative}
-#map{display:block;width:100%;height:auto}
-#map path{fill:rgba(127,127,127,.2);stroke:#fff;stroke-width:.4}
-#map path[data-v]:not([data-v="0"]){fill:var(--md-sys-color-primary)}
-#map path:hover{stroke:#333;stroke-width:1}
-.mapctl{position:absolute;left:8px;top:8px;display:flex;flex-direction:column}
-#tip{position:absolute;pointer-events:none;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;white-space:nowrap}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:16px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-td{border-bottom:1px solid rgba(127,127,127,.3);padding:4px}
-td.n{text-align:right}
-
-.field{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
-.field b{min-width:110px;font-weight:500}
-.switchRow{display:flex;align-items:center;justify-content:space-between;gap:16px}
-.danger{--md-text-button-label-text-color:var(--md-sys-color-error)}
-
-#login{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:100vh}
-#busy{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.7)}
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#313033;color:#f4eff4;padding:12px 16px;border-radius:8px;z-index:200}
-
-@media (max-width:840px){
-  .top,.geo{grid-template-columns:1fr}
-  nav{width:64px}
-  #appSel{width:180px}
-  main{padding:16px}
-}
-</style>
+<link rel="stylesheet" href="m3color.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="login">
-  <div class="brand">ZhiSight</div>
+  <img src="zhisight-logo.svg" alt="ZhiSight" class="logo" height="28">
   <md-filled-button id="loginBtn">0F8アカウントでログイン</md-filled-button>
 </div>
 
 <div id="app" hidden>
   <header>
-    <span class="brand">ZhiSight</span>
-    <md-outlined-select id="appSel" label="アプリ"></md-outlined-select>
-    <span class="grow"></span>
-    <md-icon-button id="acctBtn" title="アカウント">
-      <md-icon id="avatarIcon">account_circle</md-icon>
-      <img id="avatar" alt="" hidden>
-    </md-icon-button>
-    <md-menu id="menu" anchor="acctBtn">
-      <md-menu-item disabled><div slot="headline" id="menuName"></div></md-menu-item>
-      <md-divider></md-divider>
-      <md-menu-item href="https://search3958.github.io/accounts/index.html" target="_blank">
-        <md-icon slot="start">manage_accounts</md-icon>
-        <div slot="headline">アカウント管理</div>
-      </md-menu-item>
-      <md-menu-item id="logout">
-        <md-icon slot="start">logout</md-icon>
-        <div slot="headline">ログアウト</div>
-      </md-menu-item>
-    </md-menu>
+    <a href="./" class="brand">
+      <img src="zhisight-logo.svg" alt="ZhiSight" class="logo" height="24">
+    </a>
+    <div class="csel wide" id="appSelWrap">
+  <button id="appSelBtn" class="csel-btn" type="button">アプリを選択</button>
+  <div id="appSelPanel" class="csel-panel" hidden></div>
+</div>
+<span class="grow"></span>
+    <div class="acct-menu">
+      <button id="acctBtn" class="acct-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="アカウント">
+        <md-icon id="avatarIcon">account_circle</md-icon>
+        <img id="avatar" alt="" hidden>
+      </button>
+      <div id="acctDropdown" class="acct-dropdown" hidden>
+        <div id="menuName" class="acct-name"></div>
+        <a class="acct-item" href="https://search3958.github.io/accounts/index.html" target="_blank" rel="noopener noreferrer">
+          <md-icon slot="start">manage_accounts</md-icon>
+          <span>アカウント管理</span>
+        </a>
+        <button id="logout" class="acct-item" type="button">
+          <md-icon slot="start">logout</md-icon>
+          <span>ログアウト</span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <div class="shell">
@@ -130,11 +77,14 @@ td.n{text-align:right}
       <section id="vOverview" hidden>
         <div class="row">
           <h1 class="grow">概要</h1>
-          <md-outlined-select id="days" label="期間">
-            <md-select-option value="7"><div slot="headline">7日</div></md-select-option>
-            <md-select-option value="30" selected><div slot="headline">30日</div></md-select-option>
-            <md-select-option value="60"><div slot="headline">60日</div></md-select-option>
-          </md-outlined-select>
+          <div class="csel" id="daysWrap">
+  <button id="daysBtn" class="csel-btn" type="button">30日</button>
+  <div id="daysPanel" class="csel-panel" hidden>
+    <button class="csel-opt" data-value="7">7日</button>
+    <button class="csel-opt" data-value="30">30日</button>
+    <button class="csel-opt" data-value="60">60日</button>
+  </div>
+</div>
           <md-outlined-button id="refresh"><md-icon slot="icon">refresh</md-icon>今すぐ集計</md-outlined-button>
         </div>
         <p class="note" id="err"></p>
@@ -257,432 +207,7 @@ td.n{text-align:right}
 <div id="busy" hidden><md-circular-progress indeterminate></md-circular-progress></div>
 <div id="toast" hidden></div>
 
-<script type="module">
-import '@material/web/all.js';
-import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
-
-document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
-
-// 集計API（zhisight Worker）の接続先
-var API = 'https://zhisight.takesen2278.workers.dev';
-var OF8 = window.OF8Account;
-var NEW = '__new', EXT = '__ext';
-var apps = [], cur = null, stats = null, keyShown = false, view = 'overview';
-var info = null, busyN = 0, geo = null, lastCountries = [];
-
-function $(id) { return document.getElementById(id); }
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
-function mask(k) { return k.slice(0, 4) + '••••••••'; }
-
-function toast(msg) {
-  var t = $('toast');
-  t.textContent = msg;
-  t.hidden = false;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function () { t.hidden = true; }, 3000);
-}
-
-// エラーはコンソールに出し、画面にも短く知らせる
-function fail(msg, e) {
-  console.error(msg, e);
-  toast(msg + '：' + (e && e.message ? e.message : String(e)));
-}
-window.addEventListener('unhandledrejection', function (ev) { fail('予期しないエラー', ev.reason); });
-window.addEventListener('error', function (ev) { console.error(ev.error || ev.message); });
-
-if (!OF8) console.error('OF8Account が見つかりません（client-service.js の読み込みを確認）');
-
-// 操作中は全画面をブロックする。終わるまで重複操作させない
-async function busy(fn) {
-  busyN++;
-  $('busy').hidden = false;
-  try { return await fn(); } finally {
-    if (--busyN === 0) $('busy').hidden = true;
-  }
-}
-function okWrite() {
-  if (info && info.permissions && info.permissions.write === false) {
-    toast('この操作には書き込み権限が必要です');
-    return false;
-  }
-  return true;
-}
-
-async function loadApps() {
-  var raw = await OF8.getItem('zs1_apps');
-  apps = raw ? JSON.parse(raw) : [];
-}
-async function saveApps() {
-  await OF8.setItem('zs1_apps', JSON.stringify(apps));
-}
-
-// API 呼び出し。通信失敗（CORS・ネットワーク）と API のエラーを区別する
-async function api(path, key, method, body) {
-  var opts = { method: method || 'GET', headers: { Authorization: 'Bearer ' + key } };
-  if (body !== undefined) {
-    opts.headers['Content-Type'] = 'application/json';
-    opts.body = JSON.stringify(body);
-  }
-  var res;
-  try {
-    res = await fetch(API + path, opts);
-  } catch (e) {
-    throw new Error('通信に失敗しました（接続先・CORS・ネットワークを確認）');
-  }
-  var data = await res.json().catch(function () { return {}; });
-  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-  return data;
-}
-
-// ---- アカウント ----
-function showAccount() {
-  var a = info.account;
-  $('menuName').textContent = a.name || '0F8アカウント';
-  if (a.icon) {
-    var img = $('avatar');
-    img.src = 'data:' + a.iconMimeType + ';base64,' + a.icon;
-    img.hidden = false;
-    $('avatarIcon').hidden = true;
-  }
-}
-$('logout').onclick = function () {
-  busy(async function () {
-    await OF8.logout();
-    location.reload();
-  }).catch(function (e) { fail('ログアウトに失敗', e); });
-};
-
-// ---- アプリ選択 ----
-function renderSelect() {
-  $('appSel').innerHTML = apps.map(function (a) {
-    return '<md-select-option value="' + esc(a.app_id) + '"><div slot="headline">' + esc(a.name) + '</div></md-select-option>';
-  }).join('') +
-    '<md-select-option value="' + NEW + '"><div slot="headline">＋ 新しいアプリを登録</div></md-select-option>' +
-    '<md-select-option value="' + EXT + '"><div slot="headline">＋ アクセスキーで追加</div></md-select-option>';
-  $('appSel').value = cur ? cur.app_id : '';
-}
-
-function select(id) {
-  cur = apps.find(function (a) { return a.app_id === id; }) || null;
-  stats = null;
-  keyShown = false;
-  renderSelect();
-  showView();
-  renderOverview();
-  if (cur) {
-    renderSettings();
-    loadStats(false);
-  }
-}
-
-$('appSel').addEventListener('change', function (e) {
-  var v = e.target.value;
-  if (v === NEW) { $('appSel').value = cur ? cur.app_id : ''; $('dlgNew').show(); return; }
-  if (v === EXT) { $('appSel').value = cur ? cur.app_id : ''; $('dlgExt').show(); return; }
-  select(v);
-});
-
-// ---- 表示切り替え ----
-function showView() {
-  document.querySelectorAll('.ri').forEach(function (r) {
-    r.querySelector('md-icon-button').selected = r.dataset.view === view;
-  });
-  $('empty').hidden = apps.length > 0;
-  $('vOverview').hidden = !cur || view !== 'overview';
-  $('vSettings').hidden = !cur || view !== 'settings';
-}
-document.querySelectorAll('.ri').forEach(function (r) {
-  r.addEventListener('click', function () {
-    view = r.dataset.view;
-    showView();
-  });
-});
-
-// ---- 概要 ----
-function loadStats(refresh) {
-  var app = cur;
-  if (!app) return Promise.resolve();
-  $('err').textContent = '';
-  return busy(async function () {
-    try {
-      if (refresh) await api('/api/refresh', app.access_key, 'POST');
-      var s = await api('/api/stats?days=' + $('days').value, app.access_key);
-      if (cur !== app) return;
-      app.allow_any_origin = s.app.allow_any_origin;
-      stats = s;
-      renderOverview();
-      renderSettings();
-    } catch (e) {
-      console.error('統計の取得に失敗', e);
-      if (cur === app) $('err').textContent = '取得に失敗: ' + e.message;
-    }
-  });
-}
-
-function rows(list) {
-  return list.length
-    ? list.map(function (r) { return '<tr><td>' + esc(r.item) + '</td><td class="n">' + r.cnt + '</td></tr>'; }).join('')
-    : '<tr><td colspan="2">データなし</td></tr>';
-}
-
-function renderOverview() {
-  var s = stats;
-  if (!s) {
-    $('kUsers').textContent = '…';
-    $('kPv').textContent = '…';
-    $('kAvg').textContent = '…';
-    $('hours').innerHTML = '';
-    ['tCountries', 'tPages', 'tCities', 'tOs'].forEach(function (t) {
-      $(t).innerHTML = '<tr><td colspan="2">読み込み中…</td></tr>';
-    });
-    drawMap([]);
-    return;
-  }
-  $('kUsers').textContent = s.summary.users;
-  $('kPv').textContent = s.summary.pv;
-  $('kAvg').textContent = s.summary.pv_per_user;
-  var max = Math.max.apply(null, s.hours.concat([1]));
-  $('hours').innerHTML = s.hours.map(function (v, h) {
-    return '<div class="bar" title="' + h + '時: ' + v + '"><i style="height:' +
-      Math.max(2, Math.round(v / max * 140)) + 'px"></i><span>' + h + '</span></div>';
-  }).join('');
-  $('tCountries').innerHTML = rows(s.countries);
-  $('tPages').innerHTML = rows(s.pages);
-  $('tCities').innerHTML = rows(s.cities);
-  $('tOs').innerHTML = rows(s.os);
-  drawMap(s.countries);
-}
-
-$('days').addEventListener('change', function () { if (cur) loadStats(false); });
-$('refresh').onclick = function () { if (cur) loadStats(true); };
-
-// ---- 国別マップ ----
-// 国名の表記ゆれを吸収する。サーバーが ISO の 2 文字コードを返した場合も英語名に変換する
-var ALIAS = {
-  'usa': 'united states of america', 'united states': 'united states of america',
-  'czech republic': 'czechia', 'türkiye': 'turkey', 'turkiye': 'turkey',
-  'russian federation': 'russia', 'korea, south': 'south korea'
-};
-function canon(s) {
-  s = String(s).trim();
-  if (/^[A-Za-z]{2}$/.test(s)) {
-    try { s = new Intl.DisplayNames(['en'], { type: 'region' }).of(s.toUpperCase()); } catch (e) {}
-  }
-  s = s.toLowerCase();
-  return ALIAS[s] || s;
-}
-
-async function initMap() {
-  try {
-    var w = await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
-    var features = topojson.feature(w, w.objects.countries).features;
-    var svg = d3.select('#map');
-    var g = svg.append('g');
-    var path = d3.geoPath(d3.geoNaturalEarth1().fitExtent([[4, 4], [956, 496]], { type: 'Sphere' }));
-    var paths = g.selectAll('path').data(features).join('path').attr('d', path);
-    var tip = $('tip'), wrap = $('mapwrap');
-
-    paths.on('mousemove', function (e, d) {
-      var v = +d3.select(this).attr('data-v') || 0;
-      var p = d3.pointer(e, wrap);
-      tip.hidden = false;
-      tip.style.left = (p[0] + 12) + 'px';
-      tip.style.top = (p[1] + 12) + 'px';
-      tip.textContent = d.properties.name + '：' + v;
-    }).on('mouseleave', function () { tip.hidden = true; });
-
-    var zoom = d3.zoom().scaleExtent([1, 8]).on('zoom', function (e) { g.attr('transform', e.transform); });
-    svg.call(zoom);
-    $('zin').onclick = function () { svg.transition().call(zoom.scaleBy, 1.6); };
-    $('zout').onclick = function () { svg.transition().call(zoom.scaleBy, 1 / 1.6); };
-    $('zreset').onclick = function () { svg.transition().call(zoom.transform, d3.zoomIdentity); };
-
-    geo = { paths: paths };
-    drawMap(lastCountries);
-  } catch (e) {
-    console.error('地図の読み込みに失敗', e);
-    $('mapnote').textContent = '地図を読み込めませんでした';
-  }
-}
-
-function drawMap(list) {
-  lastCountries = list || [];
-  if (!geo) return;
-  var vals = {};
-  lastCountries.forEach(function (r) {
-    var k = canon(r.item);
-    vals[k] = (vals[k] || 0) + r.cnt;
-  });
-  var max = Math.max.apply(null, Object.values(vals).concat([1]));
-  geo.paths
-    .attr('data-v', function (d) { return vals[canon(d.properties.name)] || 0; })
-    .style('fill-opacity', function (d) {
-      var v = vals[canon(d.properties.name)] || 0;
-      return v ? 0.25 + 0.75 * v / max : 1;
-    });
-  $('mapnote').textContent = lastCountries.length ? '' : 'データなし';
-}
-
-// ---- 設定 ----
-function renderSettings() {
-  if (!cur) return;
-  $('sName').textContent = cur.name;
-  $('sId').textContent = cur.app_id;
-  $('sOrigin').textContent = cur.origin;
-  $('allowAny').selected = !!cur.allow_any_origin;
-  updateKey();
-}
-function updateKey() {
-  $('sKey').textContent = keyShown ? cur.access_key : mask(cur.access_key);
-  $('toggleKey').querySelector('md-icon').textContent = keyShown ? 'visibility_off' : 'visibility';
-}
-$('toggleKey').onclick = function () { keyShown = !keyShown; updateKey(); };
-$('copyKey').onclick = function () {
-  navigator.clipboard.writeText(cur.access_key).then(
-    function () { toast('アクセスキーをコピーしました'); },
-    function (e) { fail('コピーできませんでした', e); }
-  );
-};
-
-$('allowAny').addEventListener('change', function (e) {
-  var v = e.target.selected, app = cur;
-  if (!okWrite()) { e.target.selected = !v; return; }
-  busy(async function () {
-    try {
-      await api('/api/apps/allow-any', app.access_key, 'POST', { allow_any_origin: v });
-      app.allow_any_origin = v;
-      await saveApps();
-      toast(v ? '全オリジン許可をONにしました' : '全オリジン許可をOFFにしました');
-    } catch (err) {
-      e.target.selected = !v;
-      fail('切り替えに失敗', err);
-    }
-  });
-});
-
-$('rotate').onclick = function () { $('dlgRotate').show(); };
-$('confirmRotate').onclick = function () {
-  if (!okWrite()) return;
-  $('dlgRotate').close();
-  busy(async function () {
-    try {
-      var res = await api('/api/apps/rotate', cur.access_key, 'POST');
-      cur.access_key = res.access_key;
-      await saveApps();
-      keyShown = true;
-      updateKey();
-      toast('新しいキーを発行しました。表示されたキーを控えてください');
-    } catch (e) {
-      fail('再発行に失敗', e);
-      $('dlgRotate').show();
-    }
-  });
-};
-
-$('remove').onclick = function () {
-  $('memo').checked = false;
-  $('confirmRemove').disabled = true;
-  $('dlgRemove').show();
-};
-$('memo').addEventListener('change', function (e) {
-  $('confirmRemove').disabled = !e.target.checked;
-});
-$('confirmRemove').onclick = function () {
-  if (!okWrite()) return;
-  var id = cur.app_id;
-  $('dlgRemove').close();
-  busy(async function () {
-    apps = apps.filter(function (a) { return a.app_id !== id; });
-    await saveApps();
-    toast('一覧から外しました');
-    select(apps[0] ? apps[0].app_id : '');
-  });
-};
-
-// ---- 登録・追加 ----
-$('confirmNew').onclick = function () {
-  if (!okWrite()) return;
-  var body = { name: $('newName').value.trim(), origin: $('newOrigin').value.trim() };
-  $('dlgNew').close();
-  busy(async function () {
-    try {
-      var d = await api('/api/apps', '', 'POST', body);
-      apps.push({
-        app_id: d.app_id, name: d.name, origin: d.origin,
-        access_key: d.access_key, allow_any_origin: false
-      });
-      await saveApps();
-      $('newName').value = '';
-      $('newOrigin').value = '';
-      toast('登録しました。アクセスキーは0F8アカウントに保存されています');
-      select(d.app_id);
-    } catch (e) {
-      fail('登録に失敗', e);
-      $('dlgNew').show();
-    }
-  });
-};
-
-$('confirmExt').onclick = function () {
-  if (!okWrite()) return;
-  var key = $('extKey').value.trim();
-  $('dlgExt').close();
-  busy(async function () {
-    try {
-      var s = await api('/api/stats?days=1', key);
-      if (apps.some(function (a) { return a.app_id === s.app.app_id; })) throw new Error('すでに追加済みです');
-      apps.push({
-        app_id: s.app.app_id, name: s.app.name, origin: s.app.origin,
-        access_key: key, allow_any_origin: !!s.app.allow_any_origin
-      });
-      await saveApps();
-      $('extKey').value = '';
-      select(s.app.app_id);
-    } catch (e) {
-      fail('追加できません', e);
-      $('dlgExt').show();
-    }
-  });
-};
-
-// ---- 起動 ----
-async function start() {
-  try {
-    await busy(async function () {
-      info = await OF8.accountInfo();
-      $('login').hidden = true;
-      $('app').hidden = false;
-      showAccount();
-      await loadApps();
-      select(apps[0] ? apps[0].app_id : '');
-    });
-  } catch (e) {
-    fail('読み込みに失敗', e);
-  }
-}
-
-$('loginBtn').onclick = async function () {
-  try {
-    await busy(function () { return OF8.login(); });
-    await start();
-  } catch (e) {
-    fail('ログインに失敗', e);
-  }
-};
-
-initMap();
-(async function boot() {
-  try {
-    if (await OF8.isLoggedIn()) await start();
-  } catch (e) {
-    fail('ログイン状態の確認に失敗', e);
-  }
-})();
-</script>
+<script type="module" src="app.js"></script>
 <script src="https://search3958.github.io/check.js"></script>
 </body>
 </html>
