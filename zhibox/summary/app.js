@@ -25,7 +25,12 @@
 
   var els = {
     loginBtn: $("#login-btn"),
+    accountBtn: $("#account-btn"),
     logoutBtn: $("#logout-btn"),
+    accountMenu: $("#account-menu"),
+    accountBtnIcon: $("#account-btn-icon"),
+    accountDropdownName: $("#account-dropdown-name"),
+    acctManageBtn: $("#account-manage-btn"),
     usage: $("#usage"),
     tabs: document.querySelectorAll(".mode-tab"),
     urlInput: $("#url-input"),
@@ -145,15 +150,31 @@
     setStatus(msg);
   }
 
-  // 利用回数の表示（赤字）
+  // 利用回数の表示（プログレスバー）
   function renderUsage() {
     if (!loggedIn) {
       els.usage.textContent = "ログインすると月" + MONTHLY_LIMIT + "回まで要約できます";
+      els.usage.classList.remove("has-bar");
       return;
     }
     if (lastUsage) {
-      els.usage.textContent = "今月の残り " + lastUsage.remaining + " / " + lastUsage.limit + " 回";
+      var limit = lastUsage.limit || MONTHLY_LIMIT;
+      var used = Math.max(0, limit - lastUsage.remaining);
+      var pct = limit > 0 ? Math.round((used / limit) * 100) : 0;
+      els.usage.classList.add("has-bar");
+      els.usage.innerHTML = "";
+      var bar = document.createElement("div");
+      bar.className = "usage-bar";
+      var fill = document.createElement("div");
+      fill.className = "usage-bar-fill";
+      fill.style.width = pct + "%";
+      bar.appendChild(fill);
+      var label = document.createElement("span");
+      label.textContent = "今月の残り " + lastUsage.remaining + " / " + limit + " 回";
+      els.usage.appendChild(label);
+      els.usage.appendChild(bar);
     } else {
+      els.usage.classList.remove("has-bar");
       els.usage.textContent = "";
     }
   }
@@ -162,16 +183,73 @@
     loggedIn = true;
     lastUsage = me.usage || null;
     els.loginBtn.hidden = true;
-    els.logoutBtn.hidden = false;
+    els.accountMenu.hidden = false;
     renderUsage();
+    updateAccountUI();
   }
 
   function setLoggedOut() {
     loggedIn = false;
     lastUsage = null;
     els.loginBtn.hidden = false;
-    els.logoutBtn.hidden = true;
+    els.accountMenu.hidden = true;
+    closeAccountDropdown();
     renderUsage();
+  }
+
+  /* ---------------- アカウントプルダウン（0F8 accountInfo） ---------------- */
+
+  var accountInfo = null;
+
+  function updateAccountUI() {
+    var OF8 = window.OF8Account;
+    if (!OF8 || !OF8.accountInfo) return;
+    OF8.accountInfo()
+      .then(function (info) {
+        accountInfo = info || null;
+        var name = (info && info.account && info.account.name) || "アカウント";
+        var icon = (info && info.account && info.account.icon) || null;
+        var mime = (info && info.account && info.account.iconMimeType) || "image/png";
+
+        els.accountDropdownName.textContent = name;
+        els.acctManageBtn.hidden = false;
+
+        if (icon) {
+          var img = document.createElement("img");
+          img.className = "avatar";
+          img.alt = "";
+          img.src = "data:" + mime + ";base64," + icon;
+          els.accountBtnIcon.innerHTML = "";
+          els.accountBtnIcon.appendChild(img);
+        } else {
+          var fallback = document.createElement("span");
+          fallback.className = "avatar-fallback";
+          fallback.textContent = name.charAt(0).toUpperCase();
+          els.accountBtnIcon.innerHTML = "";
+          els.accountBtnIcon.appendChild(fallback);
+        }
+      })
+      .catch(function () {
+        // 取得できなくてもプルダウンは最低限動作させる
+        els.accountDropdownName.textContent = "アカウント";
+        els.acctManageBtn.hidden = false;
+        var fallback = document.createElement("span");
+        fallback.className = "avatar-fallback";
+        fallback.textContent = "A";
+        els.accountBtnIcon.innerHTML = "";
+        els.accountBtnIcon.appendChild(fallback);
+      });
+  }
+
+  function openAccountDropdown() {
+    $("#account-dropdown").hidden = false;
+    els.accountBtn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeAccountDropdown() {
+    var dd = $("#account-dropdown");
+    if (dd) dd.hidden = true;
+    els.accountBtn.setAttribute("aria-expanded", "false");
   }
 
   /* ---------------- 起動時の状態判定 ---------------- */
@@ -223,6 +301,27 @@
       });
   });
 
+  els.accountBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    var dd = $("#account-dropdown");
+    if (dd.hidden) {
+      openAccountDropdown();
+    } else {
+      closeAccountDropdown();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!els.accountMenu.hidden && !els.accountMenu.contains(e.target)) {
+      closeAccountDropdown();
+    }
+  });
+
+  $("#account-manage-btn").addEventListener("click", function () {
+    window.open("https://search3958.github.io/accounts/index.html", "_blank", "noopener,noreferrer");
+    closeAccountDropdown();
+  });
+
   els.logoutBtn.addEventListener("click", function () {
     var OF8 = window.OF8Account;
 
@@ -230,6 +329,7 @@
       lastMarkdown = "";
       els.result.hidden = true;
       setError("");
+      closeAccountDropdown();
       setLoggedOut();
     };
 
