@@ -226,14 +226,14 @@
       flex: 0 0 56px;
       padding: 0;
       border: 0;
-      border-radius: 16px;
+      border-radius: 99px;
       background: none;
       cursor: pointer;
     }
 
     #color-input::-webkit-color-swatch-wrapper { padding: 0; }
-    #color-input::-webkit-color-swatch { border: 0; border-radius: 16px; }
-    #color-input::-moz-color-swatch { border: 0; border-radius: 16px; }
+    #color-input::-webkit-color-swatch { border: 0; border-radius: 99px; }
+    #color-input::-moz-color-swatch { border: 0; border-radius: 99px; }
 
     a {
       text-decoration: none;
@@ -612,9 +612,6 @@
     function updateSheet() {
       const previewSize = Math.min(state.size, 96);
       els.preview.className = `icon icon-${state.icon}`;
-      els.preview.style.width = `${previewSize}px`;
-      els.preview.style.height = `${previewSize}px`;
-      els.preview.style.fontSize = `${previewSize}px`;
       els.preview.style.color = state.color;
       els.title.textContent = state.icon;
       els.fileName.textContent = `${state.icon}.svg`;
