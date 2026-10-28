@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "sets": [
+    {"category":"英検5級","title":"Part 1","words":[
+      {"en":"apple","ja":"りんご"},{"en":"book","ja":"本"},{"en":"cat","ja":"ねこ"},{"en":"dog","ja":"犬"},{"en":"eat","ja":"食べる"},{"en":"family","ja":"家族"},{"en":"go","ja":"行く"},{"en":"happy","ja":"うれしい"},{"en":"school","ja":"学校"},{"en":"water","ja":"水"}
+    ]},
+    {"category":"英検5級","title":"Part 2","words":[
+      {"en":"big","ja":"大きい"},{"en":"like","ja":"好きだ"},{"en":"morning","ja":"朝"},{"en":"night","ja":"夜"},{"en":"park","ja":"公園"},{"en":"rain","ja":"雨"},{"en":"sun","ja":"太陽"},{"en":"teacher","ja":"先生"},{"en":"time","ja":"時間"},{"en":"year","ja":"年"}
+    ]},
+    {"category":"英検4級","title":"Part 1","words":[
+      {"en":"airport","ja":"空港"},{"en":"bank","ja":"銀行"},{"en":"bring","ja":"持ってくる"},{"en":"camera","ja":"カメラ"},{"en":"dinner","ja":"夕食"},{"en":"early","ja":"早い"},{"en":"enjoy","ja":"楽しむ"},{"en":"forget","ja":"忘れる"},{"en":"hospital","ja":"病院"},{"en":"job","ja":"仕事"}
+    ]},
+    {"category":"英検4級","title":"Part 2","words":[
+      {"en":"letter","ja":"手紙"},{"en":"library","ja":"図書館"},{"en":"listen","ja":"聞く"},{"en":"move","ja":"引っ越す"},{"en":"museum","ja":"博物館"},{"en":"important","ja":"重要な"},{"en":"price","ja":"値段"},{"en":"quiet","ja":"静かな"},{"en":"remember","ja":"覚えている"},{"en":"station","ja":"駅"}
+    ]},
+    {"category":"英検3級","title":"Part 1","words":[
+      {"en":"achieve","ja":"達成する"},{"en":"avoid","ja":"避ける"},{"en":"cause","ja":"原因"},{"en":"define","ja":"定義する"},{"en":"environment","ja":"環境"},{"en":"improve","ja":"改善する"},{"en":"increase","ja":"増える"},{"en":"manage","ja":"管理する"},{"en":"opportunity","ja":"機会"},{"en":"pollution","ja":"汚染"}
+    ]},
+    {"category":"英検3級","title":"Part 2","words":[
+      {"en":"positive","ja":"前向きな"},{"en":"prepare","ja":"準備する"},{"en":"provide","ja":"提供する"},{"en":"release","ja":"発売する"},{"en":"role","ja":"役割"},{"en":"serious","ja":"深刻な"},{"en":"support","ja":"支援する"},{"en":"tradition","ja":"伝統"},{"en":"variety","ja":"多様性"},{"en":"available","ja":"利用できる"}
+    ]},
+    {"category":"英検準2級","title":"Part 1","words":[
+      {"en":"benefit","ja":"利益"},{"en":"character","ja":"性格"},{"en":"communicate","ja":"伝える"},{"en":"control","ja":"管理する"},{"en":"develop","ja":"発達させる"},{"en":"effect","ja":"影響"},{"en":"emotion","ja":"感情"},{"en":"experience","ja":"経験"},{"en":"fail","ja":"失敗する"},{"en":"gain","ja":"得る"}
+    ]},
+    {"category":"英検準2級","title":"Part 2","words":[
+      {"en":"global","ja":"世界的な"},{"en":"impact","ja":"影響"},{"en":"individual","ja":"個人の"},{"en":"influence","ja":"影響を与える"},{"en":"injury","ja":"けが"},{"en":"nature","ja":"自然"},{"en":"obtain","ja":"手に入れる"},{"en":"reduce","ja":"減らす"},{"en":"skill","ja":"技能"},{"en":"source","ja":"源"}
+    ]},
+    {"category":"英検2級","title":"Part 1","words":[
+      {"en":"accurate","ja":"正確な"},{"en":"adopt","ja":"採用する"},{"en":"analyze","ja":"分析する"},{"en":"approve","ja":"承認する"},{"en":"asset","ja":"資産"},{"en":"circumstance","ja":"状況"},{"en":"concept","ja":"概念"},{"en":"contribute","ja":"貢献する"},{"en":"deliberate","ja":"慎重な"},{"en":"eliminate","ja":"取り除く"}
+    ]},
+    {"category":"英検2級","title":"Part 2","words":[
+      {"en":"fundamental","ja":"基本的な"},{"en":"hypothesis","ja":"仮説"},{"en":"implement","ja":"実行する"},{"en":"notify","ja":"通知する"},{"en":"previous","ja":"以前の"},{"en":"retain","ja":"保持する"},{"en":"significant","ja":"重要な"},{"en":"sufficient","ja":"十分な"},{"en":"undergo","ja":"経験する"},{"en":"vast","ja":"広大な"}
+    ]},
+    {"category":"英検準1級","title":"Part 1","words":[
+      {"en":"abandon","ja":"捨てる"},{"en":"accumulate","ja":"蓄積する"},{"en":"ambiguous","ja":"曖昧な"},{"en":"anticipate","ja":"予想する"},{"en":"assess","ja":"評価する"},{"en":"collapse","ja":"崩壊する"},{"en":"conflict","ja":"対立"},{"en":"consequence","ja":"結果"},{"en":"coordinate","ja":"調整する"},{"en":"dispute","ja":"論争"}
+    ]},
+    {"category":"英検準1級","title":"Part 2","words":[
+      {"en":"dominant","ja":"支配的な"},{"en":"endeavor","ja":"努力"},{"en":"exploit","ja":"利用する"},{"en":"feasible","ja":"実現可能な"},{"en":"hostile","ja":"敵意のある"},{"en":"inevitable","ja":"避けられない"},{"en":"intricate","ja":"複雑な"},{"en":"persuade","ja":"説得する"},{"en":"precise","ja":"正確な"},{"en":"sustain","ja":"持続させる"}
+    ]},
+    {"category":"英検1級","title":"Part 1","words":[
+      {"en":"alleviate","ja":"和らげる"},{"en":"ameliorate","ja":"改善する"},{"en":"audacious","ja":"大胆な"},{"en":"cynical","ja":"冷笑的な"},{"en":"dilemma","ja":"板挟み"},{"en":"eloquent","ja":"雄弁な"},{"en":"fragile","ja":"もろい"},{"en":"hierarchy","ja":"階層"},{"en":"illuminate","ja":"照らす"},{"en":"meticulous","ja":"几帳面な"}
+    ]},
+    {"category":"英検1級","title":"Part 2","words":[
+      {"en":"ostensibly","ja":"表面上は"},{"en":"paradigm","ja":"範例"},{"en":"pragmatic","ja":"実用的な"},{"en":"prevalent","ja":"広く行き渡った"},{"en":"proliferate","ja":"急増する"},{"en":"resilient","ja":"回復力のある"},{"en":"scrutinize","ja":"精査する"},{"en":"tenacious","ja":"粘り強い"},{"en":"ubiquitous","ja":"至る所にある"},{"en":"vindicate","ja":"正当性を証明する"}
+    ]},
+    {"category":"日常会話","title":"基本フレーズ","words":[
+      {"en":"Good morning","ja":"おはよう"},{"en":"Thank you","ja":"ありがとう"},{"en":"See you later","ja":"またあとで"},{"en":"How much is it?","ja":"いくらですか"},{"en":"Nice to meet you","ja":"はじめまして"},{"en":"I'm sorry","ja":"ごめんなさい"},{"en":"Excuse me","ja":"すみません"},{"en":"Take care","ja":"気をつけて"},{"en":"No problem","ja":"どういたしまして"},{"en":"Let's go","ja":"行こう"}
+    ]},
+    {"category":"旅行","title":"基本","words":[
+      {"en":"passport","ja":"パスポート"},{"en":"luggage","ja":"荷物"},{"en":"ticket","ja":"切符"},{"en":"reservation","ja":"予約"},{"en":"departure","ja":"出発"},{"en":"arrival","ja":"到着"},{"en":"hotel","ja":"ホテル"},{"en":"tourist","ja":"観光客"},{"en":"map","ja":"地図"},{"en":"guide","ja":"ガイド"}
+    ]},
+    {"category":"食べ物","title":"基本","words":[
+      {"en":"breakfast","ja":"朝食"},{"en":"lunch","ja":"昼食"},{"en":"vegetable","ja":"野菜"},{"en":"fruit","ja":"果物"},{"en":"meat","ja":"肉"},{"en":"fish","ja":"魚"},{"en":"bread","ja":"パン"},{"en":"sugar","ja":"砂糖"},{"en":"salt","ja":"塩"},{"en":"delicious","ja":"おいしい"}
+    ]},
+    {"category":"ビジネス","title":"基本","words":[
+      {"en":"meeting","ja":"会議"},{"en":"schedule","ja":"予定"},{"en":"project","ja":"プロジェクト"},{"en":"client","ja":"顧客"},{"en":"contract","ja":"契約"},{"en":"budget","ja":"予算"},{"en":"report","ja":"報告書"},{"en":"deadline","ja":"締め切り"},{"en":"profit","ja":"利益"},{"en":"negotiate","ja":"交渉する"}
+    ]},
+    {"category":"学校","title":"基本","words":[
+      {"en":"homework","ja":"宿題"},{"en":"exam","ja":"試験"},{"en":"classroom","ja":"教室"},{"en":"student","ja":"生徒"},{"en":"subject","ja":"教科"},{"en":"principal","ja":"校長"},{"en":"lesson","ja":"授業"},{"en":"pencil","ja":"鉛筆"},{"en":"graduate","ja":"卒業する"},{"en":"club","ja":"部活"}
+    ]},
+    {"category":"天気・自然","title":"基本","words":[
+      {"en":"sunny","ja":"晴れた"},{"en":"cloudy","ja":"曇った"},{"en":"storm","ja":"嵐"},{"en":"wind","ja":"風"},{"en":"snow","ja":"雪"},{"en":"mountain","ja":"山"},{"en":"river","ja":"川"},{"en":"ocean","ja":"海"},{"en":"forest","ja":"森"},{"en":"temperature","ja":"気温"}
+    ]}
+  ]
+}

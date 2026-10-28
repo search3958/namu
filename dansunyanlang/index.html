@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6750a4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="英検単語">
+<title>英検単語 学習</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../m3color.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "@material/web/": "https://esm.run/@material/web/"
+      }
+    }
+  </script>
+  <script type="module">
+    import '@material/web/all.js';
+    import {styles as typescaleStyles} from '@material/web/typography/md-typescale-styles.js';
+
+    document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+  </script>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+md-tabs#modeTabs {border-radius: 99px;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;overflow:hidden;font-family:"Noto Sans JP",system-ui,sans-serif;
+  background:var(--md-sys-color-surface);color:var(--md-sys-color-on-surface)}
+.material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400;user-select:none}
+
+/* ---- ページ遷移 ---- */
+#pageList{position:fixed;inset:0;overflow-y:auto;background:var(--md-sys-color-surface);z-index:1;transition:transform .5s cubic-bezier(.2,.8,.2,1),filter .5s}
+.page{position:fixed;inset:0;overflow-y:auto;background:var(--md-sys-color-surface);z-index:10;transform:translateX(100%);
+  transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s;box-shadow:-10px 0 30px rgba(0,0,0,.12)}
+#pageStudy{z-index:20;overflow:hidden}
+.page.show{transform:translateX(0)}
+.under{transform:translateX(-22%)!important;filter:brightness(.94)}
+
+/* ---- ヘッダー（M3 Top App Bar相当） ---- */
+.appbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;
+  padding:8px 12px 8px 8px;min-height:64px;background:var(--md-sys-color-surface);color:var(--md-sys-color-on-surface)}
+.appbar .md-typescale-title-large{margin:0}
+.appbar .md-typescale-body-medium{margin:0}
+.muted{color:var(--md-sys-color-on-surface-variant);font-size:13px}
+.grow{flex:1;min-width:0}
+.pad,.mlist{max-width:720px;margin:0 auto;padding:16px}
+.card{background:var(--md-sys-color-surface-container-low);color:var(--md-sys-color-on-surface);border-radius:20px;padding:16px;margin-bottom:12px}
+.cardtitle{font-weight:500;margin-bottom:8px}
+.empty{text-align:center;padding:32px 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.danger{--md-text-button-label-text-color:var(--md-sys-color-error)}
+
+/* ---- インストールカード ---- */
+.install-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* ---- 教材カード ---- */
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.mcard{animation:cardIn .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 70ms)}
+#matList.noanim .mcard{animation:none}
+.mactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+/* ---- 詳細 ---- */
+.stats{display:flex;text-align:center}
+.stat{flex:1}
+.stat b{display:block;font-size:22px;font-weight:500}
+.hist{display:flex;justify-content:space-between;gap:8px;padding:8px 0;
+  border-bottom:1px solid var(--md-sys-color-outline-variant);font-size:14px}
+.scroll{max-height:320px;overflow:auto}
+svg text{font-size:11px;fill:var(--md-sys-color-on-surface-variant)}
+
+/* ---- 学習画面 ---- */
+.study{display:flex;flex-direction:column;height:100%}
+#prog{width:100%}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:hidden}
+@keyframes qIn{from{opacity:0;transform:translateX(90px)}to{opacity:1;transform:none}}
+.qcard{width:100%;max-width:560px;text-align:center;animation:qIn .5s cubic-bezier(.2,.8,.2,1) both}
+.qhead{color:var(--md-sys-color-on-surface-variant);font-size:14px;margin-bottom:8px}
+.word{font-size:44px;font-weight:500;margin:12px 0 28px;word-break:break-word;line-height:1.25}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choices md-outlined-button{display:flex;width:100%;min-height:58px;white-space:normal;border-radius:16px}
+.hit{background:var(--md-sys-color-tertiary-container)!important;color:var(--md-sys-color-on-tertiary-container)!important}
+.miss{background:var(--md-sys-color-error-container)!important;color:var(--md-sys-color-on-error-container)!important}
+.spell{margin-bottom:16px}
+.spell md-outlined-text-field{width:100%}
+.foot{text-align:center;padding:12px}
+
+/* 正解・不正解の演出 */
+.fb{position:fixed;left:50%;top:38%;z-index:100;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;
+  transform:translate(-50%,-50%);animation:fbPop 1s cubic-bezier(0.5,0,.63,.23) forwards}
+.fb .material-symbols-rounded{font-size:120px;font-variation-settings:'FILL' 1,'wght' 500}
+.fb .t{font-size:26px;font-weight:700}
+.fb.ok{color:var(--md-sys-color-tertiary)}
+.fb.ng{color:var(--md-sys-color-error)}
+@keyframes fbPop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+  28%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  55%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-170%) scale(1)}
+}
+.sum .big{font-size:96px;font-weight:500;line-height:1;margin-top:8px}
+md-linear-progress{width:100%}
+
+/* ---- ダイアログ ---- */
+.dlg-body{display:flex;flex-direction:column;gap:16px;max-width:720px;margin:0 auto;width:100%}
+.dlg-col{display:flex;flex-direction:column;gap:12px}
+.dlg-body md-outlined-text-field,.dlg-body md-outlined-select{width:100%}
+#dbList{padding:0;border-radius:16px;background:var(--md-sys-color-surface-container-low)}
+</style>
+</head>
+<body>
+
+<!-- 教材一覧 -->
+<div id="pageList">
+  <header class="appbar">
+    <div class="grow"><div class="md-typescale-title-large">教材</div></div>
+    <md-filled-button id="addMat"><span class="material-symbols-rounded" slot="icon">add</span>教材を作成</md-filled-button>
+  </header>
+  <div class="mlist">
+    <section class="card" id="installCard" hidden>
+      <div class="row">
+        <span class="material-symbols-rounded">install_mobile</span>
+        <div class="grow">
+          <div class="md-typescale-title-medium">ホーム画面に追加</div>
+          <div class="muted">アプリのように素早く開けて、オフラインでも使えます</div>
+        </div>
+      </div>
+      <div class="install-actions">
+        <md-filled-tonal-button id="installBtn">追加する</md-filled-tonal-button>
+        <md-text-button id="installLater">あとで</md-text-button>
+      </div>
+    </section>
+    <div id="matList"></div>
+  </div>
+</div>
+
+<!-- 詳細 -->
+<section class="page" id="pageDetail" hidden></section>
+
+<!-- 学習（全画面） -->
+<section class="page" id="pageStudy" hidden>
+  <div class="study">
+    <header class="appbar">
+      <md-icon-button id="stClose" aria-label="閉じる"><span class="material-symbols-rounded">close</span></md-icon-button>
+      <div class="grow">
+        <div class="md-typescale-title-large" id="sessName"></div>
+        <div class="muted" id="phaseLbl"></div>
+      </div>
+    </header>
+    <md-linear-progress id="prog" value="0"></md-linear-progress>
+    <div class="stage"><div id="qArea" style="width:100%;display:flex;justify-content:center"></div></div>
+    <div class="muted foot" id="counts"></div>
+  </div>
+</section>
+
+<!-- 教材の作成・編集（全画面） -->
+<md-dialog id="matDlg" fullscreen>
+  <div slot="headline" id="dlgTitle">教材を作成</div>
+  <div slot="content" class="dlg-body">
+    <md-tabs id="modeTabs">
+      <md-primary-tab>手動で</md-primary-tab>
+      <md-primary-tab>既存から</md-primary-tab>
+    </md-tabs>
+
+    <md-outlined-text-field id="mName" label="教材名"></md-outlined-text-field>
+
+    <div id="panelManual" class="dlg-col">
+      <div class="row">
+        <span class="muted grow">英単語,日本語訳 を1行に1つ（2語以上）</span>
+        <md-text-button id="mSample">サンプル入力</md-text-button>
+      </div>
+      <md-outlined-text-field id="mWords" type="textarea" rows="12" label="単語"></md-outlined-text-field>
+    </div>
+
+    <div id="panelDb" class="dlg-col" hidden>
+      <md-outlined-select id="dbCat" label="カテゴリ" hidden></md-outlined-select>
+      <div class="muted" id="dbMsg"></div>
+      <md-list id="dbList"></md-list>
+    </div>
+  </div>
+  <div slot="actions">
+    <md-text-button id="mDelete" class="danger" style="margin-right:auto" hidden>削除</md-text-button>
+    <md-text-button id="mCancel">キャンセル</md-text-button>
+    <md-filled-button id="mSave">保存</md-filled-button>
+  </div>
+</md-dialog>
+
+<!-- 削除確認 -->
+<md-dialog id="delDlg">
+  <div slot="headline">教材を削除しますか？</div>
+  <div slot="content">「<span id="delName"></span>」と学習記録がすべて削除されます。この操作は取り消せません。</div>
+  <div slot="actions">
+    <md-text-button id="delCancel">キャンセル</md-text-button>
+    <md-filled-button id="delOk">削除する</md-filled-button>
+  </div>
+</md-dialog>
+
+<!-- ホーム画面への追加方法（iOS / 手動） -->
+<md-dialog id="iosDlg">
+  <div slot="headline">ホーム画面に追加</div>
+  <div slot="content">
+    <p style="margin:0 0 12px">iPhone / iPad（Safari）：画面下の共有ボタン（□に↑）をタップし、「ホーム画面に追加」を選んでください。</p>
+    <p style="margin:0">Android（Chrome）：右上のメニュー（⋮）から「アプリをインストール」または「ホーム画面に追加」を選んでください。</p>
+  </div>
+  <div slot="actions">
+    <md-filled-button id="iosOk">わかった</md-filled-button>
+  </div>
+</md-dialog>
+
+<script>
+(() => {
+const KEY = 'eiken-vocab-v1';
+const DB_URL = 'words.json';
+const SAMPLE = 'apple,りんご\nbook,本\ncat,ねこ\ndog,犬\neat,食べる\nfamily,家族\ngo,行く\nhappy,うれしい\nschool,学校\nwater,水\nbig,大きい\nlike,好きである';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
+const fmt = t => new Date(t).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+const icon = n => `<span class="material-symbols-rounded">${n}</span>`;
+const catOf = m => m.category ?? m.grade ?? '手動';
+const parseLine = line => {
+  const i = line.search(/[,\t]/);
+  if (i < 0) return null;
+  const en = line.slice(0, i).trim(), ja = line.slice(i + 1).trim();
+  return en && ja ? { en, ja } : null;
+};
+
+// ---- 保存 ----
+let data = { materials: [] };
+try {
+  const raw = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (raw && Array.isArray(raw.materials)) data = raw;
+} catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} };
+
+let S = null;
+let detailId = null;
+
+// ---- ページスタック ----
+const pageList = $('#pageList'), pageDetail = $('#pageDetail'), pageStudy = $('#pageStudy');
+const stack = [];
+function openPage(el) {
+  const prev = stack.length ? stack[stack.length - 1] : pageList;
+  prev.classList.add('under');
+  stack.push(el);
+  el.hidden = false;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  requestAnimationFrame(() => el.classList.add('show'));
+}
+function closePage(el) {
+  const i = stack.indexOf(el);
+  if (i < 0) return;
+  const prev = i === 0 ? pageList : stack[i - 1];
+  stack.splice(i, 1);
+  el.classList.remove('show');
+  prev.classList.remove('under');
+  setTimeout(() => { if (!el.classList.contains('show')) el.hidden = true; }, 520);
+}
+
+// ---- 教材一覧 ----
+const matList = $('#matList');
+function renderList(anim = true) {
+  matList.classList.toggle('noanim', !anim);
+  if (!data.materials.length) {
+    matList.innerHTML = `<div class="card empty"><div class="muted" style="margin-bottom:12px">教材がまだありません</div><md-filled-button data-add>教材を作成</md-filled-button></div>`;
+    return;
+  }
+  matList.innerHTML = data.materials.map((m, i) => {
+    const sess = m.sessions.filter(s => s.total > 0);
+    const last = sess.at(-1);
+    return `<article class="card mcard" style="--i:${i}">
+      <div class="md-typescale-title-medium">${esc(m.name)}</div>
+      <div class="muted">${esc(catOf(m))} ・ ${m.words.length}語 ・ 学習${sess.length}回${last ? ` ・ 直近${last.score}点` : ''}</div>
+      <div class="mactions">
+        <md-filled-button data-study="${m.id}">学習開始</md-filled-button>
+        <md-outlined-button data-detail="${m.id}">詳細</md-outlined-button>
+        <span class="grow"></span>
+        <md-icon-button data-edit="${m.id}" aria-label="編集">${icon('edit')}</md-icon-button>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+matList.addEventListener('click', e => {
+  if (e.target.closest('[data-add]')) return openForm(null);
+  const st = e.target.closest('[data-study]');
+  if (st) return startStudy(st.dataset.study);
+  const dt = e.target.closest('[data-detail]');
+  if (dt) { renderDetail(dt.dataset.detail); return openPage(pageDetail); }
+  const ed = e.target.closest('[data-edit]');
+  if (ed) openForm(ed.dataset.edit);
+});
+$('#addMat').addEventListener('click', () => openForm(null));
+
+// ---- 既存単語データ（words.json） ----
+let DB = null;
+async function loadDB() {
+  if (DB) return DB;
+  try {
+    const r = await fetch(DB_URL, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(String(r.status));
+    const json = await r.json();
+    if (!Array.isArray(json.sets)) throw new Error('invalid');
+    DB = json;
+  } catch (e) {
+    DB = null;
+  }
+  return DB;
+}
+
+// ---- 教材の作成・編集 ----
+let editId = null;
+let selSet = -1;
+let selCat = null;
+const modeTabs = $('#modeTabs');
+
+function setMode(mode) {
+  $('#panelManual').hidden = mode !== 'manual';
+  $('#panelDb').hidden = mode !== 'db';
+}
+modeTabs.addEventListener('change', async () => {
+  const mode = modeTabs.activeTabIndex === 1 ? 'db' : 'manual';
+  setMode(mode);
+  if (mode === 'db') await fillDb();
+});
+
+async function fillDb() {
+  const db = await loadDB();
+  const sel = $('#dbCat');
+  if (!db) {
+    sel.hidden = true;
+    $('#dbList').innerHTML = '';
+    $('#dbMsg').textContent = '単語データ（words.json）を読み込めませんでした。';
+    return;
+  }
+  $('#dbMsg').textContent = '';
+  const cats = [...new Set(db.sets.map(s => s.category))];
+  sel.hidden = false;
+  sel.innerHTML = cats.map(c => `<md-select-option value="${esc(c)}"><div slot="headline">${esc(c)}</div></md-select-option>`).join('');
+  if (!selCat || !cats.includes(selCat)) selCat = cats[0];
+  await new Promise(r => requestAnimationFrame(r));
+  sel.value = selCat;
+  renderDbList();
+}
+
+$('#dbCat').addEventListener('change', e => {
+  selCat = e.target.value;
+  renderDbList();
+});
+
+function renderDbList() {
+  if (!DB) return;
+  const list = $('#dbList');
+  list.innerHTML = DB.sets
+    .map((s, i) => ({ s, i }))
+    .filter(x => x.s.category === selCat)
+    .map(({ s, i }) => `
+      <md-list-item type="button" data-set="${i}">
+        <div slot="headline">${esc(s.title)}</div>
+        <div slot="supporting-text">${s.words.length}語 ・ ${esc(s.words.slice(0, 3).map(w => w.en).join(', '))} …</div>
+        <md-radio slot="end" name="dbset" data-set="${i}" tabindex="-1" ${i === selSet ? 'checked' : ''}></md-radio>
+      </md-list-item>`).join('');
+}
+
+$('#dbList').addEventListener('click', e => {
+  const it = e.target.closest('[data-set]');
+  if (!it || !DB) return;
+  selSet = +it.dataset.set;
+  const s = DB.sets[selSet];
+  $('#mName').value = `${s.category} ${s.title}`;
+  $('#mName').error = false;
+  $('#dbMsg').textContent = '';
+  renderDbList();
+});
+
+function openForm(id) {
+  editId = id || null;
+  const m = id ? data.materials.find(x => x.id === id) : null;
+  $('#dlgTitle').textContent = m ? '教材を編集' : '教材を作成';
+  $('#mName').value = m ? m.name : '';
+  $('#mName').error = false;
+  $('#mWords').value = m ? m.words.map(w => `${w.en},${w.ja}`).join('\n') : '';
+  $('#mWords').error = false;
+  $('#dbMsg').textContent = '';
+  selSet = -1;
+  modeTabs.hidden = !!m;
+  modeTabs.activeTabIndex = 0;
+  setMode('manual');
+  $('#mDelete').hidden = !m;
+  $('#matDlg').show();
+}
+
+$('#mSample').addEventListener('click', () => {
+  $('#mWords').value = SAMPLE;
+  if (!$('#mName').value.trim()) $('#mName').value = 'サンプル単語';
+});
+$('#mCancel').addEventListener('click', () => $('#matDlg').close());
+
+$('#mSave').addEventListener('click', () => {
+  const name = $('#mName').value.trim();
+  if (!name) {
+    $('#mName').error = true;
+    $('#mName').errorText = '教材名を入力してください';
+    return;
+  }
+  const isDb = !editId && modeTabs.activeTabIndex === 1;
+  let words, category = null;
+
+  if (isDb) {
+    if (selSet < 0 || !DB) {
+      $('#dbMsg').textContent = '単語セットを選んでください';
+      return;
+    }
+    const s = DB.sets[selSet];
+    words = s.words.map(w => ({ en: w.en, ja: w.ja }));
+    category = s.category;
+  } else {
+    words = $('#mWords').value.split('\n').map(parseLine).filter(Boolean);
+    if (words.length < 2) {
+      $('#mWords').error = true;
+      $('#mWords').errorText = '2語以上入力してください';
+      return;
+    }
+  }
+
+  if (editId) {
+    const m = data.materials.find(x => x.id === editId);
+    if (m) Object.assign(m, { name, words });
+  } else {
+    data.materials.push({
+      id: uid(), name, words,
+      category: category ?? '手動',
+      sessions: [], createdAt: Date.now()
+    });
+  }
+  save();
+  $('#matDlg').close();
+  renderList(true);
+  if (detailId && stack.at(-1) === pageDetail) renderDetail(detailId);
+});
+
+// ---- 削除（編集ダイアログ内のボタンから。確認を必ず挟む） ----
+let delId = null, delFromEdit = false, delDone = false;
+$('#mDelete').addEventListener('click', () => {
+  const id = editId;
+  $('#matDlg').close();
+  askDelete(id, true);
+});
+
+function askDelete(id, fromEdit = false) {
+  const m = data.materials.find(x => x.id === id);
+  if (!m) return;
+  delId = id;
+  delFromEdit = fromEdit;
+  delDone = false;
+  $('#delName').textContent = m.name;
+  $('#delDlg').show();
+}
+$('#delCancel').addEventListener('click', () => $('#delDlg').close());
+// 戻る操作（Esc・背景タップ）でも編集画面に戻す
+$('#delDlg').addEventListener('close', () => {
+  if (!delDone && delFromEdit && delId) openForm(delId);
+});
+$('#delOk').addEventListener('click', () => {
+  delDone = true;
+  data.materials = data.materials.filter(m => m.id !== delId);
+  save();
+  $('#delDlg').close();
+  if (detailId === delId && stack.includes(pageDetail)) closePage(pageDetail);
+  renderList(false);
+});
+
+// ---- 詳細 ----
+function bucket(vals) {
+  const n = vals.length;
+  if (n <= 20) return vals.map((v, i) => ({ v, label: String(i + 1) }));
+  const out = [];
+  for (let i = 0; i < 20; i++) {
+    const a = Math.floor(i * n / 20), b = Math.floor((i + 1) * n / 20);
+    out.push({ v: mean(vals.slice(a, b)), label: `${a + 1}-${b}` });
+  }
+  return out;
+}
+function chartSVG(points) {
+  const W = 640, H = 260, L = 40, R = 12, T = 14, B = 44;
+  const iw = W - L - R, ih = H - T - B, N = points.length;
+  const X = i => N === 1 ? L + iw / 2 : L + iw * i / (N - 1);
+  const Y = v => T + ih * (1 - v / 100);
+  let g = '';
+  for (const k of [0, 25, 50, 75, 100]) {
+    g += `<line x1="${L}" x2="${W - R}" y1="${Y(k)}" y2="${Y(k)}" style="stroke:var(--md-sys-color-outline-variant)"/><text x="${L - 6}" y="${Y(k) + 4}" text-anchor="end">${k}</text>`;
+  }
+  g += `<polyline points="${points.map((p, i) => `${X(i)},${Y(p.v)}`).join(' ')}" fill="none" stroke-width="2.5" style="stroke:var(--md-sys-color-primary)"/>`;
+  points.forEach((p, i) => {
+    g += `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4" style="fill:var(--md-sys-color-primary)"><title>${esc(p.label)}: ${p.v.toFixed(1)}点</title></circle>`;
+    g += `<text x="${X(i)}" y="${H - B + 16}" text-anchor="middle">${esc(p.label)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="点数の推移">${g}</svg>`;
+}
+
+function renderDetail(id) {
+  detailId = id;
+  const m = data.materials.find(x => x.id === id);
+  if (!m) return closePage(pageDetail);
+  const sess = m.sessions.filter(s => s.total > 0);
+  let body;
+  if (!sess.length) {
+    body = '<div class="card empty muted">学習記録はまだありません</div>';
+  } else {
+    const scores = sess.map(s => s.score);
+    const wrong = {};
+    sess.forEach(s => s.logs.forEach(l => { if (!l.ok) wrong[l.en] = (wrong[l.en] || 0) + 1; }));
+    const top = Object.entries(wrong).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const rows = [...sess].reverse().map(s =>
+      `<div class="hist"><span>${fmt(s.at)}</span><span class="muted">${s.correct}/${s.total}回答 ・ ${s.completed ? '完了' : '中断'}</span><strong>${s.score}点</strong></div>`).join('');
+    body = `
+      <div class="card stats">
+        <div class="stat"><span class="muted">学習回数</span><b>${sess.length}</b></div>
+        <div class="stat"><span class="muted">平均点</span><b>${mean(scores).toFixed(1)}</b></div>
+        <div class="stat"><span class="muted">最高点</span><b>${Math.max(...scores)}</b></div>
+        <div class="stat"><span class="muted">直近</span><b>${scores.at(-1)}</b></div>
+      </div>
+      <div class="card">
+        <div class="cardtitle">点数の推移</div>
+        <div class="muted" style="margin-bottom:8px">${sess.length > 20 ? `全${sess.length}回を20区間に分け、各区間の平均点を表示` : `全${sess.length}回の点数`}</div>
+        ${chartSVG(bucket(scores))}
+      </div>
+      <div class="card">
+        <div class="cardtitle">よく間違える単語</div>
+        ${top.length ? top.map(([en, n]) => `<div class="hist"><span>${esc(en)}</span><span class="muted">${n}回誤答</span></div>`).join('') : '<div class="muted">誤答はありません</div>'}
+      </div>
+      <div class="card">
+        <div class="cardtitle">学習履歴（新しい順）</div>
+        <div class="scroll">${rows}</div>
+      </div>`;
+  }
+  pageDetail.innerHTML = `
+    <header class="appbar">
+      <md-icon-button data-back aria-label="戻る">${icon('arrow_back')}</md-icon-button>
+      <div class="grow">
+        <div class="md-typescale-title-large">${esc(m.name)}</div>
+        <div class="muted">${esc(catOf(m))} ・ ${m.words.length}語</div>
+      </div>
+      <md-icon-button data-edit="${m.id}" aria-label="編集">${icon('edit')}</md-icon-button>
+      <md-filled-button data-study="${m.id}">学習開始</md-filled-button>
+    </header>
+    <div class="pad">
+      ${body}
+      <div class="card">
+        <div class="cardtitle">単語（${m.words.length}語）</div>
+        <div class="scroll">${m.words.map(w => `<div class="hist"><span>${esc(w.en)}</span><span class="muted">${esc(w.ja)}</span></div>`).join('')}</div>
+      </div>
+    </div>`;
+}
+pageDetail.addEventListener('click', e => {
+  if (e.target.closest('[data-back]')) return closePage(pageDetail);
+  const ed = e.target.closest('[data-edit]');
+  if (ed) return openForm(ed.dataset.edit);
+  const st = e.target.closest('[data-study]');
+  if (st) startStudy(st.dataset.study);
+});
+
+// ---- 学習セッション ----
+// 流れ：全単語の選択 → 正解した単語を順にスペル入力 → 不正解だった単語は次の周で再び選択から
+function newSession(m) {
+  return {
+    mat: m,
+    choiceQ: shuffle(m.words.map((_, i) => i)),
+    spellQ: [], retry: [],
+    cycle: 1, done: 0, correct: 0, total: 0, logs: [],
+    started: Date.now(), state: 'run', phase: 'choice',
+    cur: null, dir: 'en', busy: false
+  };
+}
+function later(ms, fn) {
+  const me = S;
+  setTimeout(() => { if (S === me) fn(); }, ms);
+}
+
+function startStudy(id) {
+  const m = data.materials.find(x => x.id === id);
+  if (!m) return;
+  S = newSession(m);
+  $('#qArea').innerHTML = '';
+  updateProgress();
+  openPage(pageStudy);
+  later(380, nextStep);
+}
+function restart() {
+  const m = S.mat;
+  S = newSession(m);
+  $('#qArea').innerHTML = '';
+  updateProgress();
+  later(250, nextStep);
+}
+
+function nextStep() {
+  if (!S) return;
+  if (S.choiceQ.length) { S.phase = 'choice'; S.cur = S.choiceQ.shift(); return showChoice(); }
+  if (S.spellQ.length) { S.phase = 'spell'; S.cur = S.spellQ.shift(); return showSpell(); }
+  if (S.retry.length) { S.choiceQ = shuffle(S.retry); S.retry = []; S.cycle++; return nextStep(); }
+  finish();
+}
+
+function setQ(html) {
+  $('#qArea').innerHTML = `<div class="qcard">${html}</div>`;
+}
+
+function updateProgress() {
+  if (!S) return;
+  const N = S.mat.words.length;
+  $('#prog').value = S.done / N;
+  $('#counts').textContent = `完了 ${S.done}/${N}語 ・ 正解 ${S.correct}/${S.total}回答`;
+  const phase = S.phase === 'choice' ? '選択' : S.phase === 'spell' ? 'スペル入力' : '';
+  $('#phaseLbl').textContent = `${catOf(S.mat)} ・ ${S.cycle > 1 ? `${S.cycle}周目 ・ ` : ''}${phase}`;
+}
+
+function showChoice() {
+  const w = S.mat.words[S.cur];
+  S.busy = false;
+  S.dir = Math.random() < 0.5 ? 'en' : 'ja';
+  const key = S.dir === 'en' ? 'ja' : 'en';
+  const correct = w[key];
+  const pool = [...new Set(S.mat.words.filter(x => x !== w).map(x => x[key]).filter(v => v !== correct))];
+  const opts = shuffle([correct, ...shuffle(pool).slice(0, 3)]);
+  const prompt = S.dir === 'en' ? w.en : w.ja;
+  setQ(`
+    <div class="qhead">${S.dir === 'en' ? '英単語の日本語訳を選択' : '日本語訳に合う英単語を選択'}</div>
+    <div class="word">${esc(prompt)}</div>
+    <div class="choices">${opts.map((o, k) => `<md-outlined-button data-k="${k}">${esc(o)}</md-outlined-button>`).join('')}</div>`);
+  updateProgress();
+  const btns = [...$('#qArea').querySelectorAll('md-outlined-button')];
+  btns.forEach(b => b.addEventListener('click', () => {
+    if (S.busy) return;
+    S.busy = true;
+    answerChoice(opts[+b.dataset.k], correct, btns, opts, w);
+  }));
+}
+
+function answerChoice(picked, correct, btns, opts, w) {
+  const idx = S.cur, ok = picked === correct;
+  log('choice', w, ok, picked, S.dir);
+  if (ok) {
+    S.spellQ.push(idx);
+    showFx(true);
+    later(260, nextStep);
+    return;
+  }
+  S.retry.push(idx);
+  btns.forEach((b, k) => {
+    if (opts[k] === correct) b.classList.add('hit');
+    else if (opts[k] === picked) b.classList.add('miss');
+  });
+  showFx(false);
+  later(700, nextStep);
+}
+
+function showSpell() {
+  const w = S.mat.words[S.cur];
+  S.busy = false;
+  setQ(`
+    <div class="qhead">日本語訳から英単語をスペル入力</div>
+    <div class="word">${esc(w.ja)}</div>
+    <div class="spell"><md-outlined-text-field id="spellIn" label="英単語" autocomplete="off" spellcheck="false"></md-outlined-text-field></div>
+    <md-filled-button id="spellSubmit">回答</md-filled-button>`);
+  const inp = $('#spellIn');
+  const go = () => { if (S.busy) return; S.busy = true; submitSpell(inp.value, w); };
+  $('#spellSubmit').addEventListener('click', go);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  updateProgress();
+  later(450, () => inp.focus());
+}
+
+function submitSpell(val, w) {
+  const idx = S.cur, ok = norm(val) === norm(w.en);
+  log('spell', w, ok, val.trim(), 'ja');
+  if (ok) {
+    S.done++;
+    showFx(true);
+    later(260, nextStep);
+  } else {
+    S.retry.push(idx);
+    showFx(false);
+    later(700, nextStep);
+  }
+  updateProgress();
+}
+
+function log(mode, w, ok, answer, dir) {
+  S.total++;
+  if (ok) S.correct++;
+  S.logs.push({ en: w.en, ja: w.ja, mode, dir, ok, answer, at: Date.now() });
+}
+
+function showFx(ok) {
+  const el = document.createElement('div');
+  el.className = `fb ${ok ? 'ok' : 'ng'}`;
+  el.innerHTML = `${icon(ok ? 'check_circle' : 'cancel')}<span class="t">${ok ? '正解' : '不正解'}</span>`;
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+const scoreOf = s => Math.round(s.correct / s.total * 100);
+
+function saveSession(completed) {
+  if (!S || !S.total) return;
+  S.mat.sessions.push({
+    id: uid(), at: Date.now(), completed,
+    score: scoreOf(S), correct: S.correct, total: S.total,
+    words: S.mat.words.length, mastered: S.done,
+    seconds: Math.round((Date.now() - S.started) / 1000),
+    logs: S.logs
+  });
+  save();
+}
+
+function countUp(el, to, ms) {
+  const t0 = performance.now();
+  const step = t => {
+    const p = Math.min(1, (t - t0) / ms);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function finish() {
+  S.state = 'done';
+  S.phase = 'done';
+  saveSession(true);
+  updateProgress();
+  const sec = Math.round((Date.now() - S.started) / 1000);
+  setQ(`
+    <div class="sum">
+      <div class="big" id="bigScore">0</div>
+      <div class="muted">点</div>
+      <div class="muted" style="margin-top:8px">正解 ${S.correct} / 回答 ${S.total} ・ ${sec}秒 ・ ${S.cycle}周</div>
+      <div class="row" style="justify-content:center;margin-top:24px">
+        <md-outlined-button id="again">もう一度</md-outlined-button>
+        <md-filled-button id="sumClose">閉じる</md-filled-button>
+      </div>
+    </div>`);
+  countUp($('#bigScore'), scoreOf(S), 900);
+  $('#again').addEventListener('click', restart);
+  $('#sumClose').addEventListener('click', closeStudy);
+}
+
+function closeStudy() {
+  if (S && S.state === 'run' && S.total > 0) saveSession(false);
+  S = null;
+  closePage(pageStudy);
+  if (detailId && stack.at(-1) === pageDetail) renderDetail(detailId);
+  renderList(false);
+}
+$('#stClose').addEventListener('click', closeStudy);
+
+// ---- PWA：ホーム画面への追加 ----
+const installCard = $('#installCard');
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isDismissed = () => localStorage.getItem('pwa-dismissed') === '1';
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let deferredPrompt = null;
+
+function showInstall() {
+  if (!isStandalone && !isDismissed()) installCard.hidden = false;
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstall();
+});
+window.addEventListener('appinstalled', () => {
+  installCard.hidden = true;
+  deferredPrompt = null;
+});
+if (isIOS) showInstall();
+
+$('#installBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (choice.outcome === 'accepted') installCard.hidden = true;
+  } else {
+    $('#iosDlg').show();
+  }
+});
+$('#installLater').addEventListener('click', () => {
+  localStorage.setItem('pwa-dismissed', '1');
+  installCard.hidden = true;
+});
+$('#iosOk').addEventListener('click', () => $('#iosDlg').close());
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ---- 初期化 ----
+(async () => {
+  await Promise.all([
+    'md-filled-button', 'md-filled-tonal-button', 'md-outlined-button', 'md-text-button', 'md-icon-button',
+    'md-outlined-text-field', 'md-outlined-select', 'md-select-option', 'md-dialog',
+    'md-linear-progress', 'md-tabs', 'md-primary-tab', 'md-list', 'md-list-item', 'md-radio'
+  ].map(t => customElements.whenDefined(t)));
+  renderList(true);
+})();
+})();
+</script>
+</body>
+</html>
