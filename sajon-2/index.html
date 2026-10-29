@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>漢字変換・英単語辞書</title>
+<style>
+  :root {
+    --primary: #5500FF;
+    --primary-dark: #4400CC;
+    --primary-light: #EDE7FF;
+    --surface: #FFFFFF;
+    --bg: #F5F5F7;
+    --text: rgba(0,0,0,.87);
+    --text-2: rgba(0,0,0,.6);
+    --elev1: 0 1px 3px rgba(0,0,0,.2), 0 1px 1px rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12);
+    --elev4: 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px 0 rgba(0,0,0,.14), 0 1px 10px 0 rgba(0,0,0,.12);
+    --elev8: 0 5px 5px -3px rgba(0,0,0,.2), 0 8px 10px 1px rgba(0,0,0,.14), 0 3px 14px 2px rgba(0,0,0,.12);
+  }
+  @font-face {
+    font-family: "ChrmKorean";
+    src: url("https://search3958.github.io/project/chrm.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    unicode-range: U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF;
+  }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "ChrmKorean", Roboto, "Noto Sans JP", "Noto Sans KR", -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px;
+  }
+  .serif { font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif; }
+
+  /* App bar */
+  .appbar {
+    position: sticky; top: 0; z-index: 20; height: 64px; display: flex; align-items: center; gap: 12px;
+    padding: 0 16px 0 8px; background: var(--primary); color: #fff; box-shadow: var(--elev4);
+  }
+  .iconbtn {
+    width: 40px; height: 40px; flex: 0 0 40px; border: 0; border-radius: 50%; background: transparent;
+    color: inherit; font-size: 20px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    font-family: inherit; transition: background .15s;
+  }
+  .iconbtn:hover { background: rgba(255,255,255,.16); }
+  #appTitle { font-size: 20px; font-weight: 500; letter-spacing: .02em; flex: 1; white-space: nowrap; }
+  #appInput {
+    flex: 1; min-width: 0; height: 44px; padding: 6px 4px; font-size: 20px; font-weight: 500;
+    color: #fff; background: transparent; border: 0; border-bottom: 1px solid rgba(255,255,255,.6);
+    outline: none; font-family: inherit; letter-spacing: .02em; transition: border-color .15s;
+  }
+  #appInput::placeholder { color: rgba(255,255,255,.7); font-weight: 400; font-size: 16px; }
+  #appInput:focus { border-bottom: 2px solid #fff; padding-bottom: 5px; }
+  .status { font-size: 12px; opacity: .85; white-space: nowrap; }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 16px; }
+  .card-surface { background: var(--surface); border-radius: 4px; box-shadow: var(--elev1); }
+
+  /* Load box */
+  #loadBox { padding: 16px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  #loadBox p { margin: 0; color: var(--text-2); flex: 1; min-width: 200px; }
+  input[type=file] { font-size: 13px; }
+
+  /* Home cards */
+  .home-h { font-size: 16px; font-weight: 500; color: var(--text-2); margin: 8px 0 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .hcard {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left;
+    background: var(--surface); border: 0; border-radius: 4px; box-shadow: var(--elev1);
+    padding: 20px; cursor: pointer; font-family: inherit; color: var(--text); transition: box-shadow .15s, transform .15s;
+  }
+  .hcard:hover { box-shadow: var(--elev8); transform: translateY(-2px); }
+  .hg {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--primary-light); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; font-size: 28px; font-family: "ChrmKorean", "Noto Serif JP", "Yu Mincho", serif;
+  }
+  .ht { font-size: 18px; font-weight: 500; }
+  .hd { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; background: var(--surface); border-radius: 4px 4px 0 0; box-shadow: var(--elev1); overflow-x: auto;
+  }
+  .tab {
+    flex: 1; min-width: 130px; border: 0; background: transparent; padding: 14px 12px; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 500; color: var(--text-2); position: relative;
+    letter-spacing: .02em; transition: background .15s, color .15s;
+  }
+  .tab:hover { background: rgba(85,0,255,.06); }
+  .tab.active { color: var(--primary); }
+  .tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--primary); }
+  .tab-body {
+    background: var(--surface); border-radius: 0 0 4px 4px; box-shadow: var(--elev1);
+    padding: 16px; margin-top: 1px; min-height: 240px;
+  }
+  .tab-hint { color: var(--text-2); font-size: 12px; margin: 0 0 12px; }
+
+  /* Section headings */
+  .sec {
+    font-size: 13px; font-weight: 500; color: var(--primary); margin: 20px 0 10px;
+    letter-spacing: .02em; border-bottom: 1px solid rgba(0,0,0,.08); padding-bottom: 6px;
+  }
+  .sec:first-child { margin-top: 0; }
+  .cnt { color: var(--text-2); font-weight: 400; margin-left: 4px; }
+  .empty { color: var(--text-2); font-style: italic; margin: 8px 0; }
+  .note { color: var(--text-2); font-size: 12px; margin: 6px 0 0; }
+  .en { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.5; word-break: break-word; }
+  .sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+
+  /* Clickable items */
+  .clickable { cursor: pointer; }
+  .clickable:hover { box-shadow: var(--elev4); }
+
+  /* Grid cells */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+  .gcell {
+    background: var(--surface); box-shadow: var(--elev1); border-radius: 4px;
+    padding: 14px 8px 12px; text-align: center; transition: box-shadow .15s;
+  }
+  .gh { font-size: 48px; line-height: 1.1; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif; }
+  .gk { font-size: 14px; color: var(--primary); margin-top: 6px; min-height: 18px; }
+  .gcell .en { margin-top: 4px; font-size: 12px; }
+
+  /* List rows */
+  .lrow {
+    background: var(--surface); box-shadow: var(--elev1); border-radius: 4px;
+    padding: 12px 14px; margin-bottom: 8px; transition: box-shadow .15s;
+  }
+  .lline { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .rd-big { font-size: 22px; font-weight: 500; }
+  .rk { font-size: 16px; color: var(--primary); }
+  .kbig { font-size: 20px; font-weight: 500; color: var(--primary); }
+
+  /* English rows */
+  .erow {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: var(--surface); box-shadow: var(--elev1); border-radius: 4px;
+    padding: 12px 14px; margin-bottom: 8px; transition: box-shadow .15s;
+  }
+  .ek { font-size: 20px; font-weight: 500; color: var(--primary); min-width: 0; word-break: break-word; }
+  .eh { display: flex; align-items: baseline; gap: 8px; flex: 0 0 auto; }
+  .ehj { font-size: 28px; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif; }
+  .erd { font-size: 16px; color: var(--text-2); }
+
+  /* Translate view */
+  .tr-card { overflow: hidden; }
+  .tr-head {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .tr-lab { font-size: 13px; font-weight: 500; color: var(--primary); }
+  .tr-lab:last-child { text-align: left; }
+  .swap {
+    width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--primary-light); color: var(--primary);
+    font-size: 20px; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .swap:hover { background: #DCD2FF; }
+  .tr-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: 260px; }
+  .tr-in, .tr-out {
+    padding: 16px; min-height: 260px; font-size: 20px; line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+  }
+  .tr-in {
+    border: 0; outline: none; resize: vertical; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif;
+    background: var(--surface); color: var(--text);
+  }
+  .tr-out { background: #FAFAFC; border-left: 1px solid rgba(0,0,0,.08); color: var(--primary); }
+  .ph { color: rgba(0,0,0,.35); font-style: italic; font-size: 16px; }
+  @media (max-width: 640px) {
+    .tr-grid { grid-template-columns: 1fr; }
+    .tr-out { border-left: 0; border-top: 1px solid rgba(0,0,0,.08); }
+  }
+  .bgrid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .bchar {
+    background: var(--surface); box-shadow: var(--elev1); border-radius: 4px; padding: 10px; min-width: 150px; max-width: 220px; flex: 1 1 150px;
+  }
+  .bg { font-size: 36px; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif; text-align: center; margin-bottom: 6px; }
+  .cand { padding: 6px 8px; border-radius: 4px; margin-top: 4px; background: #FAFAFC; }
+  .cd { font-weight: 500; margin-right: 6px; }
+  .ck { color: var(--primary); font-size: 13px; }
+  .cen { display: block; color: var(--text-2); font-size: 12px; margin-top: 2px; word-break: break-word; }
+
+  /* English-Japanese dictionary */
+  .dict-panel { padding: 16px; }
+  .dict-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .dict-headline { font-size: 16px; font-weight: 500; }
+  .dict-status { color: var(--text-2); font-size: 12px; }
+  .dict-directions { margin-bottom: 14px; }
+  .dict-loadbox { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px; margin-bottom: 14px; background: #FAFAFC; border-radius: 4px; }
+  .dict-loadbox p { margin: 0; flex: 1 1 240px; color: var(--text-2); line-height: 1.5; }
+  .dict-hint { color: var(--text-2); font-size: 12px; margin: 0 0 12px; }
+  .dict-result-meta { color: var(--text-2); font-size: 12px; margin: 0 0 10px; }
+  .ej-row { background: var(--surface); box-shadow: var(--elev1); border-radius: 4px; padding: 12px 14px; margin-bottom: 8px; }
+  .ej-word { color: var(--primary); font-size: 18px; font-weight: 500; overflow-wrap: anywhere; }
+  .ej-meaning { margin-top: 5px; font-size: 14px; line-height: 1.65; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .ej-match { color: var(--text-2); font-size: 12px; margin-top: 5px; }
+
+  /* API dictionaries */
+  .api-panel { padding: 16px; }
+  .api-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .api-heading { font-size: 16px; font-weight: 500; }
+  .api-tabs { margin-bottom: 14px; }
+  .api-hint { color: var(--text-2); font-size: 12px; line-height: 1.6; margin: 0 0 12px; }
+  .api-actions { display: flex; justify-content: flex-end; margin: 0 0 14px; }
+  .api-search-button { border: 0; border-radius: 4px; padding: 10px 18px; background: var(--primary); color: #fff; font: inherit; cursor: pointer; }
+  .api-search-button:hover { background: var(--primary-dark); }
+  .api-search-button:disabled { cursor: wait; opacity: .65; }
+  .api-message { color: var(--text-2); padding: 12px 0; line-height: 1.6; }
+  .api-message.error { color: #B3261E; }
+  .api-source { color: var(--text-2); font-size: 12px; margin: 0 0 12px; }
+  .api-entry { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,.08); line-height: 1.7; overflow-wrap: anywhere; }
+  .api-entry:first-child { padding-top: 0; }
+  .api-entry:last-child { border-bottom: 0; }
+  .api-entry h2, .api-entry h3, .api-entry h4 { line-height: 1.35; }
+  .api-entry h2 { font-size: 21px; margin: 0 0 8px; }
+  .api-entry h3 { font-size: 17px; margin: 16px 0 6px; }
+  .api-entry h4 { font-size: 15px; margin: 12px 0 4px; }
+  .api-entry ul { padding-left: 22px; }
+  .api-entry li { margin: 4px 0; }
+  .api-korean, [lang="ko"] { font-family: "ChrmKorean", sans-serif; }
+  .api-korean .api-entry-title { color: var(--primary); font-size: 18px; font-weight: 500; }
+  .api-definition { margin: 5px 0 0; white-space: pre-wrap; }
+  @media (max-width: 640px) {
+    .api-panel { padding: 12px; }
+    .api-tabs .tab { min-width: 115px; padding: 12px 8px; }
+  }
+
+  /* Detail sheet */
+  .scrim {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.36);
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .sheet {
+    background: var(--surface); width: 100%; max-width: 720px; max-height: 88vh;
+    display: flex; flex-direction: column; border-radius: 12px 12px 0 0; box-shadow: var(--elev8);
+  }
+  @media (min-width: 720px) {
+    .scrim { align-items: center; }
+    .sheet { border-radius: 8px; }
+  }
+  .sheet-bar {
+    display: flex; align-items: center; gap: 4px; padding: 8px 8px 8px 12px; border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .sheet-bar .iconbtn { color: rgba(0,0,0,.6); }
+  .sheet-bar .iconbtn:hover { background: rgba(0,0,0,.06); }
+  .sheet-bar .iconbtn.on { color: var(--primary); }
+  .sheet-title { flex: 1; font-size: 16px; font-weight: 500; color: var(--text); padding-left: 4px; }
+  .sheet-body { overflow-y: auto; padding: 16px; }
+  .dhero { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+  .dglyph {
+    width: 88px; height: 88px; flex: 0 0 88px; border-radius: 50%; background: var(--primary-light); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; font-size: 52px; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif;
+  }
+  .dread { font-size: 26px; font-weight: 500; }
+  .dko { font-size: 18px; color: var(--primary); margin-top: 4px; }
+  .dblock { font-size: 14px; line-height: 1.6; word-break: break-word; background: #FAFAFC; border-radius: 4px; padding: 10px 12px; }
+  .raw { font-family: "ChrmKorean", ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--text-2); word-break: break-all; background: #FAFAFC; padding: 8px 10px; border-radius: 4px; }
+  .rel {
+    display: flex; gap: 12px; align-items: center; background: var(--surface); box-shadow: var(--elev1);
+    border-radius: 4px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; transition: box-shadow .15s;
+  }
+  .rel:hover { box-shadow: var(--elev4); }
+  .rel-h { font-size: 32px; font-family: "ChrmKorean", "Noto Serif JP", "Noto Serif KR", "Yu Mincho", serif; flex: 0 0 48px; text-align: center; }
+  .rel-b { min-width: 0; flex: 1; }
+  .rd { font-size: 16px; font-weight: 500; }
+  .via { font-size: 12px; color: var(--primary); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <button class="iconbtn" id="backBtn" title="戻る" hidden>←</button>
+  <span id="appTitle">漢字変換ツール</span>
+  <input id="appInput" type="text" autocomplete="off" spellcheck="false" hidden
+         placeholder="入力（例: 가게 / 仮 / falsehood）">
+  <span class="status" id="status">読み込み中…</span>
+</header>
+
+<!-- Home -->
+<main id="home" class="wrap">
+  <section class="card-surface" id="loadBox" hidden>
+    <p>hanja.txt を自動で読み込めませんでした（ブラウザがファイルを直接開いている場合に起こります）。hanja.txt を選択してください。</p>
+    <input type="file" id="fileInput" accept=".txt,text/plain">
+  </section>
+  <h2 class="home-h">機能を選択</h2>
+  <div class="cards">
+    <button class="hcard" data-view="tool" data-mode="hanja">
+      <span class="hg">漢</span>
+      <span class="ht">漢字変換</span>
+      <span class="hd">ハングルの読み → 漢字 ／ 漢字 → 読み</span>
+    </button>
+    <button class="hcard" data-view="tool" data-mode="native">
+      <span class="hg">固</span>
+      <span class="ht">固有語⇄漢字語</span>
+      <span class="hd">固有語 → 漢字 ／ 漢字 → 固有語</span>
+    </button>
+    <button class="hcard" data-view="tool" data-mode="english">
+      <span class="hg">英</span>
+      <span class="ht">英単語→漢字語</span>
+      <span class="hd">英語の意味から漢字語を検索</span>
+    </button>
+    <button class="hcard" data-view="vocab">
+      <span class="hg">辞</span>
+      <span class="ht">英単語辞書</span>
+      <span class="hd">英単語 → 日本語の意味 ／ 日本語の意味 → 英単語</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="ja">
+      <span class="hg">日</span>
+      <span class="ht">日本語辞書</span>
+      <span class="hd">Wiktionary APIで日本語の見出し語を検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="en">
+      <span class="hg">英</span>
+      <span class="ht">英英辞書</span>
+      <span class="hd">英単語の発音・品詞・英語定義を検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="ko">
+      <span class="hg">한</span>
+      <span class="ht">韓国語辞書</span>
+      <span class="hd">韓国語の見出し語を国立国語院のAPIで検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="ja-ko">
+      <span class="hg">日韓</span>
+      <span class="ht">日本語から韓国語辞典を検索</span>
+      <span class="hd">日本語の語句を韓国語辞典の検索語として使用</span>
+    </button>
+    <button class="hcard" data-view="translate">
+      <span class="hg">訳</span>
+      <span class="ht">漢字語翻訳</span>
+      <span class="hd">長文を貼り付けて読みに変換</span>
+    </button>
+    <button class="hcard" data-view="saved">
+      <span class="hg">★</span>
+      <span class="ht">保存済み</span>
+      <span class="hd">ブックマーク <span id="savedCount">0</span> 件</span>
+    </button>
+  </div>
+</main>
+
+<!-- Tools (漢字変換 / 固有語⇄漢字語 / 英単語→漢字語) -->
+<main id="tool" class="wrap" hidden>
+  <nav class="tabs">
+    <button class="tab tool-tab" data-mode="hanja">漢字変換</button>
+    <button class="tab tool-tab" data-mode="native">固有語⇄漢字語</button>
+    <button class="tab tool-tab" data-mode="english">英単語→漢字語</button>
+  </nav>
+  <section class="tab-body" id="result"></section>
+</main>
+
+<!-- English-Japanese dictionary -->
+<main id="vocab" class="wrap" hidden>
+  <section class="card-surface dict-panel">
+    <div class="dict-head">
+      <span class="dict-headline">英和・和英辞書</span>
+      <span class="dict-status" id="dictStatus" aria-live="polite">辞書を読み込み中…</span>
+    </div>
+    <nav class="tabs dict-directions" aria-label="検索方向">
+      <button class="tab dict-direction active" type="button" data-dict-direction="en-ja" aria-pressed="true">英単語 → 日本語の意味</button>
+      <button class="tab dict-direction" type="button" data-dict-direction="ja-en" aria-pressed="false">日本語の意味 → 英単語</button>
+    </nav>
+    <section class="dict-loadbox" id="dictLoadBox" hidden>
+      <p><code>ejdict-hand-utf8.txt</code> を自動で読み込めませんでした。HTMLと同じフォルダーに置くか、ここから辞書ファイルを選択してください。</p>
+      <input type="file" id="dictFileInput" accept=".txt,text/plain">
+    </section>
+    <p class="dict-hint" id="dictHint">英単語を入力すると、日本語の意味を検索します。</p>
+    <section id="dictResult" aria-live="polite"></section>
+  </section>
+</main>
+
+<!-- API dictionaries: API search only; no saved words or history -->
+<main id="apiDict" class="wrap" hidden>
+  <section class="card-surface api-panel">
+    <div class="api-head">
+      <span class="api-heading" id="apiHeading">日本語辞書</span>
+      <span class="dict-status" id="apiStatus" aria-live="polite">検索待機中</span>
+    </div>
+    <nav class="tabs api-tabs" aria-label="オンライン辞書">
+      <button class="tab api-dict-tab active" type="button" data-api-dict-tab="ja" aria-pressed="true">日本語辞書</button>
+      <button class="tab api-dict-tab" type="button" data-api-dict-tab="en" aria-pressed="false">英英辞書</button>
+      <button class="tab api-dict-tab" type="button" data-api-dict-tab="ko" aria-pressed="false">韓国語辞書</button>
+      <button class="tab api-dict-tab" type="button" data-api-dict-tab="ja-ko" aria-pressed="false">日本語で韓国語検索</button>
+    </nav>
+    <p class="api-hint" id="apiHint">日本語の見出し語を入力してください。</p>
+    <div class="api-actions">
+      <button id="apiSearchButton" class="api-search-button" type="button">検索</button>
+    </div>
+    <section id="apiResult" aria-live="polite">
+      <div class="api-message">検索語を入力して検索してください。</div>
+    </section>
+  </section>
+</main>
+
+<!-- Translate -->
+<main id="trans" class="wrap" hidden>
+  <section class="card-surface tr-card">
+    <div class="tr-head">
+      <span class="tr-lab" id="lab1">漢字</span>
+      <button class="swap" id="swap" title="入れ替え">⇄</button>
+      <span class="tr-lab" id="lab2">読み（ハングル）</span>
+    </div>
+    <div class="tr-grid">
+      <textarea id="trIn" class="tr-in" spellcheck="false"
+                placeholder="漢字語を貼り付け（例: 假想 仮想 可能性）"></textarea>
+      <div class="tr-out" id="trOut"><span class="ph">訳文</span></div>
+    </div>
+  </section>
+  <div id="trBreak"></div>
+</main>
+
+<!-- Saved -->
+<main id="saved" class="wrap" hidden>
+  <section class="tab-body" id="savedBody" style="margin-top:0"></section>
+</main>
+
+<!-- Detail sheet -->
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-bar">
+      <button class="iconbtn" id="dBack" title="前の項目" hidden>←</button>
+      <span class="sheet-title" id="dTitle">詳細</span>
+      <button class="iconbtn" id="dBm" title="ブックマーク">☆</button>
+      <button class="iconbtn" id="dClose" title="閉じる">✕</button>
+    </div>
+    <div class="sheet-body" id="dBody"></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ---------- State & data ---------- */
+let db = [];
+let byHanja = new Map(), byReading = new Map(), byKo = new Map(), byEn = new Map();
+let ejdb = [];
+let view = 'home', mode = 'hanja', trDir = 'h2r', dictDirection = 'en-ja';
+let apiDictType = 'ja';
+let apiRequestSerial = 0;
+let apiRequestController = null;
+const DICTIONARY_API_PROXY = 'https://bhwxeffktrxzfdmpfhpd.supabase.co/functions/v1/sajon';
+const KRDICT_API_KEY = 'EE34BD8FDD19B110D40B4BBE6766F801';
+let detailStack = [];
+const LIMIT = 80;
+const bookmarks = new Set(loadBM());
+
+const isHangul = ch => /^[\uAC00-\uD7A3]$/.test(ch);
+const isHanja  = ch => /^[\u3400-\u9FFF\uF900-\uFAFF]$/.test(ch);
+const CJK_RE   = /[\uAC00-\uD7A3\u3400-\u9FFF\uF900-\uFAFF]/;
+const LATIN_RE = /[A-Za-z]/;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const push = (m, k, v) => { if (!k) return; if (!m.has(k)) m.set(k, []); m.get(k).push(v); };
+const uniqBy = arr => { const m = new Map(); arr.forEach(x => { if (!m.has(x.id)) m.set(x.id, x); }); return [...m.values()]; };
+const key = e => `${e.hanja}|${e.reading}|${e.ko}`;
+
+function loadBM() { try { return JSON.parse(localStorage.getItem('hanjaBM') || '[]'); } catch (_) { return []; } }
+function saveBM() { try { localStorage.setItem('hanjaBM', JSON.stringify([...bookmarks])); } catch (_) {} }
+
+// 英語の意味だけ抜き出す
+function englishOf(rest) {
+  const s = rest.split(/[,;]/).map(t => t.trim())
+    .filter(t => LATIN_RE.test(t) && !CJK_RE.test(t))
+    .join(', ');
+  return s.length > 90 ? s.slice(0, 90) + '…' : s;
+}
+
+// Format: 仮=거짓 가, 假의 略字, falsehood, deception; vacation (6)
+function parse(text) {
+  const list = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('[')) continue;
+    const m = line.match(/^(\S)\s*=\s*(.+)$/);
+    if (!m || !isHanja(m[1])) continue;
+    const body = m[2].replace(/\(\d+\)\s*$/, '').trim();
+    const parts = body.split(/[,，]/);
+    const toks = parts[0].trim().split(/\s+/);
+    const reading = toks[toks.length - 1];
+    if (!isHangul(reading)) continue;
+    const rest = parts.slice(1).join(', ').trim();
+    list.push({
+      hanja: m[1], reading,
+      ko: toks.slice(0, -1).join(' '),
+      rest, en: englishOf(rest), raw: line
+    });
+  }
+  return list;
+}
+
+function buildIndex() {
+  byHanja = new Map(); byReading = new Map(); byKo = new Map(); byEn = new Map();
+  db.forEach((e, i) => {
+    e.id = i;
+    e.kos = e.ko ? e.ko.split(/\s+/) : [];
+    e.ens = e.en ? [...new Set(e.en.split(/,\s*/).map(s => s.toLowerCase()).filter(Boolean))] : [];
+    push(byHanja, e.hanja, e);
+    push(byReading, e.reading, e);
+    e.kos.forEach(k => push(byKo, k, e));
+    e.ens.forEach(w => push(byEn, w, e));
+  });
+}
+
+/* ---------- Render helpers ---------- */
+const sec  = (title, body) => `<h3 class="sec">${esc(title)}</h3>${body}`;
+const none = msg => `<p class="empty">${esc(msg)}</p>`;
+const more = n => n > LIMIT ? `<p class="note">ほか ${n - LIMIT} 件</p>` : '';
+const eng  = e => e.en ? `<div class="en">${esc(e.en)}</div>` : '';
+
+function gridCell(e, withEn) {
+  return `<div class="gcell clickable" data-id="${e.id}">
+    <div class="gh">${esc(e.hanja)}</div>
+    <div class="gk">${esc(e.ko)}</div>
+    ${withEn ? eng(e) : ''}
+  </div>`;
+}
+function readRow(e) {
+  return `<div class="lrow clickable" data-id="${e.id}">
+    <div class="lline"><span class="rd-big">${esc(e.reading)}</span>${e.ko ? `<span class="rk">${esc(e.ko)}</span>` : ''}</div>
+    ${eng(e)}
+  </div>`;
+}
+function savedRow(e) {
+  return `<div class="erow clickable" data-id="${e.id}">
+    <div style="min-width:0;flex:1">
+      <div class="ek">${esc(e.ko || '—')}</div>
+      ${eng(e)}
+    </div>
+    <div class="eh"><span class="ehj">${esc(e.hanja)}</span><span class="erd">${esc(e.reading)}</span></div>
+  </div>`;
+}
+
+/* ---------- Tool: 漢字変換 ---------- */
+function tabHanja(q) {
+  return [...q].map(ch => {
+    if (isHangul(ch)) {
+      const hits = byReading.get(ch) || [];
+      const body = hits.length
+        ? `<div class="grid">${hits.slice(0, LIMIT).map(e => gridCell(e, false)).join('')}</div>${more(hits.length)}`
+        : none('候補なし');
+      return sec(`${ch} → 漢字`, body);
+    }
+    if (isHanja(ch)) {
+      const hits = byHanja.get(ch) || [];
+      const body = hits.length
+        ? hits.slice(0, LIMIT).map(readRow).join('') + more(hits.length)
+        : none('データなし');
+      return sec(`${ch} → 読み`, body);
+    }
+    return '';
+  }).join('');
+}
+
+/* ---------- Tool: 固有語⇄漢字語 ---------- */
+function tabNative(q) {
+  const word = q.trim();
+  if ([...word].some(isHanja)) {
+    return [...word].filter(isHanja).map(ch => {
+      const hits = (byHanja.get(ch) || []).filter(e => e.ko);
+      const body = hits.length
+        ? hits.slice(0, LIMIT).map(e => `
+            <div class="lrow clickable" data-id="${e.id}">
+              <div class="kbig">${esc(e.ko)}</div>
+              <div class="sub">発音: ${esc(e.reading)}</div>
+              ${eng(e)}
+            </div>`).join('') + more(hits.length)
+        : none('固有語なし');
+      return sec(`${ch} → 固有語`, body);
+    }).join('');
+  }
+  const hits = word.includes(' ') ? db.filter(e => e.ko === word) : (byKo.get(word) || []);
+  const body = hits.length
+    ? `<div class="grid">${hits.slice(0, LIMIT).map(e => gridCell(e, true)).join('')}</div>${more(hits.length)}`
+    : none('対応する漢字なし');
+  return sec(`固有語「${word}」→ 漢字`, body);
+}
+
+/* ---------- Tool: 英単語→漢字語 ---------- */
+function tabEnglish(q) {
+  const w = q.trim();
+  const pattern = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('(^|[^A-Za-z])' + pattern + '([^A-Za-z]|$)', 'i');
+  const hits = db.filter(e => re.test(e.rest));
+  const body = hits.length
+    ? hits.slice(0, LIMIT).map(e => `
+        <div class="erow clickable" data-id="${e.id}">
+          <div class="ek">${esc(e.ko || '—')}</div>
+          <div class="eh">
+            <span class="ehj">${esc(e.hanja)}</span>
+            <span class="erd">${esc(e.reading)}</span>
+          </div>
+        </div>`).join('') + more(hits.length)
+    : none('該当なし');
+  return sec(`「${w}」を含む意味の漢字語`, body);
+}
+
+/* ---------- English-Japanese dictionary ---------- */
+function parseEjDictionary(text) {
+  const list = [];
+  const lines = String(text ?? '').replace(/^\uFEFF/, '').split(/\r?\n/);
+  for (const raw of lines) {
+    if (!raw.trim()) continue;
+    const separator = raw.indexOf('\t');
+    if (separator < 1) continue;
+    const word = raw.slice(0, separator).trim();
+    const meaning = raw.slice(separator + 1).trim();
+    if (!word || !meaning) continue;
+    const terms = word.split(/\s*,\s*/).map(s => s.trim()).filter(Boolean);
+    list.push({
+      id: list.length,
+      word,
+      meaning,
+      terms: terms.length ? terms : [word],
+      lowerMeaning: meaning.toLocaleLowerCase('ja'),
+      lowerTerms: (terms.length ? terms : [word]).map(s => s.toLocaleLowerCase('en-US'))
+    });
+  }
+  return list;
+}
+
+function loadEjDictionaryText(text, source = 'ファイル') {
+  const next = parseEjDictionary(text);
+  if (!next.length) throw new Error('有効な辞書項目がありません。タブ区切りの ejdict-hand-utf8.txt を指定してください。');
+  ejdb = next;
+  const status = $('dictStatus');
+  const loadBox = $('dictLoadBox');
+  if (status) status.textContent = `${ejdb.length.toLocaleString('ja-JP')} 件読み込み済み`;
+  if (loadBox) loadBox.hidden = true;
+  render();
+  console.info(`[英単語辞書] ${source}から ${ejdb.length.toLocaleString('ja-JP')} 件を読み込みました。`);
+}
+
+function searchEjEnglish(query) {
+  const q = query.trim().toLocaleLowerCase('en-US');
+  const hits = [];
+  for (const entry of ejdb) {
+    let score = Infinity;
+    let matchedTerm = entry.word;
+    for (let i = 0; i < entry.lowerTerms.length; i++) {
+      const term = entry.lowerTerms[i];
+      const at = term.indexOf(q);
+      if (at < 0) continue;
+      const candidateScore = term === q ? 0 : at === 0 ? 1 : 2;
+      if (candidateScore < score || (candidateScore === score && term.length < matchedTerm.length)) {
+        score = candidateScore;
+        matchedTerm = entry.terms[i] || entry.word;
+      }
+      if (score === 0) break;
+    }
+    if (score !== Infinity) hits.push({ entry, score, matchedTerm });
+  }
+  hits.sort((a, b) => a.score - b.score || a.matchedTerm.length - b.matchedTerm.length || a.matchedTerm.localeCompare(b.matchedTerm));
+  return hits;
+}
+
+function searchEjJapanese(query) {
+  const q = query.trim().toLocaleLowerCase('ja');
+  const hits = [];
+  for (const entry of ejdb) {
+    const position = entry.lowerMeaning.indexOf(q);
+    if (position >= 0) hits.push({ entry, position });
+  }
+  hits.sort((a, b) => a.position - b.position || a.entry.meaning.length - b.entry.meaning.length || a.entry.word.localeCompare(b.entry.word));
+  return hits;
+}
+
+function ejRow(entry, matchedTerm = '') {
+  const word = matchedTerm || entry.word;
+  return `<article class="ej-row">
+    <div class="ej-word">${esc(word)}</div>
+    <div class="ej-meaning">${esc(entry.meaning)}</div>
+    ${matchedTerm && matchedTerm !== entry.word ? `<div class="ej-match">辞書上の表記: ${esc(entry.word)}</div>` : ''}
+  </article>`;
+}
+
+function renderEjDictionary() {
+  const input = $('appInput');
+  const result = $('dictResult');
+  const status = $('dictStatus');
+  const hint = $('dictHint');
+  if (!input || !result || !status || !hint) {
+    console.error('[英単語辞書] 必須の表示要素が見つかりません。', { input: !!input, result: !!result, status: !!status, hint: !!hint });
+    return;
+  }
+  const q = input.value.trim();
+  const isEnglish = dictDirection === 'en-ja';
+  hint.textContent = isEnglish
+    ? '英単語を入力すると、日本語の意味を検索します。部分一致にも対応しています。'
+    : '日本語の意味を入力すると、その語句を含む英単語を検索します。';
+  if (!ejdb.length) {
+    result.innerHTML = none('辞書が読み込まれていません。下のファイル選択から ejdict-hand-utf8.txt を読み込んでください。');
+    return;
+  }
+  if (!q) {
+    result.innerHTML = none(isEnglish ? '英単語を入力してください。例: Andean' : '日本語の意味を入力してください。例: アンデス山脈');
+    return;
+  }
+  const hits = isEnglish ? searchEjEnglish(q) : searchEjJapanese(q);
+  const shown = hits.slice(0, LIMIT).map(hit => ejRow(hit.entry, isEnglish ? hit.matchedTerm : '')).join('');
+  const moreText = hits.length > LIMIT ? `<p class="note">ほか ${hits.length - LIMIT} 件</p>` : '';
+  const directionLabel = isEnglish ? '日本語の意味' : '英単語';
+  result.innerHTML = hits.length
+    ? `<p class="dict-result-meta">${hits.length.toLocaleString('ja-JP')} 件一致（最大 ${LIMIT} 件を表示）・${directionLabel}</p>${shown}${moreText}`
+    : none('該当する項目がありません');
+}
+
+function setDictDirection(direction) {
+  if (direction !== 'en-ja' && direction !== 'ja-en') {
+    console.error('[英単語辞書] 不明な検索方向です:', direction);
+    return;
+  }
+  dictDirection = direction;
+  document.querySelectorAll('[data-dict-direction]').forEach(button => {
+    const active = button.dataset.dictDirection === dictDirection;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  const input = $('appInput');
+  if (input && view === 'vocab') {
+    input.placeholder = dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）';
+  }
+  renderEjDictionary();
+}
+
+function apiDictionaryConfig(type) {
+  const configs = {
+    ja: {
+      title: '日本語辞書',
+      placeholder: '日本語の見出し語を入力（例: 辞書）',
+      hint: 'Wiktionary APIから日本語の項目を検索します。',
+      source: 'Wiktionary',
+      lang: 'ja'
+    },
+    en: {
+      title: '英英辞書',
+      placeholder: '英単語を入力（例: dictionary）',
+      hint: 'Free Dictionary APIから発音・品詞・英語定義を検索します。',
+      source: 'Free Dictionary API',
+      lang: 'en'
+    },
+    ko: {
+      title: '韓国語辞書',
+      placeholder: '韓国語の見出し語を入力（例: 사람）',
+      hint: '韓国国立国語院の辞典APIから韓国語の見出し語を検索します。',
+      source: '韓国国立国語院 韓国語辞典',
+      lang: 'ko'
+    },
+    'ja-ko': {
+      title: '日本語で韓国語辞典を検索',
+      placeholder: '日本語の語句を入力（例: 人）',
+      hint: '入力した日本語を韓国語辞典APIの検索語として送信します。日本語からの翻訳を保証するものではありません。',
+      source: '韓国国立国語院 韓国語辞典',
+      lang: 'ko'
+    }
+  };
+  return configs[type] || null;
+}
+
+function updateApiDictionaryUI() {
+  const input = $('appInput');
+  const heading = $('apiHeading');
+  const hint = $('apiHint');
+  const buttons = document.querySelectorAll('[data-api-dict-tab]');
+  const config = apiDictionaryConfig(apiDictType);
+  if (!config) {
+    console.error('[API辞書] 未対応の辞書タイプです:', apiDictType);
+    return;
+  }
+  if (!input || !heading || !hint) {
+    console.error('[API辞書] 必須の表示要素が見つかりません。', {
+      input: !!input, heading: !!heading, hint: !!hint
+    });
+    return;
+  }
+  heading.textContent = config.title;
+  hint.textContent = config.hint;
+  input.placeholder = config.placeholder;
+  buttons.forEach(button => {
+    const active = button.dataset.apiDictTab === apiDictType;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+}
+
+function setApiDictionaryType(type) {
+  if (!apiDictionaryConfig(type)) {
+    console.error('[API辞書] 不明な辞書タイプです:', type);
+    return;
+  }
+  if (apiRequestController) {
+    apiRequestController.abort();
+    apiRequestController = null;
+  }
+  apiRequestSerial++;
+  const searchButton = $('apiSearchButton');
+  if (searchButton) searchButton.disabled = false;
+  apiDictType = type;
+  updateApiDictionaryUI();
+  const result = $('apiResult');
+  const status = $('apiStatus');
+  if (result) result.innerHTML = '<div class="api-message">検索語を入力して検索してください。</div>';
+  if (status) status.textContent = '検索待機中';
+}
+
+function buildDictionaryApiUrl(type, query) {
+  const encoded = encodeURIComponent(query);
+  switch (type) {
+    case 'ja':
+      return `https://ja.wiktionary.org/w/api.php?action=query&titles=${encoded}&prop=extracts&explaintext=1&format=json`;
+    case 'en':
+      return `https://api.dictionaryapi.dev/api/v2/entries/en/${encoded}`;
+    case 'ko':
+    case 'ja-ko':
+      return `https://krdict.korean.go.kr/api/search?key=${KRDICT_API_KEY}&q=${encoded}`;
+    default:
+      throw new Error('対応していない辞書です。');
+  }
+}
+
+async function requestDictionaryApi(targetUrl, signal) {
+  const response = await fetch(DICTIONARY_API_PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: targetUrl }),
+    signal
+  });
+  if (!response.ok) throw new Error(`API中継へのリクエストに失敗しました（HTTP ${response.status}）。`);
+  const envelope = await response.json();
+  if (!envelope || typeof envelope !== 'object' || !Object.prototype.hasOwnProperty.call(envelope, 'data')) {
+    const detail = envelope && typeof envelope.error === 'string' ? envelope.error : '応答データがありません。';
+    throw new Error(detail);
+  }
+  return envelope.data;
+}
+
+function parseApiJson(rawData) {
+  if (typeof rawData !== 'string') return rawData;
+  try {
+    return JSON.parse(rawData);
+  } catch (error) {
+    throw new Error('辞書APIのJSON応答を解析できませんでした。');
+  }
+}
+
+function renderWiktionaryResult(rawData, query) {
+  const data = parseApiJson(rawData);
+  const pages = data && data.query && data.query.pages;
+  const page = pages ? Object.values(pages)[0] : null;
+  if (!page || page.missing !== undefined || !String(page.extract || '').trim()) {
+    throw new Error('該当する項目が見つかりませんでした。');
+  }
+  // Escape API text before converting Wiktionary's plain-text section headings to HTML.
+  const content = esc(page.extract)
+    .replace(/^====\s*(.*?)\s*====$/gm, '<h4>$1</h4>')
+    .replace(/^===\s*(.*?)\s*===$/gm, '<h3>$1</h3>')
+    .replace(/^==\s*(.*?)\s*==$/gm, '<h2>$1</h2>')
+    .replace(/\n/g, '<br>');
+  const pageUrl = `https://ja.wiktionary.org/wiki/${encodeURIComponent(String(page.title || query).replace(/ /g, '_'))}`;
+  return `<div class="api-source">出典: <a href="${esc(pageUrl)}" target="_blank" rel="noopener noreferrer">Wiktionary — ${esc(page.title || query)}</a></div>
+    <article class="api-entry" lang="ja"><h2>${esc(page.title || query)}</h2><div>${content}</div></article>`;
+}
+
+function renderEnglishDictionaryResult(rawData) {
+  const data = parseApiJson(rawData);
+  if (!Array.isArray(data) || !data.length) {
+    const apiMessage = data && typeof data.message === 'string' ? data.message : '該当する項目が見つかりませんでした。';
+    throw new Error(apiMessage);
+  }
+  const entries = data.slice(0, 5).map(entry => {
+    if (!entry || typeof entry !== 'object') return '';
+    const word = esc(entry.word || '');
+    const phonetic = esc(entry.phonetic || (Array.isArray(entry.phonetics) ? (entry.phonetics.find(item => item && item.text) || {}).text : '') || '');
+    const meanings = Array.isArray(entry.meanings) ? entry.meanings : [];
+    const meaningHtml = meanings.slice(0, 8).map(meaning => {
+      const definitions = Array.isArray(meaning.definitions) ? meaning.definitions : [];
+      const definitionHtml = definitions.slice(0, 3).map(definition => {
+        if (!definition) return '';
+        const example = definition.example ? `<p class="note">例: ${esc(definition.example)}</p>` : '';
+        return `<li>${esc(definition.definition || '')}${example}</li>`;
+      }).join('');
+      return `<h3>${esc(meaning.partOfSpeech || '品詞')}</h3>${definitionHtml ? `<ul>${definitionHtml}</ul>` : '<p>定義がありません。</p>'}`;
+    }).join('');
+    return `<article class="api-entry" lang="en"><h2>${word}${phonetic ? ` <span style="font-size:14px;color:#777;font-weight:400">${phonetic}</span>` : ''}</h2>${meaningHtml || '<p>定義がありません。</p>'}</article>`;
+  }).filter(Boolean).join('');
+  if (!entries) throw new Error('表示できる定義がありませんでした。');
+  return `<div class="api-source">出典: Free Dictionary API</div>${entries}`;
+}
+
+function xmlText(parent, tagName) {
+  if (!parent) return '';
+  const node = parent.getElementsByTagName(tagName)[0];
+  return node && node.textContent ? node.textContent.trim() : '';
+}
+
+function renderKoreanDictionaryResult(rawData) {
+  if (typeof rawData !== 'string') {
+    throw new Error('韓国語辞典APIからXML形式の応答を取得できませんでした。');
+  }
+  const doc = new DOMParser().parseFromString(rawData, 'text/xml');
+  if (doc.getElementsByTagName('parsererror').length) {
+    throw new Error('韓国語辞典APIのXML応答を解析できませんでした。');
+  }
+  const items = Array.from(doc.getElementsByTagName('item')).slice(0, 10);
+  if (!items.length) throw new Error('該当する項目が見つかりませんでした。');
+  const entries = items.map(item => {
+    const word = xmlText(item, 'word');
+    const definition = xmlText(item, 'definition');
+    const pos = xmlText(item, 'pos');
+    const origin = xmlText(item, 'origin');
+    return `<article class="api-entry" lang="ko">
+      <div class="api-entry-title">${esc(word || '見出し語なし')}</div>
+      ${pos ? `<div class="note">品詞: ${esc(pos)}</div>` : ''}
+      ${origin ? `<div class="note">語源: ${esc(origin)}</div>` : ''}
+      <p class="api-definition">${esc(definition || '意味の説明がありません。')}</p>
+    </article>`;
+  }).join('');
+  return `<div class="api-source">出典: 韓国国立国語院 韓国語辞典</div><div class="api-korean" lang="ko">${entries}</div>`;
+}
+
+function renderDictionaryApiData(type, rawData, query) {
+  switch (type) {
+    case 'ja': return renderWiktionaryResult(rawData, query);
+    case 'en': return renderEnglishDictionaryResult(rawData);
+    case 'ko':
+    case 'ja-ko': return renderKoreanDictionaryResult(rawData);
+    default: throw new Error('対応していない辞書です。');
+  }
+}
+
+async function performApiDictionarySearch() {
+  const input = $('appInput');
+  const result = $('apiResult');
+  const status = $('apiStatus');
+  const searchButton = $('apiSearchButton');
+  if (!input || !result || !status || !searchButton) {
+    console.error('[API辞書] 必須の検索要素が見つかりません。', {
+      input: !!input, result: !!result, status: !!status, searchButton: !!searchButton
+    });
+    return;
+  }
+  const query = input.value.trim();
+  if (!query) {
+    result.innerHTML = '<div class="api-message">検索語を入力してください。</div>';
+    status.textContent = '検索語が必要です';
+    return;
+  }
+  const config = apiDictionaryConfig(apiDictType);
+  if (!config) {
+    result.innerHTML = '<div class="api-message error">辞書設定を確認してください。</div>';
+    status.textContent = '設定エラー';
+    return;
+  }
+
+  if (apiRequestController) apiRequestController.abort();
+  const controller = new AbortController();
+  apiRequestController = controller;
+  const requestId = ++apiRequestSerial;
+  let timedOut = false;
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 20000);
+
+  searchButton.disabled = true;
+  result.innerHTML = '<div class="api-message">検索中です…</div>';
+  status.textContent = '検索中…';
+  try {
+    const targetUrl = buildDictionaryApiUrl(apiDictType, query);
+    const rawData = await requestDictionaryApi(targetUrl, controller.signal);
+    if (requestId !== apiRequestSerial) return;
+    const html = renderDictionaryApiData(apiDictType, rawData, query);
+    result.innerHTML = html;
+    status.textContent = '検索完了';
+  } catch (error) {
+    if (requestId !== apiRequestSerial) return;
+    const message = timedOut
+      ? 'APIの応答がタイムアウトしました。もう一度検索してください。'
+      : (error && error.name === 'AbortError'
+        ? '検索がキャンセルされました。'
+        : (error && error.message ? error.message : '辞書の検索に失敗しました。'));
+    result.innerHTML = `<div class="api-message error">${esc(message)}</div>`;
+    status.textContent = '検索失敗';
+    console.error('[API辞書] 検索に失敗しました。', { type: apiDictType, query, error });
+  } finally {
+    window.clearTimeout(timeoutId);
+    if (requestId === apiRequestSerial) {
+      searchButton.disabled = false;
+      if (apiRequestController === controller) apiRequestController = null;
+    }
+  }
+}
+
+const hints = {
+  hanja:   'ハングル → 漢字（グリッド）／ 漢字 → 読み（リスト）',
+  native:  '固有語 → 漢字（グリッド）／ 漢字 → 固有語（リスト）',
+  english: '英単語 → 固有語と漢字語（リスト）'
+};
+const fns = { hanja: tabHanja, native: tabNative, english: tabEnglish };
+
+function runTool() {
+  const q = $('appInput').value;
+  const out = $('result');
+  const hint = `<p class="tab-hint">${esc(hints[mode])}</p>`;
+  if (!db.length) { out.innerHTML = hint + none('hanja.txt が読み込まれていません'); return; }
+  if (!q.trim())  { out.innerHTML = hint + none('入力してください'); return; }
+  out.innerHTML = hint + (fns[mode](q) || none('入力に対応する文字がありません'));
+}
+
+/* ---------- Saved ---------- */
+function renderSaved() {
+  const q = $('appInput').value.trim().toLowerCase();
+  const list = db.filter(e => bookmarks.has(key(e)) &&
+    (!q || `${e.hanja}${e.reading}${e.ko}${e.rest}`.toLowerCase().includes(q)));
+  let body;
+  if (!bookmarks.size) body = none('まだ保存していません（詳細画面の ☆ で追加できます）');
+  else if (!list.length) body = none('一致する項目がありません');
+  else body = list.slice(0, LIMIT).map(savedRow).join('') + more(list.length);
+  $('savedBody').innerHTML = `<p class="tab-hint">保存済み（${bookmarks.size} 件）</p>` + body;
+}
+
+/* ---------- Translate ---------- */
+function setTrLabels() {
+  const h = trDir === 'h2r';
+  $('lab1').textContent = h ? '漢字' : '読み（ハングル）';
+  $('lab2').textContent = h ? '読み（ハングル）' : '漢字';
+  $('trIn').placeholder = h ? '漢字語を貼り付け（例: 假想 仮想 可能性）' : 'ハングルを貼り付け（例: 가상 가능성）';
+}
+
+function breakChar(ch, h2r) {
+  const list = h2r ? (byHanja.get(ch) || []) : (byReading.get(ch) || []);
+  const items = list.slice(0, 8).map(e => `
+    <div class="cand clickable" data-id="${e.id}">
+      <span class="cd">${esc(h2r ? e.reading : e.hanja)}</span><span class="ck">${esc(e.ko || '—')}</span>
+      <span class="cen">${esc(e.en)}</span>
+    </div>`).join('') || '<div class="empty">候補なし</div>';
+  return `<div class="bchar"><div class="bg">${esc(ch)}</div>${items}</div>`;
+}
+
+function doTranslate() {
+  const text = $('trIn').value;
+  const out = $('trOut'), brk = $('trBreak');
+  if (!text.trim()) {
+    out.dataset.raw = ''; out.innerHTML = '<span class="ph">訳文</span>'; brk.innerHTML = ''; return;
+  }
+  if (!db.length) {
+    out.innerHTML = '<span class="ph">hanja.txt が読み込まれていません</span>'; brk.innerHTML = ''; return;
+  }
+  const h2r = trDir === 'h2r';
+  const result = [...text].map(ch => {
+    if (h2r && isHanja(ch))  { const e = (byHanja.get(ch) || [])[0];   return e ? e.reading : ch; }
+    if (!h2r && isHangul(ch)) { const e = (byReading.get(ch) || [])[0]; return e ? e.hanja : ch; }
+    return ch;
+  }).join('');
+  out.dataset.raw = text;
+  out.textContent = result;
+
+  const targets = [...new Set([...text].filter(ch => h2r ? isHanja(ch) : isHangul(ch)))].slice(0, 300);
+  brk.innerHTML = targets.length
+    ? `<h3 class="sec">文字ごとの内訳（読みは先頭候補を使用）</h3><div class="bgrid">${targets.map(ch => breakChar(ch, h2r)).join('')}</div>`
+    : '';
+}
+
+/* ---------- Detail sheet ---------- */
+function relRow(x, via) {
+  return `<div class="rel clickable" data-id="${x.id}">
+    <div class="rel-h">${esc(x.hanja)}</div>
+    <div class="rel-b">
+      <div><span class="rd">${esc(x.reading)}</span> <span class="rk">${esc(x.ko || '—')}</span></div>
+      ${x.en ? `<div class="en">${esc(x.en)}</div>` : ''}
+      ${via ? `<div class="via">${esc(via)}</div>` : ''}
+    </div>
+  </div>`;
+}
+function relSec(title, items, toHtml) {
+  const shown = items.slice(0, 60).map(toHtml).join('');
+  return `<h3 class="sec">${esc(title)} <span class="cnt">${items.length}</span></h3>` +
+         (items.length ? shown + (items.length > 60 ? `<p class="note">ほか ${items.length - 60} 件</p>` : '') : none('なし'));
+}
+
+function detailHTML(e) {
+  const sameKo = uniqBy(e.kos.flatMap(k => byKo.get(k) || []))
+    .filter(x => x.id !== e.id && x.hanja !== e.hanja);
+  const sameHanja = (byHanja.get(e.hanja) || []).filter(x => x.id !== e.id);
+  const sameRd = uniqBy(byReading.get(e.reading) || [])
+    .filter(x => x.id !== e.id && x.hanja !== e.hanja);
+
+  const synMap = new Map();
+  for (const w of e.ens) {
+    for (const x of byEn.get(w) || []) {
+      if (x.id === e.id || x.hanja === e.hanja) continue;
+      if (!synMap.has(x.id)) synMap.set(x.id, { x, words: [] });
+      synMap.get(x.id).words.push(w);
+    }
+  }
+  const syn = [...synMap.values()].sort((a, b) => b.words.length - a.words.length);
+
+  return `
+    <div class="dhero">
+      <div class="dglyph">${esc(e.hanja)}</div>
+      <div><div class="dread">${esc(e.reading)}</div><div class="dko">${esc(e.ko || '固有語なし')}</div></div>
+    </div>
+    <h3 class="sec">英語の意味</h3>
+    <div class="dblock">${esc(e.en || '—')}</div>
+    <h3 class="sec">意味（全文）</h3>
+    <div class="dblock">${esc(e.rest || '—')}</div>
+    <h3 class="sec">原文</h3>
+    <div class="raw">${esc(e.raw)}</div>
+    ${relSec('同じ固有語の別漢字', sameKo, x => relRow(x))}
+    ${relSec('同じ漢字の別の読み・固有語', sameHanja, x => relRow(x))}
+    ${relSec('同じ音の別漢字', sameRd, x => relRow(x))}
+    ${relSec('英語ベースの類義語', syn, s => relRow(s.x, '一致: ' + [...new Set(s.words)].join(', ')))}
+  `;
+}
+
+function openDetail(id) {
+  if (detailStack[detailStack.length - 1] !== id) detailStack.push(id);
+  $('scrim').hidden = false;
+  document.body.style.overflow = 'hidden';
+  renderDetail();
+}
+function renderDetail() {
+  const e = db[detailStack[detailStack.length - 1]];
+  if (!e) return;
+  $('dBack').hidden = detailStack.length < 2;
+  $('dTitle').textContent = `${e.hanja}  ${e.reading}`;
+  updateBmButton(e);
+  $('dBody').innerHTML = detailHTML(e);
+  $('dBody').scrollTop = 0;
+}
+function updateBmButton(e) {
+  const on = bookmarks.has(key(e));
+  $('dBm').textContent = on ? '★' : '☆';
+  $('dBm').classList.toggle('on', on);
+}
+function toggleBM() {
+  const e = db[detailStack[detailStack.length - 1]];
+  if (!e) return;
+  bookmarks.has(key(e)) ? bookmarks.delete(key(e)) : bookmarks.add(key(e));
+  saveBM();
+  updateBmButton(e);
+  updateCounts();
+  if (view === 'saved') renderSaved();
+}
+function closeDetail() {
+  $('scrim').hidden = true;
+  detailStack = [];
+  document.body.style.overflow = '';
+}
+function backDetail() {
+  detailStack.pop();
+  renderDetail();
+}
+
+/* ---------- Navigation ---------- */
+function go(v, m, apiType) {
+  if (view === 'apiDict' && v !== 'apiDict') {
+    if (apiRequestController) {
+      apiRequestController.abort();
+      apiRequestController = null;
+    }
+    apiRequestSerial++;
+    const searchButton = $('apiSearchButton');
+    if (searchButton) searchButton.disabled = false;
+  }
+  view = v;
+  if (m) mode = m;
+  if (v === 'apiDict' && apiType) apiDictType = apiType;
+  $('home').hidden  = v !== 'home';
+  $('tool').hidden  = v !== 'tool';
+  $('vocab').hidden = v !== 'vocab';
+  $('apiDict').hidden = v !== 'apiDict';
+  $('trans').hidden = v !== 'translate';
+  $('saved').hidden = v !== 'saved';
+  document.querySelectorAll('.tool-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  $('backBtn').hidden = v === 'home';
+  $('appInput').hidden = !(v === 'tool' || v === 'saved' || v === 'vocab' || v === 'apiDict');
+  $('appTitle').hidden = !(v === 'home' || v === 'translate');
+  $('appTitle').textContent = v === 'translate' ? '漢字語翻訳' : '漢字変換ツール';
+  $('appInput').placeholder = v === 'saved'
+    ? '保存済みを検索'
+    : v === 'vocab'
+      ? (dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）')
+      : v === 'apiDict'
+        ? ((apiDictionaryConfig(apiDictType) || {}).placeholder || '検索語を入力')
+        : '入力（例: 가게 / 仮 / falsehood）';
+  window.scrollTo(0, 0);
+  render();
+  if (v === 'apiDict') updateApiDictionaryUI();
+  if ((v === 'tool' || v === 'vocab' || v === 'apiDict') && !$('appInput').hidden) $('appInput').focus();
+  if (v === 'translate') $('trIn').focus();
+}
+
+function render() {
+  if (view === 'tool') runTool();
+  else if (view === 'vocab') renderEjDictionary();
+  else if (view === 'apiDict') updateApiDictionaryUI();
+  else if (view === 'saved') renderSaved();
+  else if (view === 'translate') doTranslate();
+}
+
+function updateCounts() {
+  $('status').textContent = db.length ? `${db.length} 件` : '未読込';
+  $('savedCount').textContent = bookmarks.size;
+}
+
+function loadText(text) {
+  db = parse(text);
+  buildIndex();
+  $('loadBox').hidden = true;
+  updateCounts();
+  render();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click', ev => {
+  if (ev.target.id === 'scrim') { closeDetail(); return; }
+  const card = ev.target.closest('[data-view]');
+  if (card) {
+    if (card.dataset.view === 'apiDict') go('apiDict', null, card.dataset.apiDict || 'ja');
+    else go(card.dataset.view, card.dataset.mode);
+    return;
+  }
+  const item = ev.target.closest('[data-id]');
+  if (item) { openDetail(+item.dataset.id); return; }
+});
+document.querySelectorAll('.tool-tab').forEach(b =>
+  b.addEventListener('click', () => go('tool', b.dataset.mode)));
+document.querySelectorAll('[data-dict-direction]').forEach(button => {
+  button.addEventListener('click', () => setDictDirection(button.dataset.dictDirection));
+});
+document.querySelectorAll('[data-api-dict-tab]').forEach(button => {
+  button.addEventListener('click', () => setApiDictionaryType(button.dataset.apiDictTab));
+});
+const apiSearchButton = $('apiSearchButton');
+if (apiSearchButton) {
+  apiSearchButton.addEventListener('click', performApiDictionarySearch);
+} else {
+  console.error('[API辞書] #apiSearchButton が見つかりません。');
+}
+$('appInput').addEventListener('keydown', event => {
+  if (event.key === 'Enter' && view === 'apiDict') {
+    event.preventDefault();
+    performApiDictionarySearch();
+  }
+});
+$('backBtn').addEventListener('click', () => go('home'));
+$('appInput').addEventListener('input', render);
+$('trIn').addEventListener('input', doTranslate);
+$('swap').addEventListener('click', () => {
+  const prevOut = $('trOut').dataset.raw || '';
+  trDir = trDir === 'h2r' ? 'r2h' : 'h2r';
+  $('trIn').value = prevOut;
+  setTrLabels();
+  doTranslate();
+});
+$('dClose').addEventListener('click', closeDetail);
+$('dBack').addEventListener('click', backDetail);
+$('dBm').addEventListener('click', toggleBM);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('scrim').hidden) closeDetail(); });
+
+$('fileInput').addEventListener('change', async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    loadText(await f.text());
+  } catch (error) {
+    console.error('[漢字変換] hanja.txt の読み込みに失敗しました。', error);
+  }
+});
+
+const dictFileInput = $('dictFileInput');
+if (dictFileInput) {
+  dictFileInput.addEventListener('change', async event => {
+    const file = event.currentTarget && event.currentTarget.files ? event.currentTarget.files[0] : null;
+    if (!file) return;
+    try {
+      loadEjDictionaryText(await file.text(), file.name || '選択したファイル');
+    } catch (error) {
+      const status = $('dictStatus');
+      const loadBox = $('dictLoadBox');
+      if (status) status.textContent = '読み込み失敗';
+      if (loadBox) loadBox.hidden = false;
+      console.error('[英単語辞書] 辞書ファイルの読み込みに失敗しました。', error);
+    }
+  });
+} else {
+  console.error('[英単語辞書] #dictFileInput が見つかりません。');
+}
+
+setTrLabels();
+updateCounts();
+updateApiDictionaryUI();
+go('home');
+
+// 同じフォルダの hanja.txt を自動読込（http経由の場合）
+fetch('hanja.txt')
+  .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+  .then(loadText)
+  .catch(() => {
+    $('status').textContent = '未読込';
+    $('loadBox').hidden = false;
+  });
+
+// 同じフォルダーの ejdict-hand-utf8.txt を自動読込（http経由の場合）
+fetch('ejdict-hand-utf8.txt')
+  .then(response => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.text();
+  })
+  .then(text => loadEjDictionaryText(text, 'ejdict-hand-utf8.txt'))
+  .catch(error => {
+    const status = $('dictStatus');
+    const loadBox = $('dictLoadBox');
+    if (status) status.textContent = '未読込';
+    if (loadBox) loadBox.hidden = false;
+    // file:// で開いた場合などはファイル選択による読み込みに切り替える。
+    console.info('[英単語辞書] 自動読み込みは利用できません。ファイル選択で読み込んでください。', error);
+  });
+</script>
+</body>
+</html>
