@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>漢字変換・英単語辞書</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<title>千里馬事典 2.0</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5500FF">
 <style>
   :root {
     --primary: #5500FF;
@@ -233,6 +236,7 @@
   .sheet {
     background: var(--surface); width: 100%; max-width: 720px; max-height: 88vh;
     display: flex; flex-direction: column; border-radius: 12px 12px 0 0; box-shadow: var(--elev8);
+    animation: material-sheet-enter .22s cubic-bezier(.0, 0, .2, 1) both;
   }
   @media (min-width: 720px) {
     .scrim { align-items: center; }
@@ -264,16 +268,104 @@
   .rel-b { min-width: 0; flex: 1; }
   .rd { font-size: 16px; font-weight: 500; }
   .via { font-size: 12px; color: var(--primary); margin-top: 2px; }
+
+  /* 千里馬事典 2.0 additions */
+  .appbar { gap: 8px; }
+  #brandLogo { display: block; width: min(260px, 48vw); max-height: 24px; object-fit: contain; object-position: left center; flex: 1 1 auto; }
+  #appTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .iconbtn svg, .back-icon { width: 24px; height: 24px; display: block; fill: currentColor; }
+  #settingsBtn { margin-left: auto; }
+  #status { display: none !important; }
+  .hcard { color: #fff; background: var(--card-color, var(--primary)); }
+  .hcard[data-theme="red"] { --card-color: #cc2222; }
+  .hcard[data-theme="blue"] { --card-color: #1144ee; }
+  .hcard[data-theme="orange"] { --card-color: #ee9911; }
+  .hcard[data-theme="green"] { --card-color: #00aa55; }
+  .hcard[data-theme="purple"] { --card-color: #5500FF; }
+  .ht, .hd { color: #fff; }
+  .hd { opacity: .9; }
+  .hg { width: 52px; height: 52px; background: rgba(255,255,255,.16); color: #fff; }
+  .hg svg { width: 29px; height: 29px; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .app-search-button, .app-save-button {
+    flex: 0 0 auto; border: 0; border-radius: 4px; min-height: 38px; padding: 0 12px;
+    color: var(--primary); background: #fff; font: inherit; font-weight: 500; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,.16); white-space: nowrap;
+  }
+  .app-save-button { min-width: 38px; padding: 0 10px; font-size: 18px; }
+  .app-search-button:disabled, .app-save-button:disabled { opacity: .55; cursor: wait; }
+  .api-actions { display: none !important; }
+  .dict-save-row { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+  .secondary-action, .danger-action, .primary-action {
+    border: 0; border-radius: 4px; min-height: 40px; padding: 0 16px; font: inherit; cursor: pointer;
+  }
+  .primary-action { color: #fff; background: var(--primary); }
+  .secondary-action { color: var(--primary); background: var(--primary-light); }
+  .danger-action { color: #b3261e; background: #fce8e6; }
+  .settings-panel { display: grid; gap: 14px; }
+  .settings-section { background: var(--surface); padding: 16px; border-radius: 4px; box-shadow: var(--elev1); }
+  .settings-section h2 { margin: 0 0 14px; font-size: 16px; font-weight: 500; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.08); }
+  .setting-row:last-child { border-bottom: 0; }
+  .setting-row > span, .setting-copy { min-width: 0; flex: 1; line-height: 1.5; }
+  .setting-row select { min-width: 145px; max-width: 55%; height: 40px; border: 1px solid rgba(0,0,0,.24); border-radius: 4px; background: #fff; color: #222; font: inherit; padding: 0 8px; }
+  .setting-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .settings-note { color: var(--text-2); line-height: 1.6; margin: 10px 0 0; font-size: 12px; }
+  .saved-external-row { background: var(--surface); border-radius: 4px; box-shadow: var(--elev1); padding: 12px; margin-bottom: 8px; }
+  .saved-external-head { display: flex; align-items: flex-start; gap: 10px; }
+  .saved-external-title { font-weight: 500; min-width: 0; flex: 1; overflow-wrap: anywhere; }
+  .saved-external-summary { margin-top: 8px; color: var(--text-2); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 140px; overflow: auto; }
+  .saved-external-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .saved-external-actions button { min-height: 34px; padding: 0 10px; }
+  #splash {
+    position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; background: #fff; padding: 24px 0 max(18px, env(safe-area-inset-bottom));
+  }
+  #splash[hidden] { display: none !important; }
+  #splash img { display: block; width: min(90vw, 520px); max-height: 68vh; object-fit: contain; }
+  #splashNotice { position: absolute; left: 16px; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); margin: 0 auto; max-width: 75vw; text-align: center; font-size: 12px; line-height: 1.7; color: rgba(0,0,0,.62); }
+  #snackbar { position: fixed; z-index: 1200; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translate(-50%, 16px); opacity: 0; pointer-events: none; background: #323232; color: #fff; padding: 12px 16px; border-radius: 4px; max-width: calc(100vw - 32px); box-shadow: var(--elev8); transition: opacity .18s, transform .18s; }
+  #snackbar.show { opacity: 1; transform: translate(-50%, 0); }
+  .view-enter { animation: material-view-enter .22s cubic-bezier(.0, 0, .2, 1) both; }
+  @keyframes material-view-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes material-sheet-enter { from { opacity: .7; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .ripple-host { position: relative; overflow: hidden; isolation: isolate; }
+  .ripple-effect { position: absolute; border-radius: 50%; pointer-events: none; transform: scale(0); background: currentColor; opacity: .18; animation: ripple-ink .52s ease-out forwards; z-index: 0; }
+  @keyframes ripple-ink { to { transform: scale(1); opacity: 0; } }
+  body.font-chrm-disabled, body.font-chrm-disabled * { font-family: Roboto, "Noto Sans JP", "Noto Sans KR", -apple-system, "Segoe UI", sans-serif !important; }
+  @media (max-width: 640px) {
+    .appbar { height: 60px; padding-right: 8px; gap: 4px; }
+    #brandLogo { width: 100%; max-width: none; max-height: 24px; }
+    #appInput { font-size: 17px; }
+    #appInput::placeholder { font-size: 13px; }
+    .app-search-button { padding: 0 10px; }
+    .app-save-button { min-width: 34px; padding: 0 7px; }
+    #splash img { width: 100vw; max-height: 66vh; }
+    .setting-row { align-items: flex-start; }
+    .setting-row select { max-width: 58%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+  }
+
 </style>
 </head>
-<body>
+<body class="is-loading">
+<div id="splash" role="status" aria-live="polite">
+  <img src="hello.svg" alt="千里馬事典 2.0" fetchpriority="high">
+  <p id="splashNotice">翻訳等では正確な情報が表示されない場合があります。ご了承ください。利用規約と個人情報保護方針を必ずご確認ください。</p>
+</div>
+<div id="snackbar" role="status" aria-live="polite" hidden></div>
 
 <header class="appbar">
-  <button class="iconbtn" id="backBtn" title="戻る" hidden>←</button>
-  <span id="appTitle">漢字変換ツール</span>
+  <button class="iconbtn" id="backBtn" type="button" title="戻る" aria-label="戻る" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+  <img id="brandLogo" src="text_logo.svg" alt="千里馬事典 2.0">
+  <span id="appTitle" hidden>千里馬事典 2.0</span>
   <input id="appInput" type="text" autocomplete="off" spellcheck="false" hidden
-         placeholder="入力（例: 가게 / 仮 / falsehood）">
-  <span class="status" id="status">読み込み中…</span>
+         placeholder="入力（例: 가게 / 仮 / falsehood）" aria-label="検索語">
+  <button id="apiSearchButton" class="app-search-button" type="button" hidden>検索</button>
+  <button id="apiSaveButton" class="app-save-button" type="button" title="検索結果を保存" aria-label="検索結果を保存" hidden>☆</button>
+  <button class="iconbtn" id="settingsBtn" type="button" title="設定" aria-label="設定"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.95l-.36-2.54A.49.49 0 0 0 13.9 2h-3.8a.49.49 0 0 0-.49.41L9.25 4.95c-.59.23-1.14.55-1.63.95l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.48a.5.5 0 0 0 .12.64l2.03 1.58a7.49 7.49 0 0 0-.05.94c0 .32.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.49.4 1.04.72 1.63.95l.36 2.54a.49.49 0 0 0 .49.41h3.8a.49.49 0 0 0 .49-.41l.36-2.54c.59-.23 1.14-.55 1.63-.95l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
+  <span class="status" id="status" aria-hidden="true">読み込み中…</span>
 </header>
 
 <!-- Home -->
@@ -284,57 +376,81 @@
   </section>
   <h2 class="home-h">機能を選択</h2>
   <div class="cards">
-    <button class="hcard" data-view="tool" data-mode="hanja">
-      <span class="hg">漢</span>
+    <button class="hcard" data-view="tool" data-mode="hanja" data-theme="red">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h7M4 20h7M15 15l2 2 4-5"/></svg></span>
       <span class="ht">漢字変換</span>
       <span class="hd">ハングルの読み → 漢字 ／ 漢字 → 読み</span>
     </button>
-    <button class="hcard" data-view="tool" data-mode="native">
-      <span class="hg">固</span>
+    <button class="hcard" data-view="tool" data-mode="native" data-theme="red">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19 10 5l6 14M6.5 13h7M17 8h4M17 12h4M17 16h4"/></svg></span>
       <span class="ht">固有語⇄漢字語</span>
       <span class="hd">固有語 → 漢字 ／ 漢字 → 固有語</span>
     </button>
-    <button class="hcard" data-view="tool" data-mode="english">
-      <span class="hg">英</span>
+    <button class="hcard" data-view="tool" data-mode="english" data-theme="red">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9l2 6M12 9l-2 6M7 13h5M15 9h2M15 12h2M15 15h2"/></svg></span>
       <span class="ht">英単語→漢字語</span>
       <span class="hd">英語の意味から漢字語を検索</span>
     </button>
-    <button class="hcard" data-view="vocab">
-      <span class="hg">辞</span>
+    <button class="hcard" data-view="vocab" data-theme="blue">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5zM4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg></span>
       <span class="ht">英単語辞書</span>
       <span class="hd">英単語 → 日本語の意味 ／ 日本語の意味 → 英単語</span>
     </button>
-    <button class="hcard" data-view="apiDict" data-api-dict="ja">
-      <span class="hg">日</span>
-      <span class="ht">日本語辞書</span>
-      <span class="hd">Wiktionary APIで日本語の見出し語を検索</span>
-    </button>
-    <button class="hcard" data-view="apiDict" data-api-dict="en">
-      <span class="hg">英</span>
-      <span class="ht">英英辞書</span>
-      <span class="hd">英単語の発音・品詞・英語定義を検索</span>
-    </button>
-    <button class="hcard" data-view="apiDict" data-api-dict="ko">
-      <span class="hg">한</span>
-      <span class="ht">韓国語辞書</span>
-      <span class="hd">韓国語の見出し語を国立国語院のAPIで検索</span>
-    </button>
-    <button class="hcard" data-view="apiDict" data-api-dict="ja-ko">
-      <span class="hg">日韓</span>
-      <span class="ht">日本語から韓国語辞典を検索</span>
-      <span class="hd">日本語の語句を韓国語辞典の検索語として使用</span>
-    </button>
-    <button class="hcard" data-view="translate">
-      <span class="hg">訳</span>
+    <button class="hcard" data-view="translate" data-theme="purple">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h11M8.5 3v2M5 9c1.5 3 4 5 7 6M12 8c-1 3-3 5-6 7M15 12h6M18 9l4 11M16.5 17h5"/></svg></span>
       <span class="ht">漢字語翻訳</span>
       <span class="hd">長文を貼り付けて読みに変換</span>
     </button>
-    <button class="hcard" data-view="saved">
-      <span class="hg">★</span>
+    <button class="hcard" data-view="saved" data-theme="purple">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"/></svg></span>
       <span class="ht">保存済み</span>
       <span class="hd">ブックマーク <span id="savedCount">0</span> 件</span>
     </button>
   </div>
+
+  <!-- namu-tools -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6151036058675874"
+     data-ad-slot="3695134123"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+  
+  <h2 class="home-h">クラシック</h2>
+  <div class="cards">
+    <button class="hcard" data-view="apiDict" data-api-dict="ja" data-theme="orange">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5zM4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg></span>
+      <span class="ht">日本語辞書</span>
+      <span class="hd">Wiktionary APIで日本語の見出し語を検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="en" data-theme="orange">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9l2 6M12 9l-2 6M7 13h5M15 9h2M15 12h2M15 15h2"/></svg></span>
+      <span class="ht">英英辞書</span>
+      <span class="hd">英単語の発音・品詞・英語定義を検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="ko" data-theme="green">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span>
+      <span class="ht">韓国語辞書</span>
+      <span class="hd">韓国語の見出し語を国立国語院のAPIで検索</span>
+    </button>
+    <button class="hcard" data-view="apiDict" data-api-dict="ja-ko" data-theme="green">
+      <span class="hg"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6M10.5 7.5v6"/></svg></span>
+      <span class="ht">日本語から韓国語辞典を検索</span>
+      <span class="hd">日本語の語句を韓国語辞典の検索語として使用</span>
+    </button>
+  </div>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6151036058675874"
+     crossorigin="anonymous"></script>
+<!-- namu-tools -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6151036058675874"
+     data-ad-slot="3695134123"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 </main>
 
 <!-- Tools (漢字変換 / 固有語⇄漢字語 / 英単語→漢字語) -->
@@ -354,6 +470,7 @@
       <span class="dict-headline">英和・和英辞書</span>
       <span class="dict-status" id="dictStatus" aria-live="polite">辞書を読み込み中…</span>
     </div>
+    <div class="dict-save-row"><button id="dictSaveButton" class="secondary-action" type="button" hidden>検索結果を保存</button></div>
     <nav class="tabs dict-directions" aria-label="検索方向">
       <button class="tab dict-direction active" type="button" data-dict-direction="en-ja" aria-pressed="true">英単語 → 日本語の意味</button>
       <button class="tab dict-direction" type="button" data-dict-direction="ja-en" aria-pressed="false">日本語の意味 → 英単語</button>
@@ -381,9 +498,6 @@
       <button class="tab api-dict-tab" type="button" data-api-dict-tab="ja-ko" aria-pressed="false">日本語で韓国語検索</button>
     </nav>
     <p class="api-hint" id="apiHint">日本語の見出し語を入力してください。</p>
-    <div class="api-actions">
-      <button id="apiSearchButton" class="api-search-button" type="button">検索</button>
-    </div>
     <section id="apiResult" aria-live="polite">
       <div class="api-message">検索語を入力して検索してください。</div>
     </section>
@@ -412,11 +526,47 @@
   <section class="tab-body" id="savedBody" style="margin-top:0"></section>
 </main>
 
+
+<!-- Settings -->
+<main id="settings" class="wrap" hidden>
+  <div class="settings-panel">
+    <section class="settings-section">
+      <h2>表示</h2>
+      <label class="setting-row" for="languageSelect"><span>全体の言語</span>
+        <select id="languageSelect" name="languageSelect">
+          <option value="ja">日本語</option><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="ko">한국어</option><option value="ko-KP">조선말</option>
+        </select>
+      </label>
+      <label class="setting-row" for="fontToggle"><span>千里馬フォントを使用する</span><input id="fontToggle" type="checkbox" checked></label>
+    </section>
+    <section class="settings-section">
+      <h2>保存済み項目</h2>
+      <div class="setting-actions">
+        <button id="exportSavedButton" class="primary-action" type="button">エクスポート</button>
+        <button id="importSavedButton" class="secondary-action" type="button">インポート</button>
+        <button id="clearSavedButton" class="danger-action" type="button">すべて消去</button>
+        <input id="importSavedInput" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p class="settings-note">漢字項目のブックマークと、各辞書で保存した検索結果をJSON形式で管理します。</p>
+    </section>
+    <section class="settings-section">
+      <h2>アプリ</h2>
+      <div class="setting-actions"><button id="installPwaButton" class="primary-action" type="button">アプリをインストール</button></div>
+      <p id="pwaStatus" class="settings-note" aria-live="polite">インストール可能な環境では、ここからホーム画面に追加できます。</p>
+    </section>
+    <section class="settings-section">
+      <h2>アプリ情報</h2>
+      <div class="setting-row"><span>アプリ名</span><strong>千里馬事典 2.0</strong></div>
+      <div class="setting-row"><span>バージョン</span><span>2.0.0</span></div>
+    </section>
+  </div>
+</main>
+
 <!-- Detail sheet -->
 <div class="scrim" id="scrim" hidden>
   <div class="sheet" role="dialog" aria-modal="true">
     <div class="sheet-bar">
-      <button class="iconbtn" id="dBack" title="前の項目" hidden>←</button>
+      <button class="iconbtn" id="dBack" title="前の項目" aria-label="前の項目" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-1.42-1.42-8 8 8 8 1.42-1.42L7.83 13H20z"/></svg></button>
       <span class="sheet-title" id="dTitle">詳細</span>
       <button class="iconbtn" id="dBm" title="ブックマーク">☆</button>
       <button class="iconbtn" id="dClose" title="閉じる">✕</button>
@@ -426,19 +576,37 @@
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
+const missingElementIds = new Set();
+const $ = id => {
+  const element = document.getElementById(id);
+  if (!element && !missingElementIds.has(id)) {
+    missingElementIds.add(id);
+    console.error(`[DOM] 必須要素 #${id} が見つかりません。HTMLのIDと配置を確認してください。`);
+  } else if (element && missingElementIds.has(id)) {
+    missingElementIds.delete(id);
+  }
+  return element;
+};
 
 /* ---------- State & data ---------- */
+const SUPPORTED_LANGS = ['ja', 'en', 'zh-CN', 'zh-TW', 'ko', 'ko-KP'];
+const APP_VERSION = '2.0.0';
 let db = [];
 let byHanja = new Map(), byReading = new Map(), byKo = new Map(), byEn = new Map();
 let ejdb = [];
 let view = 'home', mode = 'hanja', trDir = 'h2r', dictDirection = 'en-ja';
 let apiDictType = 'ja';
 let apiRequestSerial = 0;
+let currentLang = getInitialLanguage();
+let savedExternal = loadExternalSaved();
+let deferredInstallPrompt = null;
+let snackbarTimer = null;
+let restoringRoute = false;
 let apiRequestController = null;
 const DICTIONARY_API_PROXY = 'https://bhwxeffktrxzfdmpfhpd.supabase.co/functions/v1/sajon';
 const KRDICT_API_KEY = 'EE34BD8FDD19B110D40B4BBE6766F801';
 let detailStack = [];
+let pendingDetailId = null;
 const LIMIT = 80;
 const bookmarks = new Set(loadBM());
 
@@ -451,8 +619,35 @@ const push = (m, k, v) => { if (!k) return; if (!m.has(k)) m.set(k, []); m.get(k
 const uniqBy = arr => { const m = new Map(); arr.forEach(x => { if (!m.has(x.id)) m.set(x.id, x); }); return [...m.values()]; };
 const key = e => `${e.hanja}|${e.reading}|${e.ko}`;
 
-function loadBM() { try { return JSON.parse(localStorage.getItem('hanjaBM') || '[]'); } catch (_) { return []; } }
-function saveBM() { try { localStorage.setItem('hanjaBM', JSON.stringify([...bookmarks])); } catch (_) {} }
+function getInitialLanguage() {
+  try {
+    const stored = localStorage.getItem('selectedLang');
+    return SUPPORTED_LANGS.includes(stored) ? stored : 'ja';
+  } catch (error) {
+    console.error('[設定] 言語設定を読み込めません。', error);
+    return 'ja';
+  }
+}
+function loadBM() {
+  try {
+    const value = JSON.parse(localStorage.getItem('hanjaBM') || '[]');
+    return Array.isArray(value) ? value.filter(item => typeof item === 'string') : [];
+  } catch (error) { console.error('[保存済み] ブックマークの読み込みに失敗しました。', error); return []; }
+}
+function saveBM() {
+  try { localStorage.setItem('hanjaBM', JSON.stringify([...bookmarks])); return true; }
+  catch (error) { console.error('[保存済み] ブックマークを保存できません。', error); showSnackbar('保存できませんでした。ストレージの空き容量を確認してください。'); return false; }
+}
+function loadExternalSaved() {
+  try {
+    const value = JSON.parse(localStorage.getItem('chollimaSavedExternal') || '[]');
+    return Array.isArray(value) ? value.filter(item => item && typeof item.id === 'string' && typeof item.title === 'string' && typeof item.summary === 'string') : [];
+  } catch (error) { console.error('[保存済み] 辞書検索結果の読み込みに失敗しました。', error); return []; }
+}
+function persistExternalSaved() {
+  try { localStorage.setItem('chollimaSavedExternal', JSON.stringify(savedExternal)); return true; }
+  catch (error) { console.error('[保存済み] 辞書検索結果を保存できません。', error); showSnackbar('保存できませんでした。ストレージの空き容量を確認してください。'); return false; }
+}
 
 // 英語の意味だけ抜き出す
 function englishOf(rest) {
@@ -624,7 +819,7 @@ function loadEjDictionaryText(text, source = 'ファイル') {
   if (status) status.textContent = `${ejdb.length.toLocaleString('ja-JP')} 件読み込み済み`;
   if (loadBox) loadBox.hidden = true;
   render();
-  console.info(`[英単語辞書] ${source}から ${ejdb.length.toLocaleString('ja-JP')} 件を読み込みました。`);
+  console.log(`[英単語辞書] ${source}から ${ejdb.length.toLocaleString('ja-JP')} 件を読み込みました。`);
 }
 
 function searchEjEnglish(query) {
@@ -684,6 +879,8 @@ function renderEjDictionary() {
   hint.textContent = isEnglish
     ? '英単語を入力すると、日本語の意味を検索します。部分一致にも対応しています。'
     : '日本語の意味を入力すると、その語句を含む英単語を検索します。';
+  const saveButton = $('dictSaveButton');
+  if (saveButton) saveButton.hidden = true;
   if (!ejdb.length) {
     result.innerHTML = none('辞書が読み込まれていません。下のファイル選択から ejdict-hand-utf8.txt を読み込んでください。');
     return;
@@ -699,6 +896,7 @@ function renderEjDictionary() {
   result.innerHTML = hits.length
     ? `<p class="dict-result-meta">${hits.length.toLocaleString('ja-JP')} 件一致（最大 ${LIMIT} 件を表示）・${directionLabel}</p>${shown}${moreText}`
     : none('該当する項目がありません');
+  if (saveButton) saveButton.hidden = !hits.length;
 }
 
 function setDictDirection(direction) {
@@ -714,9 +912,10 @@ function setDictDirection(direction) {
   });
   const input = $('appInput');
   if (input && view === 'vocab') {
-    input.placeholder = dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）';
+    input.placeholder = translateText(dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）');
   }
   renderEjDictionary();
+  localizeDOM();
 }
 
 function apiDictionaryConfig(type) {
@@ -771,12 +970,13 @@ function updateApiDictionaryUI() {
   }
   heading.textContent = config.title;
   hint.textContent = config.hint;
-  input.placeholder = config.placeholder;
+  input.placeholder = translateText(config.placeholder);
   buttons.forEach(button => {
     const active = button.dataset.apiDictTab === apiDictType;
     button.classList.toggle('active', active);
     button.setAttribute('aria-pressed', String(active));
   });
+  localizeDOM();
 }
 
 function setApiDictionaryType(type) {
@@ -791,6 +991,8 @@ function setApiDictionaryType(type) {
   apiRequestSerial++;
   const searchButton = $('apiSearchButton');
   if (searchButton) searchButton.disabled = false;
+  const saveButton = $('apiSaveButton');
+  if (saveButton) saveButton.hidden = true;
   apiDictType = type;
   updateApiDictionaryUI();
   const result = $('apiResult');
@@ -961,6 +1163,7 @@ async function performApiDictionarySearch() {
   searchButton.disabled = true;
   result.innerHTML = '<div class="api-message">検索中です…</div>';
   status.textContent = '検索中…';
+  localizeDOM();
   try {
     const targetUrl = buildDictionaryApiUrl(apiDictType, query);
     const rawData = await requestDictionaryApi(targetUrl, controller.signal);
@@ -968,6 +1171,9 @@ async function performApiDictionarySearch() {
     const html = renderDictionaryApiData(apiDictType, rawData, query);
     result.innerHTML = html;
     status.textContent = '検索完了';
+    const saveButton = $('apiSaveButton');
+    if (saveButton) saveButton.hidden = false;
+    localizeDOM();
   } catch (error) {
     if (requestId !== apiRequestSerial) return;
     const message = timedOut
@@ -977,6 +1183,9 @@ async function performApiDictionarySearch() {
         : (error && error.message ? error.message : '辞書の検索に失敗しました。'));
     result.innerHTML = `<div class="api-message error">${esc(message)}</div>`;
     status.textContent = '検索失敗';
+    const saveButton = $('apiSaveButton');
+    if (saveButton) saveButton.hidden = true;
+    localizeDOM();
     console.error('[API辞書] 検索に失敗しました。', { type: apiDictType, query, error });
   } finally {
     window.clearTimeout(timeoutId);
@@ -1005,14 +1214,29 @@ function runTool() {
 
 /* ---------- Saved ---------- */
 function renderSaved() {
-  const q = $('appInput').value.trim().toLowerCase();
+  const input = $('appInput');
+  const q = input ? input.value.trim().toLowerCase() : '';
   const list = db.filter(e => bookmarks.has(key(e)) &&
     (!q || `${e.hanja}${e.reading}${e.ko}${e.rest}`.toLowerCase().includes(q)));
-  let body;
-  if (!bookmarks.size) body = none('まだ保存していません（詳細画面の ☆ で追加できます）');
-  else if (!list.length) body = none('一致する項目がありません');
-  else body = list.slice(0, LIMIT).map(savedRow).join('') + more(list.length);
-  $('savedBody').innerHTML = `<p class="tab-hint">保存済み（${bookmarks.size} 件）</p>` + body;
+  const external = savedExternal.filter(item => !q || `${item.title} ${item.query} ${item.summary}`.toLowerCase().includes(q));
+  const classicBody = list.length ? list.slice(0, LIMIT).map(savedRow).join('') + more(list.length) : '';
+  const externalBody = external.map(item => `
+    <article class="saved-external-row">
+      <div class="saved-external-head"><div class="saved-external-title">${esc(item.title)}</div></div>
+      <div class="note">${esc(item.query)} · ${esc(new Date(item.savedAt || Date.now()).toLocaleString(currentLang))}</div>
+      <div class="saved-external-summary">${esc(item.summary)}</div>
+      <div class="saved-external-actions">
+        <button class="secondary-action" type="button" data-restore-saved="${esc(item.id)}">再検索</button>
+        <button class="danger-action" type="button" data-delete-saved="${esc(item.id)}">削除</button>
+      </div>
+    </article>`).join('');
+  const empty = !bookmarks.size && !savedExternal.length
+    ? none('まだ保存していません（詳細画面の ☆ で追加できます）')
+    : (!list.length && !external.length ? none('一致する項目がありません') : '');
+  const target = $('savedBody');
+  if (!target) { console.error('[保存済み] #savedBody が見つかりません。'); return; }
+  target.innerHTML = `<p class="tab-hint">保存済み（漢字 ${bookmarks.size} 件・辞書 ${savedExternal.length} 件）</p>${empty}${classicBody}${externalBody}`;
+  localizeDOM();
 }
 
 /* ---------- Translate ---------- */
@@ -1114,6 +1338,7 @@ function openDetail(id) {
   $('scrim').hidden = false;
   document.body.style.overflow = 'hidden';
   renderDetail();
+  updateShareUrl(false);
 }
 function renderDetail() {
   const e = db[detailStack[detailStack.length - 1]];
@@ -1123,6 +1348,7 @@ function renderDetail() {
   updateBmButton(e);
   $('dBody').innerHTML = detailHTML(e);
   $('dBody').scrollTop = 0;
+  localizeDOM();
 }
 function updateBmButton(e) {
   const on = bookmarks.has(key(e));
@@ -1131,9 +1357,22 @@ function updateBmButton(e) {
 }
 function toggleBM() {
   const e = db[detailStack[detailStack.length - 1]];
-  if (!e) return;
-  bookmarks.has(key(e)) ? bookmarks.delete(key(e)) : bookmarks.add(key(e));
-  saveBM();
+  if (!e) { console.error('[保存済み] ブックマーク対象が見つかりません。'); return; }
+  const entryKey = key(e);
+  const wasSaved = bookmarks.has(entryKey);
+  if (wasSaved) {
+    const message = ({ja:'この項目の保存を解除しますか？', en:'Remove this bookmark?', 'zh-CN':'要取消保存此项目吗？', 'zh-TW':'要取消儲存此項目嗎？', ko:'이 항목의 저장을 해제할까요?', 'ko-KP':'이 항목의 보관을 해제하겠습니까?'})[currentLang];
+    if (!window.confirm(message)) return;
+    bookmarks.delete(entryKey);
+  } else {
+    bookmarks.add(entryKey);
+  }
+  if (!saveBM()) {
+    if (wasSaved) bookmarks.add(entryKey); else bookmarks.delete(entryKey);
+    updateBmButton(e);
+    updateCounts();
+    return;
+  }
   updateBmButton(e);
   updateCounts();
   if (view === 'saved') renderSaved();
@@ -1142,177 +1381,701 @@ function closeDetail() {
   $('scrim').hidden = true;
   detailStack = [];
   document.body.style.overflow = '';
+  updateShareUrl(false);
 }
 function backDetail() {
   detailStack.pop();
   renderDetail();
+  updateShareUrl(false);
 }
 
-/* ---------- Navigation ---------- */
-function go(v, m, apiType) {
+/* ---------- Navigation / theme / URL ---------- */
+const PAGE_IDS = ['home', 'tool', 'vocab', 'apiDict', 'translate', 'saved', 'settings'];
+const THEME_COLORS = {
+  home: '#5500FF', tool: '#cc2222', vocab: '#1144ee', translate: '#5500FF',
+  saved: '#5500FF', apiJa: '#ee9911', apiKo: '#00aa55', settings: '#5500FF'
+};
+function applyThemeForView() {
+  let color = THEME_COLORS.home;
+  if (view === 'tool') color = THEME_COLORS.tool;
+  else if (view === 'vocab') color = THEME_COLORS.vocab;
+  else if (view === 'translate') color = THEME_COLORS.translate;
+  else if (view === 'saved') color = THEME_COLORS.saved;
+  else if (view === 'apiDict') color = (apiDictType === 'ja' || apiDictType === 'en') ? THEME_COLORS.apiJa : THEME_COLORS.apiKo;
+  else if (view === 'settings') color = THEME_COLORS.settings;
+  const root = document.documentElement;
+  root.style.setProperty('--primary', color);
+  const darken = { '#5500FF': '#4400CC', '#cc2222': '#a91c1c', '#1144ee': '#0b34b7', '#ee9911': '#b9790d', '#00aa55': '#008744' };
+  root.style.setProperty('--primary-dark', darken[color] || '#4400CC');
+  const light = { '#5500FF': '#EDE7FF', '#cc2222': '#f9e3e3', '#1144ee': '#e4eaff', '#ee9911': '#fff1d6', '#00aa55': '#d9f4e6' };
+  root.style.setProperty('--primary-light', light[color] || '#EDE7FF');
+}
+function updateShareUrl(push = false) {
+  if (restoringRoute || !window.history || !window.history.replaceState) return;
+  try {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+    params.set('view', view);
+    params.set('lang', currentLang);
+    if (view === 'tool') params.set('mode', mode); else params.delete('mode');
+    if (view === 'apiDict') params.set('dict', apiDictType); else params.delete('dict');
+    if (view === 'vocab') params.set('dir', dictDirection); else params.delete('dir');
+    const input = $('appInput');
+    const query = (['tool', 'saved', 'vocab', 'apiDict'].includes(view) && input) ? input.value : '';
+    if (query && query.length <= 8000) params.set('q', query); else params.delete('q');
+    const trInput = $('trIn');
+    if (view === 'translate' && trInput && trInput.value && trInput.value.length <= 8000) {
+      params.set('text', trInput.value); params.set('trDir', trDir);
+    } else { params.delete('text'); params.delete('trDir'); }
+    if (detailStack.length) params.set('detail', String(detailStack[detailStack.length - 1]));
+    else if (pendingDetailId !== null) params.set('detail', String(pendingDetailId));
+    else params.delete('detail');
+    const method = push ? 'pushState' : 'replaceState';
+    window.history[method]({ chollima: true }, '', url);
+  } catch (error) { console.error('[URL] 共有URLを更新できません。', error); }
+}
+function go(v, m, apiType, options = {}) {
+  const settings = { sync: options.sync !== false, animate: options.animate !== false };
+  if (!PAGE_IDS.includes(v)) {
+    console.error('[画面遷移] 未対応の画面です:', v);
+    v = 'home';
+  }
   if (view === 'apiDict' && v !== 'apiDict') {
-    if (apiRequestController) {
-      apiRequestController.abort();
-      apiRequestController = null;
-    }
+    if (apiRequestController) { apiRequestController.abort(); apiRequestController = null; }
     apiRequestSerial++;
     const searchButton = $('apiSearchButton');
     if (searchButton) searchButton.disabled = false;
+    const saveButton = $('apiSaveButton');
+    if (saveButton) saveButton.hidden = true;
   }
+  const previousView = view;
+  if (!restoringRoute && previousView !== v && v !== 'home' && v !== 'settings' && ['tool', 'saved', 'vocab', 'apiDict'].includes(v)) { const oldInput = $('appInput'); if (oldInput) oldInput.value = ''; }
   view = v;
-  if (m) mode = m;
-  if (v === 'apiDict' && apiType) apiDictType = apiType;
-  $('home').hidden  = v !== 'home';
-  $('tool').hidden  = v !== 'tool';
-  $('vocab').hidden = v !== 'vocab';
-  $('apiDict').hidden = v !== 'apiDict';
-  $('trans').hidden = v !== 'translate';
-  $('saved').hidden = v !== 'saved';
-  document.querySelectorAll('.tool-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  $('backBtn').hidden = v === 'home';
-  $('appInput').hidden = !(v === 'tool' || v === 'saved' || v === 'vocab' || v === 'apiDict');
-  $('appTitle').hidden = !(v === 'home' || v === 'translate');
-  $('appTitle').textContent = v === 'translate' ? '漢字語翻訳' : '漢字変換ツール';
-  $('appInput').placeholder = v === 'saved'
-    ? '保存済みを検索'
-    : v === 'vocab'
-      ? (dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）')
-      : v === 'apiDict'
-        ? ((apiDictionaryConfig(apiDictType) || {}).placeholder || '検索語を入力')
-        : '入力（例: 가게 / 仮 / falsehood）';
+  if (m && ['hanja', 'native', 'english'].includes(m)) mode = m;
+  if (v === 'apiDict' && apiType && apiDictionaryConfig(apiType)) apiDictType = apiType;
+  ['home', 'tool', 'vocab', 'apiDict', 'trans', 'saved', 'settings'].forEach(id => { const el = $(id); if (el) el.hidden = id !== (v === 'translate' ? 'trans' : v); });
+  const toolTabs = document.querySelectorAll('.tool-tab');
+  toolTabs.forEach(button => button.classList.toggle('active', button.dataset.mode === mode));
+  const back = $('backBtn'); if (back) back.hidden = v === 'home';
+  const settingsButton = $('settingsBtn'); if (settingsButton) settingsButton.hidden = v !== 'home';
+  const logo = $('brandLogo'); if (logo) logo.hidden = v !== 'home';
+  const title = $('appTitle');
+  if (title) {
+    title.hidden = v === 'home' || ['tool', 'saved', 'vocab', 'apiDict'].includes(v);
+    title.textContent = v === 'translate' ? '漢字語翻訳' : v === 'settings' ? '設定' : '千里馬事典 2.0';
+  }
+  const input = $('appInput');
+  if (input) {
+    input.hidden = !['tool', 'saved', 'vocab', 'apiDict'].includes(v);
+    input.placeholder = translateText(v === 'saved' ? '保存済みを検索'
+      : v === 'vocab' ? (dictDirection === 'en-ja' ? '英単語を入力（例: Andean）' : '日本語の意味を入力（例: アンデス山脈）')
+      : v === 'apiDict' ? ((apiDictionaryConfig(apiDictType) || {}).placeholder || '検索語を入力')
+      : '入力（例: 가게 / 仮 / falsehood）');
+  }
+  const apiSearch = $('apiSearchButton'); if (apiSearch) apiSearch.hidden = v !== 'apiDict';
+  if (v !== 'apiDict') { const b = $('apiSaveButton'); if (b) b.hidden = true; }
+  if (v === 'apiDict') updateApiDictionaryUI();
+  if (v === 'vocab') setDictDirection(dictDirection);
+  if (v === 'settings') updateSettingsUI();
+  applyThemeForView();
+  if (settings.animate) {
+    const pageId = v === 'translate' ? 'trans' : v;
+    const page = $(pageId);
+    if (page) { page.classList.remove('view-enter'); void page.offsetWidth; page.classList.add('view-enter'); }
+  }
   window.scrollTo(0, 0);
   render();
-  if (v === 'apiDict') updateApiDictionaryUI();
-  if ((v === 'tool' || v === 'vocab' || v === 'apiDict') && !$('appInput').hidden) $('appInput').focus();
-  if (v === 'translate') $('trIn').focus();
+  if (input && !input.hidden && ['tool', 'vocab', 'apiDict'].includes(v)) input.focus({ preventScroll: true });
+  if (v === 'translate') { const tr = $('trIn'); if (tr) tr.focus({ preventScroll: true }); }
+  if (settings.sync) updateShareUrl(true);
 }
-
 function render() {
   if (view === 'tool') runTool();
   else if (view === 'vocab') renderEjDictionary();
   else if (view === 'apiDict') updateApiDictionaryUI();
   else if (view === 'saved') renderSaved();
   else if (view === 'translate') doTranslate();
+  applyThemeForView();
+  localizeDOM();
 }
 
 function updateCounts() {
-  $('status').textContent = db.length ? `${db.length} 件` : '未読込';
-  $('savedCount').textContent = bookmarks.size;
+  const status = $('status');
+  if (status) status.textContent = db.length ? `${db.length} 件` : '未読込';
+  const savedCount = $('savedCount'); if (savedCount) savedCount.textContent = String(bookmarks.size + savedExternal.length);
 }
-
 function loadText(text) {
-  db = parse(text);
+  const parsed = parse(text);
+  if (!parsed.length) throw new Error('hanja.txt から有効な項目を読み込めませんでした。');
+  db = parsed;
   buildIndex();
-  $('loadBox').hidden = true;
-  updateCounts();
-  render();
+  if (pendingDetailId !== null && db[pendingDetailId]) { const detailId = pendingDetailId; pendingDetailId = null; openDetail(detailId); }
+  const loadBox = $('loadBox'); if (loadBox) loadBox.hidden = true;
+  updateCounts(); render();
 }
 
-/* ---------- Events ---------- */
+/* ---------- Settings, localization, save/export, install, routing ---------- */
+const TRANSLATION_ROWS = [
+  ['千里馬事典 2.0', 'Chollima Dictionary 2.0', '千里馬事典 2.0', '千里馬事典 2.0', '천리마 사전 2.0', '천리마사전 2.0'],
+  ['機能を選択', 'Choose a function', '选择功能', '選擇功能', '기능 선택', '기능을 선택'],
+  ['クラシック', 'Dictionaries', '经典辞典', '經典辭典', '사전', '사전'],
+  ['漢字変換', 'Hanja conversion', '汉字转换', '漢字轉換', '한자 변환', '한자변환'],
+  ['固有語⇄漢字語', 'Native Korean ⇄ Sino-Korean', '固有词⇄汉字词', '固有詞⇄漢字詞', '고유어⇄한자어', '고유어⇄한자어'],
+  ['英単語→漢字語', 'English → Sino-Korean', '英语单词→汉字词', '英語單字→漢字詞', '영어 단어→한자어', '영어단어→한자어'],
+  ['英単語辞書', 'English–Japanese dictionary', '英日词典', '英日詞典', '영일 사전', '영일사전'],
+  ['漢字語翻訳', 'Hanja text conversion', '汉字词转换', '漢字詞轉換', '한자어 변환', '한자어변환'],
+  ['保存済み', 'Saved items', '已保存项目', '已儲存項目', '저장 항목', '보관 항목'],
+  ['日本語辞書', 'Japanese dictionary', '日语词典', '日語辭典', '일본어 사전', '일본어사전'],
+  ['英英辞書', 'English dictionary', '英英词典', '英英詞典', '영영 사전', '영영사전'],
+  ['韓国語辞書', 'Korean dictionary', '韩语词典', '韓語詞典', '한국어 사전', '조선어사전'],
+  ['日本語から韓国語辞典を検索', 'Search the Korean dictionary in Japanese', '用日语搜索韩语词典', '用日語搜尋韓語詞典', '일본어로 한국어 사전 검색', '일본어로 조선어사전 검색'],
+  ['日本語で韓国語検索', 'Search Korean using Japanese', '用日语搜索韩语', '用日語搜尋韓語', '일본어로 한국어 검색', '일본어로 조선어 검색'],
+  ['ハングルの読み → 漢字 ／ 漢字 → 読み', 'Hangul reading → Hanja / Hanja → reading', '谚文读音→汉字／汉字→读音', '諺文讀音→漢字／漢字→讀音', '한글 독음 → 한자 / 한자 → 독음', '한글읽기 → 한자 / 한자 → 읽기'],
+  ['固有語 → 漢字 ／ 漢字 → 固有語', 'Native Korean → Hanja / Hanja → Native Korean', '固有词→汉字／汉字→固有词', '固有詞→漢字／漢字→固有詞', '고유어 → 한자 / 한자 → 고유어', '고유어 → 한자 / 한자 → 고유어'],
+  ['英語の意味から漢字語を検索', 'Find Sino-Korean words by English meaning', '按英语释义搜索汉字词', '按英語釋義搜尋漢字詞', '영어 뜻으로 한자어 검색', '영어뜻으로 한자어 검색'],
+  ['英単語 → 日本語の意味 ／ 日本語の意味 → 英単語', 'English → Japanese / Japanese → English', '英语→日语释义／日语释义→英语', '英語→日語釋義／日語釋義→英語', '영어 → 일본어 뜻 / 일본어 뜻 → 영어', '영어 → 일본어뜻 / 일본어뜻 → 영어'],
+  ['長文を貼り付けて読みに変換', 'Paste text to convert readings', '粘贴长文并转换读音', '貼上長文並轉換讀音', '긴 글을 붙여넣어 독음으로 변환', '긴 글을 붙여넣어 읽기로 변환'],
+  ['ブックマーク', 'Bookmarks', '书签', '書籤', '북마크', '북마크'],
+  ['検索', 'Search', '搜索', '搜尋', '검색', '검색'],
+  ['検索結果を保存', 'Save results', '保存搜索结果', '儲存搜尋結果', '검색 결과 저장', '검색 결과 보관'],
+  ['検索待機中', 'Ready to search', '等待搜索', '等待搜尋', '검색 대기 중', '검색 대기 중'],
+  ['検索完了', 'Search complete', '搜索完成', '搜尋完成', '검색 완료', '검색 완료'],
+  ['検索中…', 'Searching…', '搜索中…', '搜尋中…', '검색 중…', '검색 중…'],
+  ['検索失敗', 'Search failed', '搜索失败', '搜尋失敗', '검색 실패', '검색 실패'],
+  ['検索語を入力して検索してください。', 'Enter a query and search.', '请输入词语并搜索。', '請輸入詞語並搜尋。', '검색어를 입력하세요.', '검색어를 입력하시오.'],
+  ['検索語を入力してください。', 'Please enter a query.', '请输入搜索词。', '請輸入搜尋詞。', '검색어를 입력하세요.', '검색어를 입력하시오.'],
+  ['検索語が必要です', 'A query is required', '需要搜索词', '需要搜尋詞', '검색어가 필요합니다', '검색어가 필요합니다'],
+  ['入力してください', 'Enter text', '请输入内容', '請輸入內容', '입력하세요', '입력하시오'],
+  ['候補なし', 'No candidates', '没有候选项', '沒有候選項', '후보 없음', '후보 없음'],
+  ['データなし', 'No data', '没有数据', '沒有資料', '자료 없음', '자료 없음'],
+  ['該当なし', 'No matches', '没有匹配项', '沒有相符項目', '일치 항목 없음', '맞는 항목 없음'],
+  ['該当する項目がありません', 'No matching entries', '没有匹配的条目', '沒有相符的項目', '일치하는 항목이 없습니다', '맞는 항목이 없습니다'],
+  ['一致する項目がありません', 'No matching items', '没有匹配项目', '沒有相符項目', '일치하는 항목이 없습니다', '맞는 항목이 없습니다'],
+  ['まだ保存していません（詳細画面の ☆ で追加できます）', 'Nothing saved yet. Use ☆ on a detail page to save an item.', '尚未保存项目（可在详情页点 ☆ 添加）', '尚未儲存項目（可在詳細頁按 ☆ 加入）', '아직 저장한 항목이 없습니다. 상세 화면에서 ☆를 눌러 추가할 수 있습니다.', '아직 보관한 항목이 없습니다. 상세화면에서 ☆를 눌러 추가할 수 있습니다.'],
+  ['詳細', 'Details', '详情', '詳細資料', '상세', '상세'],
+  ['閉じる', 'Close', '关闭', '關閉', '닫기', '닫기'],
+  ['戻る', 'Back', '返回', '返回', '뒤로', '뒤로'],
+  ['設定', 'Settings', '设置', '設定', '설정', '설정'],
+  ['表示', 'Display', '显示', '顯示', '표시', '표시'],
+  ['全体の言語', 'Application language', '应用语言', '應用程式語言', '전체 언어', '전체 언어'],
+  ['千里馬フォントを使用する', 'Use the Chollima font', '使用千里马字体', '使用千里馬字體', '천리마 글꼴 사용', '천리마글자체 사용'],
+  ['保存済み項目', 'Saved items', '已保存项目', '已儲存項目', '저장 항목', '보관 항목'],
+  ['エクスポート', 'Export', '导出', '匯出', '내보내기', '내보내기'],
+  ['インポート', 'Import', '导入', '匯入', '가져오기', '들여오기'],
+  ['すべて消去', 'Delete all', '全部清除', '全部清除', '모두 삭제', '모두 지우기'],
+  ['アプリ', 'App', '应用', '應用程式', '앱', '프로그람'],
+  ['アプリをインストール', 'Install app', '安装应用', '安裝應用程式', '앱 설치', '프로그람 설치'],
+  ['アプリ情報', 'App information', '应用信息', '應用程式資訊', '앱 정보', '프로그람 정보'],
+  ['アプリ名', 'App name', '应用名称', '應用程式名稱', '앱 이름', '프로그람 이름'],
+  ['バージョン', 'Version', '版本', '版本', '버전', '판번호'],
+  ['削除', 'Delete', '删除', '刪除', '삭제', '삭제'],
+  ['再検索', 'Search again', '重新搜索', '重新搜尋', '다시 검색', '다시 검색'],
+  ['訳文', 'Converted text', '转换结果', '轉換結果', '변환 결과', '변환 결과'],
+  ['漢字', 'Hanja', '汉字', '漢字', '한자', '한자'],
+  ['読み（ハングル）', 'Reading (Hangul)', '读音（谚文）', '讀音（諺文）', '읽기(한글)', '읽기(한글)'],
+  ['入れ替え', 'Swap', '交换', '交換', '바꾸기', '바꾸기'],
+  ['英語の意味', 'English meaning', '英语释义', '英語釋義', '영어 뜻', '영어뜻'],
+  ['意味（全文）', 'Full meaning', '完整释义', '完整釋義', '뜻(전체)', '뜻(전문)'],
+  ['原文', 'Original text', '原文', '原文', '원문', '원문'],
+  ['同じ固有語の別漢字', 'Other Hanja for the same native word', '相同固有词的其他汉字', '相同固有詞的其他漢字', '같은 고유어의 다른 한자', '같은 고유어의 다른 한자'],
+  ['同じ漢字の別の読み・固有語', 'Other readings and native words for this Hanja', '同一汉字的其他读音和固有词', '同一漢字的其他讀音與固有詞', '같은 한자의 다른 독음·고유어', '같은 한자의 다른 읽기·고유어'],
+  ['同じ音の別漢字', 'Other Hanja with the same reading', '同音的其他汉字', '同音的其他漢字', '같은 독음의 다른 한자', '같은 읽기의 다른 한자'],
+  ['英語ベースの類義語', 'English-based synonyms', '基于英语的近义词', '以英語為基礎的近義詞', '영어 기반 유의어', '영어기반 유의어'],
+  ['なし', 'None', '无', '無', '없음', '없음'],
+  ['発音:', 'Pronunciation:', '发音：', '發音：', '발음:', '발음:'],
+  ['品詞:', 'Part of speech:', '词性：', '詞性：', '품사:', '품사:'],
+  ['語源:', 'Origin:', '词源：', '語源：', '어원:', '어원:'],
+  ['見出し語なし', 'No headword', '无词条', '無詞條', '표제어 없음', '올림말 없음'],
+  ['意味の説明がありません。', 'No definition available.', '没有释义。', '沒有釋義。', '뜻풀이가 없습니다.', '뜻풀이가 없습니다.'],
+  ['出典:', 'Source:', '来源：', '來源：', '출처:', '출처:'],
+  ['辞書を読み込み中…', 'Loading dictionary…', '正在加载词典…', '正在載入辭典…', '사전 불러오는 중…', '사전 읽어들이는 중…'],
+  ['未読込', 'Not loaded', '未加载', '未載入', '불러오지 않음', '읽어들이지 않음'],
+  ['読み込み失敗', 'Loading failed', '加载失败', '載入失敗', '불러오기 실패', '읽어들이기 실패'],
+  ['読み込み済み', 'Loaded', '已加载', '已載入', '불러옴', '읽어들임'],
+  ['hanja.txt が読み込まれていません', 'hanja.txt has not been loaded.', '尚未加载 hanja.txt', '尚未載入 hanja.txt', 'hanja.txt를 불러오지 않았습니다.', 'hanja.txt를 읽어들이지 않았습니다.'],
+  ['辞書が読み込まれていません。下のファイル選択から ejdict-hand-utf8.txt を読み込んでください。', 'The dictionary is not loaded. Select ejdict-hand-utf8.txt below.', '词典尚未加载。请在下方选择 ejdict-hand-utf8.txt。', '辭典尚未載入。請在下方選擇 ejdict-hand-utf8.txt。', '사전이 없습니다. 아래에서 ejdict-hand-utf8.txt를 선택하세요.', '사전이 없습니다. 아래에서 ejdict-hand-utf8.txt를 선택하시오.'],
+  ['検索結果を保存しました。', 'Search results saved.', '已保存搜索结果。', '已儲存搜尋結果。', '검색 결과를 저장했습니다.', '검색 결과를 보관했습니다.'],
+  ['この検索結果はすでに保存済みです。', 'These results are already saved.', '此搜索结果已保存。', '此搜尋結果已儲存。', '이 검색 결과는 이미 저장되어 있습니다.', '이 검색 결과는 이미 보관되여 있습니다.'],
+  ['保存済み項目をエクスポートしました。', 'Saved items exported.', '已导出保存项目。', '已匯出已儲存項目。', '저장 항목을 내보냈습니다.', '보관 항목을 내보냈습니다.'],
+  ['保存済み項目をインポートしました。', 'Saved items imported.', '已导入保存项目。', '已匯入已儲存項目。', '저장 항목을 가져왔습니다.', '보관 항목을 들여왔습니다.'],
+  ['保存済み項目をすべて消去しました。', 'All saved items deleted.', '已清除所有保存项目。', '已清除所有已儲存項目。', '모든 저장 항목을 삭제했습니다.', '모든 보관 항목을 지웠습니다.'],
+  ['インストール可能な環境では、ここからホーム画面に追加できます。', 'On supported browsers, you can add the app to your home screen here.', '在支持的浏览器中，可从这里添加到主屏幕。', '支援的瀏覽器可在此將應用程式加入主畫面。', '지원되는 브라우저에서는 여기서 홈 화면에 추가할 수 있습니다.', '지원되는 열람기에서는 여기서 첫화면에 추가할 수 있습니다.'],
+  ['利用規約と個人情報保護方針', 'Terms of Use and Privacy Policy', '使用条款和隐私政策', '使用條款與隱私權政策', '이용약관 및 개인정보 보호정책', '리용규정과 개인정보보호방침'],
+  ['翻訳等では正確な情報が表示されない場合があります。ご了承ください。利用規約と個人情報保護方針を必ずご確認ください。', 'Translations and similar features may not display fully accurate information. Please understand this and review the Terms of Use and Privacy Policy.', '翻译等功能可能无法显示完全准确的信息。敬请谅解，并务必查看使用条款和隐私政策。', '翻譯等功能可能無法顯示完全正確的資訊。敬請見諒，並務必查閱使用條款與隱私權政策。', '번역 등에서는 정확한 정보가 표시되지 않을 수 있습니다. 양해해 주시고 이용약관과 개인정보 보호정책을 반드시 확인해 주세요.', '번역 등에서는 정확한 정보가 표시되지 않을 수 있습니다. 량해하여 주시고 리용규정과 개인정보보호방침을 반드시 확인하십시오.']
+  ,['英和・和英辞書', 'English–Japanese / Japanese–English', '英日／日英词典', '英日／日英辭典', '영일·일영 사전', '영일·일영 사전']
+  ,['英単語 → 日本語の意味', 'English → Japanese meaning', '英语→日语释义', '英語→日語釋義', '영어 → 일본어 뜻', '영어 → 일본어뜻']
+  ,['日本語の意味 → 英単語', 'Japanese meaning → English', '日语释义→英语', '日語釋義→英語', '일본어 뜻 → 영어', '일본어뜻 → 영어']
+  ,['英単語を入力すると、日本語の意味を検索します。部分一致にも対応しています。', 'Enter an English word to search Japanese meanings. Partial matches are supported.', '输入英语单词以搜索日语释义，也支持部分匹配。', '輸入英語單字以搜尋日語釋義，也支援部分比對。', '영어 단어를 입력하면 일본어 뜻을 검색합니다. 부분 일치도 지원합니다.', '영어단어를 입력하면 일본어뜻을 검색합니다. 부분일치도 지원합니다.']
+  ,['日本語の意味を入力すると、その語句を含む英単語を検索します。', 'Enter a Japanese meaning to find English words containing it.', '输入日语释义以查找包含该词语的英语单词。', '輸入日語釋義以尋找包含該詞語的英語單字。', '일본어 뜻을 입력하면 해당 구절을 포함한 영어 단어를 검색합니다.', '일본어뜻을 입력하면 해당 어구가 들어있는 영어단어를 검색합니다.']
+  ,['日本語の見出し語を入力してください。', 'Enter a Japanese headword.', '请输入日语词条。', '請輸入日語詞條。', '일본어 표제어를 입력하세요.', '일본어 올림말을 입력하시오.']
+  ,['英単語を入力（例: dictionary）', 'Enter an English word (e.g. dictionary)', '输入英语单词（例：dictionary）', '輸入英語單字（例：dictionary）', '영어 단어 입력(예: dictionary)', '영어단어를 입력하시오(례: dictionary)']
+  ,['韓国語の見出し語を入力（例: 사람）', 'Enter a Korean headword (e.g. 사람)', '输入韩语词条（例：사람）', '輸入韓語詞條（例：사람）', '한국어 표제어 입력(예: 사람)', '조선어 올림말을 입력하시오(례: 사람)']
+  ,['日本語の語句を入力（例: 人）', 'Enter a Japanese term (e.g. 人)', '输入日语词语（例：人）', '輸入日語詞語（例：人）', '일본어 어구 입력(예: 人)', '일본어 어구를 입력하시오(례: 人)']
+  ,['Wiktionary APIから日本語の項目を検索します。', 'Search Japanese entries via the Wiktionary API.', '通过 Wiktionary API 搜索日语词条。', '透過 Wiktionary API 搜尋日語詞條。', 'Wiktionary API로 일본어 항목을 검색합니다.', 'Wiktionary API로 일본어 항목을 검색합니다.']
+  ,['Free Dictionary APIから発音・品詞・英語定義を検索します。', 'Search pronunciations, parts of speech, and English definitions via the Free Dictionary API.', '通过 Free Dictionary API 搜索发音、词性和英语释义。', '透過 Free Dictionary API 搜尋發音、詞性與英語釋義。', 'Free Dictionary API에서 발음·품사·영어 뜻풀이를 검색합니다.', 'Free Dictionary API에서 발음·품사·영어 뜻풀이를 검색합니다.']
+  ,['韓国国立国語院の辞典APIから韓国語の見出し語を検索します。', 'Search Korean headwords via the National Institute of Korean Language dictionary API.', '通过韩国国立国语院词典 API 搜索韩语词条。', '透過韓國國立國語院辭典 API 搜尋韓語詞條。', '국립국어원 사전 API로 한국어 표제어를 검색합니다.', '국립국어원 사전 API로 조선어 올림말을 검색합니다.']
+  ,['入力した日本語を韓国語辞典APIの検索語として送信します。日本語からの翻訳を保証するものではありません。', 'The Japanese text is sent as a query to the Korean dictionary API. This does not guarantee translation from Japanese.', '将输入的日语作为搜索词发送到韩语词典 API；不保证提供日语翻译。', '將輸入的日語作為搜尋詞傳送至韓語辭典 API；不保證提供日語翻譯。', '입력한 일본어를 한국어 사전 API의 검색어로 보냅니다. 일본어 번역을 보장하지 않습니다.', '입력한 일본어를 조선어사전 API의 검색어로 보냅니다. 일본어번역을 보장하지 않습니다.']
+  ,['保存済みを検索', 'Search saved items', '搜索已保存项目', '搜尋已儲存項目', '저장 항목 검색', '보관 항목 검색']
+  ,['入力（例: 가게 / 仮 / falsehood）', 'Enter text (e.g. 가게 / 仮 / falsehood)', '输入内容（例：가게 / 仮 / falsehood）', '輸入內容（例：가게 / 仮 / falsehood）', '입력(예: 가게 / 仮 / falsehood)', '입력하시오(례: 가게 / 仮 / falsehood)']
+  ,['漢字語を貼り付け（例: 假想 仮想 可能性）', 'Paste Sino-Korean text (e.g. 假想 仮想 可能性)', '粘贴汉字词（例：假想 仮想 可能性）', '貼上漢字詞（例：假想 仮想 可能性）', '한자어를 붙여넣으세요(예: 假想 仮想 可能性)', '한자어를 붙여넣으시오(례: 假想 仮想 可能性)']
+  ,['ハングルを貼り付け（例: 가상 가능성）', 'Paste Hangul (e.g. 가상 가능성)', '粘贴谚文（例：가상 가능성）', '貼上諺文（例：가상 가능성）', '한글을 붙여넣으세요(예: 가상 가능성)', '한글을 붙여넣으시오(례: 가상 가능성)']
+  ,['翻訳等では正確な情報が表示されない場合があります。ご了承ください。利用規約と個人情報保護方針を必ずご確認ください。', 'Translations and similar features may not display fully accurate information. Please understand this and review the Terms of Use and Privacy Policy.', '翻译等功能可能无法显示完全准确的信息。敬请谅解，并务必查看使用条款和隐私政策。', '翻譯等功能可能無法顯示完全正確的資訊。敬請見諒，並務必查閱使用條款與隱私權政策。', '번역 등에서는 정확한 정보가 표시되지 않을 수 있습니다. 양해해 주시고 이용약관과 개인정보 보호정책을 반드시 확인해 주세요.', '번역 등에서는 정확한 정보가 표시되지 않을 수 있습니다. 량해하여 주시고 리용규정과 개인정보보호방침을 반드시 확인하십시오.']
+  ,['検索語', 'Search query', '搜索词', '搜尋詞', '검색어', '검색어']
+  ,['前の項目', 'Previous item', '上一项', '上一項', '이전 항목', '이전 항목']
+  ,['読み込み中…', 'Loading…', '加载中…', '載入中…', '불러오는 중…', '읽어들이는 중…']
+  ,['検索中です…', 'Searching…', '搜索中…', '搜尋中…', '검색 중입니다…', '검색 중입니다…']
+  ,['英単語を入力すると、日本語の意味を検索します。', 'Enter an English word to search Japanese meanings.', '输入英语单词以搜索日语释义。', '輸入英語單字以搜尋日語釋義。', '영어 단어를 입력하면 일본어 뜻을 검색합니다.', '영어단어를 입력하면 일본어뜻을 검색합니다.']
+  ,['日本語の見出し語を入力（例: 辞書）', 'Enter a Japanese headword (e.g. 辞書)', '输入日语词条（例：辞書）', '輸入日語詞條（例：辭書）', '일본어 표제어 입력(예: 辞書)', '일본어 올림말 입력(례: 辞書)']
+  ,['英単語を入力（例: Andean）', 'Enter an English word (e.g. Andean)', '输入英语单词（例：Andean）', '輸入英語單字（例：Andean）', '영어 단어 입력(예: Andean)', '영어단어를 입력하시오(례: Andean)']
+  ,['日本語の意味を入力（例: アンデス山脈）', 'Enter a Japanese meaning (e.g. アンデス山脈)', '输入日语释义（例：アンデス山脈）', '輸入日語釋義（例：アンデス山脈）', '일본어 뜻 입력(예: アンデス山脈)', '일본어뜻을 입력하시오(례: アンデス山脈)']
+  ,['利用規約と個人情報保護方針を必ずご確認ください。', 'Please review the Terms of Use and Privacy Policy.', '请务必查看使用条款和隐私政策。', '請務必查閱使用條款與隱私權政策。', '이용약관과 개인정보 보호정책을 반드시 확인해 주세요.', '리용규정과 개인정보보호방침을 반드시 확인하십시오.']
+  ,['設定エラー', 'Settings error', '设置错误', '設定錯誤', '설정 오류', '설정 오류']
+  ,['タイムアウトしました。もう一度検索してください。', 'The request timed out. Please search again.', '请求超时，请重新搜索。', '要求逾時，請重新搜尋。', '시간 초과입니다. 다시 검색하세요.', '시간초과입니다. 다시 검색하시오.']
+  ,['件', 'items', '项', '項', '개', '개']
+  ,['Wiktionary APIで日本語の見出し語を検索', 'Search Japanese headwords via the Wiktionary API', '通过 Wiktionary API 搜索日语词条', '透過 Wiktionary API 搜尋日語詞條', 'Wiktionary API로 일본어 표제어 검색', 'Wiktionary API로 일본어 올림말 검색']
+  ,['英単語の発音・品詞・英語定義を検索', 'Search pronunciations, parts of speech, and English definitions', '搜索英语单词的发音、词性和英文释义', '搜尋英語單字的發音、詞性與英文釋義', '영어 단어의 발음·품사·영어 뜻풀이 검색', '영어단어의 발음·품사·영어 뜻풀이 검색']
+  ,['韓国語の見出し語を国立国語院のAPIで検索', 'Search Korean headwords through the National Institute of Korean Language API', '通过韩国国立国语院 API 搜索韩语词条', '透過韓國國立國語院 API 搜尋韓語詞條', '국립국어원 API로 한국어 표제어 검색', '국립국어원 API로 조선어 올림말 검색']
+  ,['日本語の語句を韓国語辞典の検索語として使用', 'Use a Japanese term as the query for the Korean dictionary', '将日语词语用作韩语词典搜索词', '將日語詞語用作韓語辭典搜尋詞', '일본어 구절을 한국어 사전 검색어로 사용', '일본어 어구를 조선어사전 검색어로 사용']
+  ,['hanja.txt を自動で読み込めませんでした（ブラウザがファイルを直接開いている場合に起こります）。hanja.txt を選択してください。', 'Could not load hanja.txt automatically. This can happen when the page is opened as a local file. Select hanja.txt.', '无法自动加载 hanja.txt（直接用浏览器打开本地文件时可能发生）。请选择 hanja.txt。', '無法自動載入 hanja.txt（直接以瀏覽器開啟本機檔案時可能發生）。請選擇 hanja.txt。', 'hanja.txt를 자동으로 불러오지 못했습니다. 파일을 직접 열었을 때 발생할 수 있습니다. hanja.txt를 선택하세요.', 'hanja.txt를 자동으로 읽어들이지 못했습니다. 파일을 직접 열었을 때 생길 수 있습니다. hanja.txt를 선택하시오.']
+  ,['を自動で読み込めませんでした。HTMLと同じフォルダーに置くか、ここから辞書ファイルを選択してください。', ' could not be loaded automatically. Place it in the same folder as the HTML file or select the dictionary file here.', '无法自动加载。请将其放在 HTML 同一文件夹中，或在此选择词典文件。', '無法自動載入。請將檔案放在 HTML 同一資料夾中，或在此選擇辭典檔案。', '자동으로 불러오지 못했습니다. HTML과 같은 폴더에 두거나 여기서 사전 파일을 선택하세요.', '자동으로 읽어들이지 못했습니다. HTML과 같은 폴더에 두거나 여기서 사전 파일을 선택하시오.']
+  ,['漢字項目のブックマークと、各辞書で保存した検索結果をJSON形式で管理します。', 'Manage Hanja bookmarks and saved dictionary search results as JSON files.', '以 JSON 格式管理汉字书签和各词典中保存的搜索结果。', '以 JSON 格式管理漢字書籤與各辭典中儲存的搜尋結果。', '한자 북마크와 각 사전에서 저장한 검색 결과를 JSON 파일로 관리합니다.', '한자 북마크와 각 사전에서 보관한 검색 결과를 JSON 파일로 관리합니다.']
+
+
+
+];
+const TEXT_TRANSLATIONS = Object.create(null);
+for (const row of TRANSLATION_ROWS) {
+  if (Array.isArray(row) && row.length === 6) {
+    const langs = ['ja', 'en', 'zh-CN', 'zh-TW', 'ko', 'ko-KP'];
+    const values = Object.create(null);
+    langs.forEach((lang, index) => { values[lang] = row[index]; });
+    TEXT_TRANSLATIONS[row[0]] = values;
+  }
+}
+const originalTextNodes = new WeakMap();
+const originalAttributes = new WeakMap();
+function translateText(source) {
+  const trimmed = String(source ?? '').trim();
+  if (!trimmed) return source;
+  const item = TEXT_TRANSLATIONS[trimmed];
+  if (item && item[currentLang]) return String(source).replace(trimmed, item[currentLang]);
+  const dynamic = [
+    [/^保存済み（(\d+) 件）$/, n => ({en:`Saved (${n} items)`, 'zh-CN':`已保存（${n} 项）`, 'zh-TW':`已儲存（${n} 項）`, ko:`저장됨(${n}개)`, 'ko-KP':`보관됨(${n}개)`}[currentLang] || `保存済み（${n} 件）`)],
+    [/^ほか (\d+) 件$/, n => ({en:`${n} more`, 'zh-CN':`另有 ${n} 项`, 'zh-TW':`另有 ${n} 項`, ko:`외 ${n}개`, 'ko-KP':`그밖에 ${n}개`}[currentLang] || `ほか ${n} 件`)],
+    [/^(\d+) 件読み込み済み$/, n => ({en:`${n} entries loaded`, 'zh-CN':`已加载 ${n} 项`, 'zh-TW':`已載入 ${n} 項`, ko:`${n}개 항목 불러옴`, 'ko-KP':`${n}개 항목을 읽어들임`}[currentLang] || `${n} 件読み込み済み`)],
+    [/^保存済み（漢字 (\d+) 件・辞書 (\d+) 件）$/, (a,b) => ({en:`Saved (Hanja ${a} · Dictionaries ${b})`, 'zh-CN':`已保存（汉字 ${a} 项 · 词典 ${b} 项）`, 'zh-TW':`已儲存（漢字 ${a} 項 · 辭典 ${b} 項）`, ko:`저장됨(한자 ${a}개 · 사전 ${b}개)`, 'ko-KP':`보관됨(한자 ${a}개 · 사전 ${b}개)`}[currentLang] || `保存済み（漢字 ${a} 件・辞書 ${b} 件）`)]
+  ];
+  for (const [pattern, factory] of dynamic) {
+    const match = trimmed.match(pattern);
+    if (match) {
+      const replacement = factory(...match.slice(1));
+      return String(source).replace(trimmed, replacement);
+    }
+  }
+  const patterns = {
+    en: [
+      [/^(.+) → 漢字$/, '$1 → Hanja'], [/^(.+) → 読み$/, '$1 → reading'], [/^(.+) → 固有語$/, '$1 → native Korean'],
+      [/^固有語「(.+)」→ 漢字$/, 'Hanja for native word “$1”'], [/^「(.+)」を含む意味の漢字語$/, 'Sino-Korean words whose meaning contains “$1”'],
+      [/^(\d+) 件一致（最大 (\d+) 件を表示）・(.+)$/, '$1 matches (showing up to $2) · $3'], [/^出典:/, 'Source:']
+    ],
+    'zh-CN': [
+      [/^(.+) → 漢字$/, '$1 → 汉字'], [/^(.+) → 読み$/, '$1 → 读音'], [/^(.+) → 固有語$/, '$1 → 固有词'],
+      [/^固有語「(.+)」→ 漢字$/, '固有词“$1”对应的汉字'], [/^「(.+)」を含む意味の漢字語$/, '释义包含“$1”的汉字词'],
+      [/^(\d+) 件一致（最大 (\d+) 件を表示）・(.+)$/, '匹配 $1 项（最多显示 $2 项）· $3'], [/^出典:/, '来源：']
+    ],
+    'zh-TW': [
+      [/^(.+) → 漢字$/, '$1 → 漢字'], [/^(.+) → 読み$/, '$1 → 讀音'], [/^(.+) → 固有語$/, '$1 → 固有詞'],
+      [/^固有語「(.+)」→ 漢字$/, '固有詞「$1」對應的漢字'], [/^「(.+)」を含む意味の漢字語$/, '釋義包含「$1」的漢字詞'],
+      [/^(\d+) 件一致（最大 (\d+) 件を表示）・(.+)$/, '符合 $1 項（最多顯示 $2 項）· $3'], [/^出典:/, '來源：']
+    ],
+    ko: [
+      [/^(.+) → 漢字$/, '$1 → 한자'], [/^(.+) → 読み$/, '$1 → 독음'], [/^(.+) → 固有語$/, '$1 → 고유어'],
+      [/^固有語「(.+)」→ 漢字$/, '고유어 “$1”의 한자'], [/^「(.+)」を含む意味の漢字語$/, '뜻에 “$1”가 포함된 한자어'],
+      [/^(\d+) 件一致（最大 (\d+) 件を表示）・(.+)$/, '$1개 일치(최대 $2개 표시) · $3'], [/^出典:/, '출처:']
+    ],
+    'ko-KP': [
+      [/^(.+) → 漢字$/, '$1 → 한자'], [/^(.+) → 読み$/, '$1 → 읽기'], [/^(.+) → 固有語$/, '$1 → 고유어'],
+      [/^固有語「(.+)」→ 漢字$/, '고유어 “$1”의 한자'], [/^「(.+)」を含む意味の漢字語$/, '뜻에 “$1”가 포함된 한자어'],
+      [/^(\d+) 件一致（最大 (\d+) 件を表示）・(.+)$/, '$1개 일치(최대 $2개 표시) · $3'], [/^出典:/, '출처:']
+    ]
+  }[currentLang] || [];
+  for (const [pattern, replacement] of patterns) {
+    if (pattern.test(trimmed)) return String(source).replace(trimmed, trimmed.replace(pattern, replacement));
+  }
+  return source;
+}
+function shouldSkipTranslation(node) {
+  const parent = node && node.parentElement;
+  if (!parent) return false;
+  if (parent.closest('script, style, code, .raw, .api-entry, .ej-row, .dblock, .saved-external-summary')) return true;
+  return false;
+}
+function localizeDOM(root = document.body) {
+  if (!root) { console.error('[多言語] 翻訳対象の要素がありません。'); return; }
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const node of nodes) {
+    if (shouldSkipTranslation(node)) continue;
+    if (!originalTextNodes.has(node)) originalTextNodes.set(node, node.nodeValue);
+    const translated = translateText(originalTextNodes.get(node));
+    if (node.nodeValue !== translated) node.nodeValue = translated;
+  }
+  const elements = root.querySelectorAll ? [ ...(root.matches && root.matches('[placeholder],[title],[aria-label]') ? [root] : []), ...root.querySelectorAll('[placeholder],[title],[aria-label]') ] : [];
+  for (const element of elements) {
+    for (const attr of ['title', 'aria-label']) {
+      if (!element.hasAttribute(attr)) continue;
+      let values = originalAttributes.get(element);
+      if (!values) { values = Object.create(null); originalAttributes.set(element, values); }
+      if (!(attr in values)) values[attr] = element.getAttribute(attr);
+      const translated = translateText(values[attr]);
+      if (element.getAttribute(attr) !== translated) element.setAttribute(attr, translated);
+    }
+  }
+}
+function applyLanguage(language, persist = true) {
+  if (!SUPPORTED_LANGS.includes(language)) {
+    console.error('[多言語] 未対応の言語です:', language);
+    language = 'ja';
+  }
+  currentLang = language;
+  document.documentElement.lang = language;
+  const selector = $('languageSelect'); if (selector) selector.value = language;
+  if (persist) {
+    try { localStorage.setItem('selectedLang', language); }
+    catch (error) { console.error('[設定] 言語設定を保存できません。', error); }
+  }
+  document.title = ({ ja:'千里馬事典 2.0', en:'Chollima Dictionary 2.0', 'zh-CN':'千里马事典 2.0', 'zh-TW':'千里馬事典 2.0', ko:'천리마 사전 2.0', 'ko-KP':'천리마사전 2.0' })[language];
+  if (view === 'apiDict') updateApiDictionaryUI();
+  else if (view === 'vocab') setDictDirection(dictDirection);
+  else if (view === 'saved') { const input = $('appInput'); if (input) input.placeholder = translateText('保存済みを検索'); }
+  else if (view === 'tool') { const input = $('appInput'); if (input) input.placeholder = translateText('入力（例: 가게 / 仮 / falsehood）'); }
+  localizeDOM();
+  updateShareUrl(false);
+}
+function showSnackbar(message) {
+  const box = $('snackbar');
+  if (!box) { console.error('[通知] #snackbar が見つかりません。'); return; }
+  box.textContent = message;
+  box.hidden = false;
+  box.classList.add('show');
+  if (snackbarTimer) clearTimeout(snackbarTimer);
+  snackbarTimer = window.setTimeout(() => { box.classList.remove('show'); window.setTimeout(() => { if (box) box.hidden = true; }, 220); }, 2600);
+}
+function updateSettingsUI() {
+  const language = $('languageSelect'); if (language) language.value = currentLang;
+  const font = $('fontToggle');
+  let enabled = true;
+  try { enabled = localStorage.getItem('chollimaFontEnabled') !== 'false'; }
+  catch (error) { console.error('[設定] フォント設定を読み込めません。', error); }
+  if (font) font.checked = enabled;
+  document.body.classList.toggle('font-chrm-disabled', !enabled);
+}
+function downloadJson(name, value) {
+  let objectUrl = null;
+  try {
+    const blob = new Blob([JSON.stringify(value, null, 2)], { type: 'application/json;charset=utf-8' });
+    objectUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = objectUrl; anchor.download = name; anchor.hidden = true;
+    document.body.appendChild(anchor); anchor.click(); anchor.remove();
+    showSnackbar(TEXT_TRANSLATIONS['保存済み項目をエクスポートしました。'][currentLang]);
+  } catch (error) { console.error('[保存済み] エクスポートに失敗しました。', error); showSnackbar('エクスポートに失敗しました。'); }
+  finally { if (objectUrl) window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000); }
+}
+function exportSaved() {
+  downloadJson('chollima-saved-items.json', {
+    format: 'chollima-saved-items', version: 2, exportedAt: new Date().toISOString(),
+    hanjaBookmarks: [...bookmarks], dictionaryResults: savedExternal
+  });
+}
+function importSavedObject(value) {
+  if (!value || typeof value !== 'object') throw new Error('JSON形式が正しくありません。');
+  const incomingBookmarks = Array.isArray(value.hanjaBookmarks) ? value.hanjaBookmarks : Array.isArray(value.bookmarks) ? value.bookmarks : [];
+  const incomingExternal = Array.isArray(value.dictionaryResults) ? value.dictionaryResults : Array.isArray(value.savedExternal) ? value.savedExternal : [];
+  let added = 0;
+  for (const keyValue of incomingBookmarks) {
+    if (typeof keyValue === 'string' && !bookmarks.has(keyValue)) { bookmarks.add(keyValue); added++; }
+  }
+  const existingIds = new Set(savedExternal.map(item => item.id));
+  for (const item of incomingExternal) {
+    if (!item || typeof item !== 'object') continue;
+    const query = typeof item.query === 'string' ? item.query.slice(0, 2000) : '';
+    const title = typeof item.title === 'string' ? item.title.slice(0, 300) : '';
+    const summary = typeof item.summary === 'string' ? item.summary.slice(0, 8000) : '';
+    if (!query || !title || !summary) continue;
+    const id = typeof item.id === 'string' ? item.id.slice(0, 120) : `saved-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    if (existingIds.has(id)) continue;
+    savedExternal.push({ id, kind: ['api','vocab'].includes(item.kind) ? item.kind : 'api', type: String(item.type || '').slice(0, 30), direction: String(item.direction || '').slice(0, 20), query, title, source: String(item.source || '').slice(0, 200), summary, savedAt: Number(item.savedAt) || Date.now() });
+    existingIds.add(id); added++;
+  }
+  saveBM();
+  persistExternalSaved();
+  updateCounts(); render();
+  showSnackbar(TEXT_TRANSLATIONS['保存済み項目をインポートしました。'][currentLang] + ` (${added})`);
+}
+function clearAllSaved() {
+  const confirmMessage = ({ja:'保存済み項目をすべて消去します。この操作は取り消せません。続行しますか？', en:'Delete all saved items? This cannot be undone.', 'zh-CN':'确定要删除所有已保存项目吗？此操作无法撤销。', 'zh-TW':'確定要刪除所有已儲存項目嗎？此操作無法復原。', ko:'저장된 항목을 모두 삭제할까요? 되돌릴 수 없습니다.', 'ko-KP':'보관된 항목을 모두 지우겠습니까? 되돌릴 수 없습니다.'})[currentLang];
+  if (!window.confirm(confirmMessage)) return;
+  const previousBookmarks = new Set(bookmarks);
+  const previousExternal = savedExternal.slice();
+  bookmarks.clear(); savedExternal = [];
+  const ok1 = saveBM(), ok2 = persistExternalSaved();
+  if (!ok1 || !ok2) {
+    bookmarks.clear(); previousBookmarks.forEach(value => bookmarks.add(value));
+    savedExternal = previousExternal;
+    saveBM(); persistExternalSaved();
+    updateCounts(); render();
+    showSnackbar('保存済み項目を消去できませんでした。もう一度お試しください。');
+    return;
+  }
+  updateCounts(); render();
+  showSnackbar(TEXT_TRANSLATIONS['保存済み項目をすべて消去しました。'][currentLang]);
+}
+function saveLookup(kind) {
+  const queryInput = $('appInput');
+  const query = queryInput ? queryInput.value.trim() : '';
+  if (!query) { showSnackbar('検索語を入力してください。'); return; }
+  const isVocab = kind === 'vocab';
+  const result = $(isVocab ? 'dictResult' : 'apiResult');
+  if (!result) { console.error('[保存済み] 保存対象の検索結果が見つかりません。'); return; }
+  const summary = result.innerText.trim().slice(0, 8000);
+  if (!summary || /該当する項目がありません|該当なし|検索中です|検索語を入力してください/.test(summary)) {
+    showSnackbar('保存できる検索結果がありません。'); return;
+  }
+  const type = isVocab ? 'vocab' : apiDictType;
+  const direction = isVocab ? dictDirection : '';
+  const title = isVocab ? `英単語辞書: ${query}` : `${(apiDictionaryConfig(apiDictType) || {}).title || '辞書'}: ${query}`;
+  const existing = savedExternal.find(item => item.kind === kind && item.type === type && item.direction === direction && item.query === query);
+  if (existing) { showSnackbar(TEXT_TRANSLATIONS['この検索結果はすでに保存済みです。'][currentLang]); return; }
+  const resultItem = { id: `lookup-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, kind, type, direction, query, title, source: isVocab ? 'ejdict-hand-utf8.txt' : (apiDictionaryConfig(type) || {}).source || '', summary, savedAt: Date.now() };
+  savedExternal.unshift(resultItem);
+  if (!persistExternalSaved()) { savedExternal = savedExternal.filter(item => item.id !== resultItem.id); return; }
+  updateCounts();
+  showSnackbar(TEXT_TRANSLATIONS['検索結果を保存しました。'][currentLang]);
+}
+function deleteSavedExternal(id) {
+  const item = savedExternal.find(entry => entry.id === id);
+  if (!item) { console.error('[保存済み] 削除対象が見つかりません。', id); return; }
+  const message = ({ja:`「${item.title}」を削除しますか？`, en:`Delete “${item.title}”?`, 'zh-CN':`要删除“${item.title}”吗？`, 'zh-TW':`要刪除「${item.title}」嗎？`, ko:`“${item.title}” 항목을 삭제할까요?`, 'ko-KP':`“${item.title}” 항목을 지우겠습니까?`})[currentLang];
+  if (!window.confirm(message)) return;
+  const previousExternal = savedExternal.slice();
+  savedExternal = savedExternal.filter(entry => entry.id !== id);
+  if (persistExternalSaved()) { updateCounts(); renderSaved(); showSnackbar('削除しました。'); }
+  else { savedExternal = previousExternal; renderSaved(); }
+}
+async function installPwa() {
+  const status = $('pwaStatus');
+  if (deferredInstallPrompt) {
+    try {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      const message = choice && choice.outcome === 'accepted' ? 'インストールを開始しました。' : 'インストールはキャンセルされました。';
+      if (status) status.textContent = message;
+      showSnackbar(message);
+    } catch (error) { console.error('[PWA] インストール要求に失敗しました。', error); if (status) status.textContent = 'インストールを開始できませんでした。'; }
+    return;
+  }
+  const isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+  const message = isStandalone ? 'このアプリはすでにインストールされています。' : ({ja:'ブラウザのメニューから「ホーム画面に追加」または「アプリをインストール」を選択してください。', en:'Open the browser menu and choose “Install app” or “Add to Home Screen”.', 'zh-CN':'请打开浏览器菜单，选择“安装应用”或“添加到主屏幕”。', 'zh-TW':'請開啟瀏覽器選單，選擇「安裝應用程式」或「加入主畫面」。', ko:'브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택하세요.', 'ko-KP':'열람기 차림표에서 “프로그람 설치” 또는 “첫화면에 추가”를 선택하십시오.'})[currentLang];
+  if (status) status.textContent = message;
+  showSnackbar(message);
+}
+function restoreSavedLookup(id) {
+  const item = savedExternal.find(entry => entry.id === id);
+  if (!item) { console.error('[저장됨] 저장한 검색 결과를 찾을 수 없습니다.', id); return; }
+  if (item.kind === 'vocab') {
+    dictDirection = item.direction === 'ja-en' ? 'ja-en' : 'en-ja';
+    go('vocab');
+  } else {
+    go('apiDict', null, apiDictionaryConfig(item.type) ? item.type : 'ja');
+  }
+  const input = $('appInput'); if (input) input.value = item.query;
+  updateShareUrl(false); render();
+  if (view === 'apiDict') performApiDictionarySearch();
+}
+function restoreRouteFromUrl() {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const lang = params.get('lang');
+  if (lang && SUPPORTED_LANGS.includes(lang)) {
+    restoringRoute = true;
+    applyLanguage(lang, true);
+    restoringRoute = false;
+  }
+  const route = PAGE_IDS.includes(params.get('view')) ? params.get('view') : 'home';
+  const q = params.get('q') || '';
+  const input = $('appInput'); if (input) input.value = q;
+  const trInput = $('trIn'); if (trInput) trInput.value = params.get('text') || '';
+  const urlMode = params.get('mode'); if (['hanja','native','english'].includes(urlMode)) mode = urlMode;
+  const dir = params.get('dir'); if (dir === 'ja-en' || dir === 'en-ja') dictDirection = dir;
+  const tr = params.get('trDir'); if (tr === 'h2r' || tr === 'r2h') trDir = tr;
+  const api = params.get('dict'); if (api && apiDictionaryConfig(api)) apiDictType = api;
+  restoringRoute = true;
+  go(route, mode, apiDictType, { sync: false, animate: false });
+  restoringRoute = false;
+  if (route === 'apiDict' && q) performApiDictionarySearch();
+  updateShareUrl(false);
+  const detailValue = params.get('detail');
+  const detail = detailValue === null ? NaN : Number(detailValue);
+  if (Number.isInteger(detail) && detail >= 0) {
+    if (db[detail]) { pendingDetailId = null; openDetail(detail); }
+    else pendingDetailId = detail;
+  }
+}
+function bind(id, eventName, handler) {
+  const element = $(id);
+  if (!element) { console.error(`[初期化] #${id} が見つかりません。`); return null; }
+  element.addEventListener(eventName, handler);
+  return element;
+}
+
+/* ---------- Event bindings ---------- */
 document.addEventListener('click', ev => {
-  if (ev.target.id === 'scrim') { closeDetail(); return; }
-  const card = ev.target.closest('[data-view]');
+  const target = ev.target instanceof Element ? ev.target : null;
+  if (!target) return;
+  if (target.id === 'scrim') { closeDetail(); updateShareUrl(false); return; }
+  const deleteButton = target.closest('[data-delete-saved]');
+  if (deleteButton) { deleteSavedExternal(deleteButton.dataset.deleteSaved); return; }
+  const restoreButton = target.closest('[data-restore-saved]');
+  if (restoreButton) { restoreSavedLookup(restoreButton.dataset.restoreSaved); return; }
+  const card = target.closest('[data-view]');
   if (card) {
     if (card.dataset.view === 'apiDict') go('apiDict', null, card.dataset.apiDict || 'ja');
     else go(card.dataset.view, card.dataset.mode);
     return;
   }
-  const item = ev.target.closest('[data-id]');
-  if (item) { openDetail(+item.dataset.id); return; }
+  const item = target.closest('[data-id]');
+  if (item) { openDetail(Number(item.dataset.id)); updateShareUrl(false); return; }
 });
-document.querySelectorAll('.tool-tab').forEach(b =>
-  b.addEventListener('click', () => go('tool', b.dataset.mode)));
-document.querySelectorAll('[data-dict-direction]').forEach(button => {
-  button.addEventListener('click', () => setDictDirection(button.dataset.dictDirection));
+document.querySelectorAll('.tool-tab').forEach(button => button.addEventListener('click', () => go('tool', button.dataset.mode)));
+document.querySelectorAll('[data-dict-direction]').forEach(button => button.addEventListener('click', () => { setDictDirection(button.dataset.dictDirection); updateShareUrl(false); }));
+document.querySelectorAll('[data-api-dict-tab]').forEach(button => button.addEventListener('click', () => { setApiDictionaryType(button.dataset.apiDictTab); applyThemeForView(); updateShareUrl(false); }));
+bind('apiSearchButton', 'click', performApiDictionarySearch);
+bind('apiSaveButton', 'click', () => saveLookup('api'));
+bind('dictSaveButton', 'click', () => saveLookup('vocab'));
+bind('settingsBtn', 'click', () => go('settings'));
+bind('backBtn', 'click', () => go('home'));
+bind('appInput', 'keydown', event => {
+  if (event.key === 'Enter' && view === 'apiDict') { event.preventDefault(); performApiDictionarySearch(); }
 });
-document.querySelectorAll('[data-api-dict-tab]').forEach(button => {
-  button.addEventListener('click', () => setApiDictionaryType(button.dataset.apiDictTab));
-});
-const apiSearchButton = $('apiSearchButton');
-if (apiSearchButton) {
-  apiSearchButton.addEventListener('click', performApiDictionarySearch);
-} else {
-  console.error('[API辞書] #apiSearchButton が見つかりません。');
-}
-$('appInput').addEventListener('keydown', event => {
-  if (event.key === 'Enter' && view === 'apiDict') {
-    event.preventDefault();
-    performApiDictionarySearch();
-  }
-});
-$('backBtn').addEventListener('click', () => go('home'));
-$('appInput').addEventListener('input', render);
-$('trIn').addEventListener('input', doTranslate);
-$('swap').addEventListener('click', () => {
-  const prevOut = $('trOut').dataset.raw || '';
+bind('appInput', 'input', () => { render(); updateShareUrl(false); });
+bind('trIn', 'input', () => { doTranslate(); updateShareUrl(false); localizeDOM(); });
+bind('swap', 'click', () => {
+  const previousOutput = $('trOut');
+  const previous = previousOutput ? previousOutput.dataset.raw || '' : '';
   trDir = trDir === 'h2r' ? 'r2h' : 'h2r';
-  $('trIn').value = prevOut;
-  setTrLabels();
-  doTranslate();
+  const trInput = $('trIn'); if (trInput) trInput.value = previous;
+  setTrLabels(); doTranslate(); updateShareUrl(false); localizeDOM();
 });
-$('dClose').addEventListener('click', closeDetail);
-$('dBack').addEventListener('click', backDetail);
-$('dBm').addEventListener('click', toggleBM);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('scrim').hidden) closeDetail(); });
-
-$('fileInput').addEventListener('change', async e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  try {
-    loadText(await f.text());
-  } catch (error) {
-    console.error('[漢字変換] hanja.txt の読み込みに失敗しました。', error);
-  }
+bind('dClose', 'click', () => { closeDetail(); updateShareUrl(false); });
+bind('dBack', 'click', backDetail);
+bind('dBm', 'click', toggleBM);
+bind('fileInput', 'change', async event => {
+  const file = event.currentTarget && event.currentTarget.files ? event.currentTarget.files[0] : null;
+  if (!file) return;
+  try { loadText(await file.text()); showSnackbar('hanja.txt を読み込みました。'); }
+  catch (error) { console.error('[漢字変換] hanja.txt の読み込みに失敗しました。', error); showSnackbar('hanja.txt の読み込みに失敗しました。'); }
 });
-
 const dictFileInput = $('dictFileInput');
 if (dictFileInput) {
   dictFileInput.addEventListener('change', async event => {
     const file = event.currentTarget && event.currentTarget.files ? event.currentTarget.files[0] : null;
     if (!file) return;
-    try {
-      loadEjDictionaryText(await file.text(), file.name || '選択したファイル');
-    } catch (error) {
-      const status = $('dictStatus');
-      const loadBox = $('dictLoadBox');
-      if (status) status.textContent = '読み込み失敗';
-      if (loadBox) loadBox.hidden = false;
-      console.error('[英単語辞書] 辞書ファイルの読み込みに失敗しました。', error);
+    try { loadEjDictionaryText(await file.text(), file.name || '選択したファイル'); showSnackbar('辞書を読み込みました。'); }
+    catch (error) {
+      const status = $('dictStatus'); const loadBox = $('dictLoadBox');
+      if (status) status.textContent = '読み込み失敗'; if (loadBox) loadBox.hidden = false;
+      console.error('[英単語辞書] 辞書ファイルの読み込みに失敗しました。', error); showSnackbar('辞書ファイルの読み込みに失敗しました。');
     }
   });
-} else {
-  console.error('[英単語辞書] #dictFileInput が見つかりません。');
-}
+} else { console.error('[英単語辞書] #dictFileInput が見つかりません。'); }
+bind('languageSelect', 'change', event => applyLanguage(event.currentTarget.value));
+bind('fontToggle', 'change', event => {
+  const enabled = Boolean(event.currentTarget.checked);
+  document.body.classList.toggle('font-chrm-disabled', !enabled);
+  try { localStorage.setItem('chollimaFontEnabled', String(enabled)); }
+  catch (error) { console.error('[設定] フォント設定を保存できません。', error); }
+});
+bind('exportSavedButton', 'click', exportSaved);
+bind('importSavedButton', 'click', () => { const input = $('importSavedInput'); if (input) input.click(); });
+bind('importSavedInput', 'change', async event => {
+  const file = event.currentTarget && event.currentTarget.files ? event.currentTarget.files[0] : null;
+  if (!file) return;
+  try { importSavedObject(JSON.parse(await file.text())); }
+  catch (error) { console.error('[保存済み] インポートに失敗しました。', error); showSnackbar(`インポートに失敗しました: ${error.message || 'ファイルを確認してください。'}`); }
+  finally { event.currentTarget.value = ''; }
+});
+bind('clearSavedButton', 'click', clearAllSaved);
+bind('installPwaButton', 'click', installPwa);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && $('scrim') && !$('scrim').hidden) closeDetail();
+});
+window.addEventListener('popstate', () => { restoreRouteFromUrl(); });
+window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); deferredInstallPrompt = event; });
+window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; showSnackbar('千里馬事典 2.0 をインストールしました。'); });
 
+document.addEventListener('click', event => {
+  const target = event.target instanceof Element ? event.target.closest('button, .clickable') : null;
+  if (!target || target.disabled || target.closest('#splash')) return;
+  const rect = target.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple-effect';
+  ripple.style.width = `${size}px`; ripple.style.height = `${size}px`;
+  ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+  ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+  target.classList.add('ripple-host');
+  target.appendChild(ripple);
+  window.setTimeout(() => ripple.remove(), 600);
+}, true);
+
+/* ---------- First paint and resource loading ---------- */
 setTrLabels();
 updateCounts();
 updateApiDictionaryUI();
-go('home');
+updateSettingsUI();
+restoringRoute = true;
+applyLanguage(currentLang, true);
+restoringRoute = false;
+restoreRouteFromUrl();
 
-// 同じフォルダの hanja.txt を自動読込（http経由の場合）
-fetch('hanja.txt')
-  .then(r => { if (!r.ok) throw new Error(); return r.text(); })
-  .then(loadText)
-  .catch(() => {
-    $('status').textContent = '未読込';
-    $('loadBox').hidden = false;
-  });
-
-// 同じフォルダーの ejdict-hand-utf8.txt を自動読込（http経由の場合）
-fetch('ejdict-hand-utf8.txt')
-  .then(response => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.text();
-  })
-  .then(text => loadEjDictionaryText(text, 'ejdict-hand-utf8.txt'))
+const splashStartedAt = Date.now();
+const minimumSplashTime = new Promise(resolve => window.setTimeout(resolve, 2000));
+const loadHanjaResource = fetch('hanja.txt')
+  .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })
+  .then(text => { loadText(text); return true; })
   .catch(error => {
-    const status = $('dictStatus');
-    const loadBox = $('dictLoadBox');
-    if (status) status.textContent = '未読込';
-    if (loadBox) loadBox.hidden = false;
-    // file:// で開いた場合などはファイル選択による読み込みに切り替える。
-    console.info('[英単語辞書] 自動読み込みは利用できません。ファイル選択で読み込んでください。', error);
+    const status = $('status'); if (status) status.textContent = '未読込';
+    const loadBox = $('loadBox'); if (loadBox) loadBox.hidden = false;
+    if (location.protocol !== 'file:') console.error('[漢字変換] hanja.txt の自動読み込みに失敗しました。', error);
+    return false;
   });
+const loadEjResource = fetch('ejdict-hand-utf8.txt')
+  .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.text(); })
+  .then(text => { loadEjDictionaryText(text, 'ejdict-hand-utf8.txt'); return true; })
+  .catch(error => {
+    const status = $('dictStatus'); if (status) status.textContent = '未読込';
+    const loadBox = $('dictLoadBox'); if (loadBox) loadBox.hidden = false;
+    if (location.protocol !== 'file:') console.error('[英単語辞書] 自動読み込みに失敗しました。ファイル選択で読み込んでください。', error);
+    return false;
+  });
+Promise.all([minimumSplashTime, Promise.allSettled([loadHanjaResource, loadEjResource])]).then(() => {
+  const splash = $('splash'); if (splash) splash.hidden = true;
+  document.body.classList.remove('is-loading');
+  localizeDOM();
+  render();
+}).catch(error => {
+  console.error('[初期化] スプラッシュを終了できません。', error);
+  const splash = $('splash'); if (splash) splash.hidden = true;
+  document.body.classList.remove('is-loading');
+});
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  navigator.serviceWorker.register('sw.js').catch(error => console.error('[PWA] Service Worker の登録に失敗しました。', error));
+}
 </script>
+<script src="https://search3958.github.io/check.js"></script>
 </body>
 </html>
