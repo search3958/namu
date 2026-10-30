@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'chollima-dictionary-v2.0.0';
+const CACHE_NAME = 'chollima-dictionary-v2.0.1';
 const OPTIONAL_ASSETS = [
   './',
   './manifest.webmanifest',
